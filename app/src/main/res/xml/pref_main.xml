@@ -1,0 +1,31 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/pref_category_connection" >
+
+        <CheckBoxPreference
+            android:key="dtr"
+            android:defaultValue="false"
+            android:title="@string/pref_title_dtr"
+            android:summary="@string/pref_summ_dtr" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_category_other" >
+
+        <CheckBoxPreference
+            android:key="volumeShowUI"
+            android:defaultValue="false"
+            android:title="@string/pref_title_volume_show_ui" />
+
+        <CheckBoxPreference
+            android:key="debug"
+            android:defaultValue="false"
+            android:title="@string/pref_title_debug"
+            android:summary="@string/pref_summ_debug" />
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

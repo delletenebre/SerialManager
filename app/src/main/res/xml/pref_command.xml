@@ -1,0 +1,76 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <CheckBoxPreference
+            android:key="autoset"
+            android:defaultValue="false"
+            android:title="@string/pref_title_autoset" />
+
+        <com.afollestad.materialdialogs.prefs.MaterialEditTextPreference
+            android:key="key"
+            android:defaultValue="@string/default_key"
+            android:capitalize="none"
+            android:inputType="text"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_key" />
+
+        <com.afollestad.materialdialogs.prefs.MaterialEditTextPreference
+            android:key="value"
+            android:defaultValue=""
+            android:capitalize="none"
+            android:inputType="text"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_value" />
+
+        <com.afollestad.materialdialogs.prefs.MaterialEditTextPreference
+            android:key="scatter"
+            android:defaultValue="0"
+            android:capitalize="none"
+            android:inputType="number|numberDecimal"
+            android:ems="10"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_scatter" />
+
+        <CheckBoxPreference
+            android:key="is_through"
+            android:defaultValue="false"
+            android:title="@string/pref_title_is_through"
+            android:summary="@string/pref_summ_is_through" />
+
+        <com.afollestad.materialdialogs.prefs.MaterialListPreference
+            android:key="action_category"
+            android:defaultValue="0"
+            android:entries="@array/pref_command_action_category_titles"
+            android:entryValues="@array/pref_command_action_category_values"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_command_action_category" />
+
+        <com.afollestad.materialdialogs.prefs.MaterialListPreference
+            android:key="action_volume"
+            android:defaultValue="0"
+            android:entries="@array/pref_command_action_volume_titles"
+            android:entryValues="@array/pref_command_action_volume_values"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_command_action_volume" />
+
+        <com.afollestad.materialdialogs.prefs.MaterialListPreference
+            android:key="action_media"
+            android:defaultValue="0"
+            android:entries="@array/pref_command_action_media_titles"
+            android:entryValues="@array/pref_command_action_media_values"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_command_action_media" />
+
+        <kg.delletenebre.serialmanager.AppChooserPreference
+            android:key="action_application"
+            android:title="@string/pref_title_command_action_application"
+            app:allowUseDefault="false" />
+
+
+</PreferenceScreen>

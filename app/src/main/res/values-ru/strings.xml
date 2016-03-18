@@ -1,0 +1,92 @@
+<resources>
+
+    <string name="settings">Настройки</string>
+
+    <string name="pref_category_connection">Соединение</string>
+    <string name="pref_category_other">Отладка</string>
+
+    <string name="pref_title_dtr">DTR</string>
+    <string name="pref_summ_dtr">Использовать строку DTR для определения готовности последовательного канала</string>
+
+    <string name="pref_title_volume_show_ui">Показывать панель громкости при изменении громкости</string>
+
+    <string name="pref_title_debug">Отладочная информация</string>
+    <string name="pref_summ_debug">Включить всплывающие окна и отправлять дополнительную информацию в logcat</string>
+
+
+
+
+
+    <!-- Dialog delete command -->
+    <string name="dialog_content_delete_command">Вы действительно хотите удалить команду %1$s?</string>
+    <string name="dialog_delete_positive">Удалить</string>
+    <string name="dialog_negative">Отмена</string>
+
+
+
+
+
+
+    <string name="pref_title_autoset">Определить ключ/значение автоматически</string>
+
+    <string name="pref_title_scatter">Погрешность значения (±)</string>
+
+    <string name="pref_title_is_through">Сквозная команда</string>
+    <string name="pref_summ_is_through">Если команда была распознана, то всё равно создавать broadcast для других приложений</string>
+
+    <string name="pref_title_command_action_category">Категория</string>
+    <string name="no_action">Нет действия</string>
+    <string-array name="pref_command_action_category_titles">
+        <item>@string/no_action</item>
+        <item>Звук</item>
+        <item>Плеер</item>
+        <item>Приложение</item>
+    </string-array>
+
+
+
+
+
+
+
+    <string name="pref_title_command_action_volume">Звук</string>
+    <string-array name="pref_command_action_volume_titles">
+        <item>Увеличить</item>
+        <item>Уменьшить</item>
+        <item>Mute</item>
+    </string-array>
+
+
+
+
+
+
+    <string name="pref_title_command_action_media">Медиа</string>
+    <string-array name="pref_command_action_media_titles">
+        <item>Перемотать назад</item>
+        <item>Предыдущий</item>
+        <item>Воспроизведение/Пауза</item>
+        <item>Следующий</item>
+        <item>Перемотать вперёд</item>
+    </string-array>
+
+
+
+
+
+
+
+
+    <string name="pref_title_command_action_application">Приложение / Ярлык</string>
+
+
+    <!-- Universal settings preferences -->
+    <string name="title_apps">Приложения</string>
+    <string name="title_shortcuts">Ярлыки</string>
+    <string name="pref_shortcut_default">(Выберите приложение)</string>
+    <string name="command_settings">Настойки &lt;ключ:значение&gt;</string>
+
+    <string name="pref_title_key">Ключ</string>
+    <string name="pref_title_value">Значение</string>
+
+</resources>

@@ -1,0 +1,92 @@
+<resources>
+    <string name="app_name" translatable="false">Serial Manager</string>
+    <string name="settings">Settings</string>
+
+    <string name="pref_category_connection">Connection</string>
+    <string name="pref_category_other">Other</string>
+
+    <string name="pref_title_dtr">DTR</string>
+    <string name="pref_summ_dtr">Use DTR line to determine serial channel readiness</string>
+
+    <string name="pref_title_volume_show_ui">Show volume UI on volume change</string>
+
+    <string name="pref_title_debug">Debug</string>
+    <string name="pref_summ_debug">Enable popups and send additional information to logcat</string>
+
+
+    <string name="sym_plus_minus" translatable="false">±</string>
+    <string name="toast_received_command" translatable="false">&lt;%1$s:%2$s&gt;</string>
+
+    <!-- Dialog delete command -->
+    <string name="dialog_content_delete_command">Are you sure to delete command %1$s?</string>
+    <string name="dialog_delete_positive">Delete</string>
+    <string name="dialog_negative">Cancel</string>
+
+    <string name="default_key" translatable="false">click</string>
+
+    <string name="command_item_key_text" translatable="false">&lt;%1$s:%2$s%3$s&gt;</string>
+    <string name="command_item_action_text" translatable="false">(%1$s) %2$s</string>
+
+    <string name="pref_title_autoset">Autoset key/value</string>
+
+    <string name="pref_title_scatter">Погрешность значения (±)</string>
+
+    <string name="pref_title_is_through">Through command</string>
+    <string name="pref_summ_is_through">Если команда была распознана, то всё равно создавать broadcast для других приложений</string>
+
+    <string name="pref_title_command_action_category">Action category</string>
+    <string name="no_action">No action</string>
+    <string-array name="pref_command_action_category_titles">
+        <item>@string/no_action</item>
+        <item>Volume</item>
+        <item>Media</item>
+        <item>Application</item>
+    </string-array>
+    <string-array name="pref_command_action_category_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string name="pref_title_command_action_volume">Volume</string>
+    <string-array name="pref_command_action_volume_titles">
+        <item>Volume Up</item>
+        <item>Volume Down</item>
+        <item>Mute</item>
+    </string-array>
+    <string-array name="pref_command_action_volume_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string name="pref_title_command_action_media">Media</string>
+    <string-array name="pref_command_action_media_titles">
+        <item>Rewind</item>
+        <item>Previous</item>
+        <item>Play/Pause</item>
+        <item>Next</item>
+        <item>Fast Forward</item>
+    </string-array>
+    <string-array name="pref_command_action_media_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+    <string name="pref_title_command_action_application">Application / Shortcut</string>
+
+
+    <!-- Universal settings preferences -->
+    <string name="title_apps">Apps</string>
+    <string name="title_shortcuts">Shortcuts</string>
+    <string name="pref_shortcut_default">(Choose application)</string>
+    <string name="command_settings">Settings</string>
+
+    <string name="pref_title_key">Key</string>
+    <string name="pref_title_value">Value</string>
+
+</resources>
