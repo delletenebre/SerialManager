@@ -2,7 +2,6 @@ package kg.delletenebre.serialmanager;
 
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -22,11 +21,10 @@ public class CommandSettingsActivity extends AppCompatActivity {
     private final String TAG = getClass().getSimpleName();
 
     protected static Activity activity;
-    private static Context mContext;
 
     public static CheckBoxPreference autosetPreference;
     public static EditTextPreference keyPreference, valuePreference;
-    private static Preference actionVolume, actionMedia, actionApplication;
+    private static Preference actionNavigation, actionVolume, actionMedia, actionApplication;
     private static PreferenceScreen preferenceScreen;
 
     private GeneralPreferenceFragment mGeneralPreferenceFragment;
@@ -41,20 +39,25 @@ public class CommandSettingsActivity extends AppCompatActivity {
                 ListPreference listPreference = (ListPreference) preference;
                 if ( listPreference.getKey().equals("action_category")) {
                     if (preferenceScreen != null) {
+                        preferenceScreen.removePreference(actionNavigation);
                         preferenceScreen.removePreference(actionVolume);
                         preferenceScreen.removePreference(actionMedia);
                         preferenceScreen.removePreference(actionApplication);
 
                         switch (stringValue) {
                             case "1":
-                                preferenceScreen.addPreference(actionVolume);
+                                preferenceScreen.addPreference(actionNavigation);
                                 break;
 
                             case "2":
-                                preferenceScreen.addPreference(actionMedia);
+                                preferenceScreen.addPreference(actionVolume);
                                 break;
 
                             case "3":
+                                preferenceScreen.addPreference(actionMedia);
+                                break;
+
+                            case "4":
                                 preferenceScreen.addPreference(actionApplication);
                                 break;
                         }
@@ -93,8 +96,6 @@ public class CommandSettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
-
-        mContext = this;
 
         mGeneralPreferenceFragment = new GeneralPreferenceFragment();
         getFragmentManager().beginTransaction()
@@ -168,6 +169,7 @@ public class CommandSettingsActivity extends AppCompatActivity {
             autosetPreference = (CheckBoxPreference) findPreference("autoset");
             keyPreference = (EditTextPreference) findPreference("key");
             valuePreference = (EditTextPreference) findPreference("value");
+            actionNavigation = findPreference("action_navigation");
             actionVolume = findPreference("action_volume");
             actionMedia = findPreference("action_media");
             actionApplication = findPreference("action_application");
@@ -176,6 +178,7 @@ public class CommandSettingsActivity extends AppCompatActivity {
             bindPreferenceSummaryToValue(valuePreference, uuid);
             bindPreferenceSummaryToValue(findPreference("scatter"), uuid);
             bindPreferenceSummaryToValue(findPreference("action_category"), uuid);
+            bindPreferenceSummaryToValue(actionNavigation, uuid);
             bindPreferenceSummaryToValue(actionVolume, uuid);
             bindPreferenceSummaryToValue(actionMedia, uuid);
             bindPreferenceSummaryToValue(actionApplication, uuid);
@@ -214,6 +217,9 @@ public class CommandSettingsActivity extends AppCompatActivity {
 
             listPreference = (ListPreference) findPreference("action_category");
             intent.putExtra("actionCategory", listPreference.getValue());
+
+            listPreference = (ListPreference) actionNavigation;
+            intent.putExtra("actionNavigation", listPreference.getValue());
 
             listPreference = (ListPreference) actionVolume;
             intent.putExtra("actionVolume", listPreference.getValue());

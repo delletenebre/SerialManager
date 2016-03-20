@@ -9,6 +9,8 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.view.KeyEvent;
 
+import java.io.IOException;
+
 public class App {
     private static App ourInstance = new App();
 
@@ -80,7 +82,7 @@ public class App {
         }
     }
 
-    public static void emulateButton(Context context, int buttonCode) {
+    public static void emulateMediaButton(Context context, int buttonCode) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             mAudioManager.dispatchMediaKeyEvent(
                     new KeyEvent(KeyEvent.ACTION_DOWN, buttonCode));
@@ -95,6 +97,20 @@ public class App {
             upIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, buttonCode));
             context.sendOrderedBroadcast(upIntent, null);
         }
+    }
+
+    public static void emulateKeyEvent(final int keyEvent) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Runtime.getRuntime().exec(new String[] {"su", "-c", "input keyevent " + keyEvent});
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
     }
 
 

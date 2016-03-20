@@ -1,12 +1,28 @@
 <resources>
 
+    <string name="md_choose_label">Выбрать</string>
     <string name="settings">Настройки</string>
 
     <string name="pref_category_connection">Соединение</string>
     <string name="pref_category_other">Отладка</string>
 
-    <string name="pref_title_dtr">DTR</string>
+
     <string name="pref_summ_dtr">Использовать строку DTR для определения готовности последовательного канала</string>
+
+    <string name="pref_title_baud_rate">Скорость передачи данных</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <string name="pref_title_volume_show_ui">Показывать панель громкости при изменении громкости</string>
 
@@ -36,12 +52,31 @@
 
     <string name="pref_title_command_action_category">Категория</string>
     <string name="no_action">Нет действия</string>
-    <string-array name="pref_command_action_category_titles">
-        <item>@string/no_action</item>
-        <item>Звук</item>
-        <item>Плеер</item>
-        <item>Приложение</item>
-    </string-array>
+    <string name="navigation_root">Навигация [ Root ]</string>
+    <string name="navigation">Навигация</string>
+    <string name="volume">Звук</string>
+    <string name="media">Плеер</string>
+    <string name="application">Приложение</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -88,5 +123,63 @@
 
     <string name="pref_title_key">Ключ</string>
     <string name="pref_title_value">Значение</string>
+
+    <!-- Widget -->
+    <string name="top_left">Вверху слева</string>
+    <string name="top_center">Вверху по центру</string>
+    <string name="top_right">Вверху справа</string>
+    <string name="middle_left">Посередине слева</string>
+    <string name="middle_center">По центру</string>
+    <string name="middle_right">Посередине справа</string>
+    <string name="bottom_left">Внизу слева</string>
+    <string name="bottom_center">Внизу по центру</string>
+    <string name="bottom_right">Внизу справа</string>
+    <string name="pref_widget_title_prefix">Текст перед полученным значением</string>
+    <string name="pref_widget_prefix_default_value">Например: </string>
+    <string name="pref_widget_title_suffix">Текст после полученного значения</string>
+    <string name="pref_widget_suffix_default_value"> ед.</string>
+    <string name="pref_widget_title_position">Расположение текста</string>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <string name="pref_widget_title_fontSize">Размер шрифта (sp)</string>
+    <string name="pref_widget_title_fontColor">Цвет шрифта</string>
+    <string name="pref_widget_title_backgroundColor">Цвет фона</string>
+
+    <string name="pref_widget_title_multiline_align">Выравнивание текста</string>
+    <string name="left">По левому краю</string>
+    <string name="center">По центру</string>
+    <string name="right">По правому краю</string>
+
+
+
+
+
+
+
+
+
+
+    <string name="pref_widget_title_use_custom_font">Использовать свой шрифт</string>
+    <string name="pref_widget_title_font_file">Файл шрифта (*.ttf)</string>
 
 </resources>

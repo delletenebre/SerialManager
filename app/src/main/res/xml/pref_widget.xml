@@ -1,0 +1,76 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.afollestad.materialdialogs.prefs.MaterialEditTextPreference
+        android:key="key"
+        android:defaultValue=""
+        android:title="@string/pref_title_key"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        app:useStockLayout="true" />
+
+    <EditTextPreference
+        android:key="prefix"
+        android:defaultValue="@string/pref_widget_prefix_default_value"
+        android:title="@string/pref_widget_title_prefix"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+    <EditTextPreference
+        android:key="suffix"
+        android:defaultValue="@string/pref_widget_suffix_default_value"
+        android:title="@string/pref_widget_title_suffix"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+    <ListPreference
+        android:key="position"
+        android:defaultValue="4"
+        android:title="@string/pref_widget_title_position"
+        android:entries="@array/pref_widget_position_titles"
+        android:entryValues="@array/pref_widget_position_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+
+    <EditTextPreference
+        android:key="fontSize"
+        android:defaultValue="24"
+        android:title="@string/pref_widget_title_fontSize"
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+    <com.rarepebble.colorpicker.ColorPreference
+        android:key="fontColor"
+        android:title="@string/pref_widget_title_fontColor" />
+
+    <com.rarepebble.colorpicker.ColorPreference
+        android:key="backgroundColor"
+        android:title="@string/pref_widget_title_backgroundColor" />
+
+    <ListPreference
+        android:key="textAlign"
+        android:defaultValue="1"
+        android:title="@string/pref_widget_title_multiline_align"
+        android:entries="@array/pref_widget_multiline_align_titles"
+        android:entryValues="@array/pref_widget_multiline_align_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+
+    <CheckBoxPreference
+        android:key="useCustomFont"
+        android:title="@string/pref_widget_title_use_custom_font"
+        android:defaultValue="false" />
+    <Preference
+        android:key="fontFile"
+        android:dependency="useCustomFont"
+        android:title="@string/pref_widget_title_font_file" />
+
+
+
+
+
+</PreferenceScreen>

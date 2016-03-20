@@ -9,6 +9,15 @@
             android:title="@string/pref_title_dtr"
             android:summary="@string/pref_summ_dtr" />
 
+        <ListPreference
+            android:key="baudRate"
+            android:defaultValue="9600"
+            android:title="@string/pref_title_baud_rate"
+            android:entries="@array/pref_baud_rate_titles"
+            android:entryValues="@array/pref_baud_rate_titles"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

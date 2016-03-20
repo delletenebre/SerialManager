@@ -93,7 +93,7 @@ public class SettingsActivity extends AppCompatActivity {
             addPreferencesFromResource(R.xml.pref_main);
             setHasOptionsMenu(true);
 
-            //bindPreferenceSummaryToValue(findPreference("action_category"));
+            bindPreferenceSummaryToValue(findPreference("baudRate"));
         }
 
         @Override

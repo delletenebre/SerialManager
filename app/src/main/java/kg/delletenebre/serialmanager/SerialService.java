@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.hardware.usb.UsbDeviceConnection;
-import android.net.Uri;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -31,13 +30,12 @@ import java.util.regex.Pattern;
 public class SerialService extends Service {
     private final String TAG = getClass().getSimpleName();
     private static boolean DEBUG;
+    public static final String MY_BROADCAST_INTENT = "kg.delletenebre.serial.NEW_DATA";
 
     protected static Service service;
 
     private SharedPreferences _settings;
     private EventsReceiver receiver;
-    public static final Intent DEFAULT_INTENT = new Intent(Intent.ACTION_VIEW,
-            Uri.parse("https://www.google.com/"));
 
     private String firstPartString = "";
 
@@ -89,7 +87,8 @@ public class SerialService extends Service {
         } else {
             try {
                 sPort.open(sConnection);
-                sPort.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+                sPort.setParameters(Integer.parseInt(_settings.getString("baudRate", "9600")), 8,
+                        UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
                 sPort.setDTR(_settings.getBoolean("dtr", false));
             } catch (IOException e) {
                 Log.e(TAG, "Error setting up device: " + e.getMessage(), e);
@@ -243,7 +242,7 @@ public class SerialService extends Service {
     }
 
     private void sendCommandBroadcast(String key, String value) {
-        Intent i = new Intent("kg.delletenebre.serial.NEW_DATA");
+        Intent i = new Intent(MY_BROADCAST_INTENT);
         i.putExtra("KEY", key);
         i.putExtra("VALUE", value);
         sendBroadcast(i);
@@ -268,7 +267,22 @@ public class SerialService extends Service {
 
                     if (command.actionCategoryId == 0) { // No action
                         // Nothing to do
-                    } else if (command.actionCategoryId == 1) { // Volume
+
+                    } else if (command.actionCategoryId == 1) { // Navigation
+
+                        switch (command.action) {
+                            case "0":
+                                App.emulateKeyEvent(KeyEvent.KEYCODE_BACK);
+                                break;
+
+                            case "1":
+                                App.emulateKeyEvent(KeyEvent.KEYCODE_HOME);
+                                break;
+
+                        }
+
+                    } else if (command.actionCategoryId == 2) { // Volume
+
                         switch (command.action) {
                             case "0":
                                 App.changeVolume("UP");
@@ -282,33 +296,33 @@ public class SerialService extends Service {
                                 App.setMute();
                                 break;
                         }
-                    } else if (command.actionCategoryId == 2) { // Media
 
+                    } else if (command.actionCategoryId == 3) { // Media
 
                         switch (command.action) {
                             case "0":
-                                App.emulateButton(this, KeyEvent.KEYCODE_MEDIA_REWIND);
+                                App.emulateMediaButton(this, KeyEvent.KEYCODE_MEDIA_REWIND);
                                 break;
 
                             case "1":
-                                App.emulateButton(this, KeyEvent.KEYCODE_MEDIA_PREVIOUS);
+                                App.emulateMediaButton(this, KeyEvent.KEYCODE_MEDIA_PREVIOUS);
                                 break;
 
                             case "2":
-                                App.emulateButton(this, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
+                                App.emulateMediaButton(this, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
                                 break;
 
                             case "3":
-                                App.emulateButton(this, KeyEvent.KEYCODE_MEDIA_NEXT);
+                                App.emulateMediaButton(this, KeyEvent.KEYCODE_MEDIA_NEXT);
                                 break;
 
                             case "4":
-                                App.emulateButton(this, KeyEvent.KEYCODE_MEDIA_FAST_FORWARD);
+                                App.emulateMediaButton(this, KeyEvent.KEYCODE_MEDIA_FAST_FORWARD);
                                 break;
                         }
 
+                    } else if (command.actionCategoryId == 4) { // Application
 
-                    } else if (command.actionCategoryId == 3) { // Application
                         Intent intent = AppChooserPreference.getIntentValue(
                                 command.action, null);
 
@@ -318,6 +332,7 @@ public class SerialService extends Service {
 
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
+
                     }
 
                     result = !command.isThrough;
@@ -340,18 +355,20 @@ public class SerialService extends Service {
         if (prefsDir.exists()) {
             for (File f : prefsDir.listFiles()) {
                 if (f.isFile()) {
-                    String filename = f.getName();
-                    filename = filename.substring(0, filename.length() - 4);
-                    if (Pattern.matches("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}", filename)) {
-                        SharedPreferences settings = context.getSharedPreferences(filename, MODE_PRIVATE);
+                    String uuid = f.getName();
+                    uuid = uuid.substring(0, uuid.length() - 4);
+                    if (Pattern.matches("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}", uuid)) {
+                        SharedPreferences settings = context.getSharedPreferences(uuid, MODE_PRIVATE);
                         int id = settings.getInt("id", -1);
-                        String uuid = filename;
+
                         String key = settings.getString("key", "");
                         String value = settings.getString("value", "");
                         String scatter = settings.getString("scatter", "");
                         boolean isThrough = settings.getBoolean("is_through", false);
                         int actionCategoryId =
                                 Integer.parseInt(settings.getString("action_category", "0"));
+
+                        String actionNavigation = settings.getString("actionNavigation", "0");
 
                         String actionVolume = settings.getString("action_volume", "0");
 
@@ -364,7 +381,7 @@ public class SerialService extends Service {
                                 : context.getString(R.string.pref_shortcut_default);
 
                         String action = getActionByActionCategoryId(context, actionCategoryId,
-                                actionVolume, actionMedia, actionApplication);
+                                actionNavigation, actionVolume, actionMedia, actionApplication);
 
                         commands.add(new Command(id, uuid, key, value, scatter, isThrough,
                                 actionCategoryId, action));
@@ -378,18 +395,22 @@ public class SerialService extends Service {
     }
 
     public static String getActionByActionCategoryId(Context context, int id,
-                                                     String volume, String media, String app) {
+                                                     String navigation, String volume,
+                                                     String media, String app) {
         switch (id) {
             case 0:
                 return context.getString(R.string.no_action);
 
             case 1:
-                return volume;
+                return navigation;
 
             case 2:
-                return media;
+                return volume;
 
             case 3:
+                return media;
+
+            case 4:
                 return app;
         }
 

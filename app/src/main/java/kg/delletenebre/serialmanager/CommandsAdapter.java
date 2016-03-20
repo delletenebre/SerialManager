@@ -160,15 +160,20 @@ public class CommandsAdapter extends RecyclerView.Adapter<CommandsAdapter.ViewHo
         switch (actionCategoryId) {
             case 1:
                 action = (context.getResources()
-                        .getStringArray(R.array.pref_command_action_volume_titles))[Integer.parseInt(action)];
+                        .getStringArray(R.array.pref_command_action_navigation_titles))[Integer.parseInt(action)];
                 break;
 
             case 2:
                 action = (context.getResources()
-                        .getStringArray(R.array.pref_command_action_media_titles))[Integer.parseInt(action)];
+                        .getStringArray(R.array.pref_command_action_volume_titles))[Integer.parseInt(action)];
                 break;
 
             case 3:
+                action = (context.getResources()
+                        .getStringArray(R.array.pref_command_action_media_titles))[Integer.parseInt(action)];
+                break;
+
+            case 4:
                 action = String.valueOf(AppChooserPreference.getDisplayValue(context, action));
                 if (action.equals("null") || action.isEmpty()) {
                     action = context.getString(R.string.pref_shortcut_default);

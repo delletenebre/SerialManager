@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -119,6 +120,8 @@ public class MainActivity extends AppCompatActivity {
             String actionCategory = data.getStringExtra("actionCategory");
             int actionCategoryId = Integer.parseInt(actionCategory);
 
+            String actionNavigation = data.getStringExtra("actionNavigation");
+
             String actionVolume = data.getStringExtra("actionVolume");
 
             String actionMedia = data.getStringExtra("actionMedia");
@@ -126,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
             String actionApplication = data.getStringExtra("actionApplication");
 
             String action = SerialService.getActionByActionCategoryId(this, actionCategoryId,
-                    actionVolume, actionMedia, actionApplication);
+                    actionNavigation, actionVolume, actionMedia, actionApplication);
 
             if (requestCode == REQ_NEW_COMMAND) {
                 addCommand(id, uuid, key, value, scatter, isThrough, actionCategoryId, action);

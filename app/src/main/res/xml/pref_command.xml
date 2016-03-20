@@ -13,7 +13,8 @@
             android:inputType="text"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="@string/pref_title_key" />
+            android:title="@string/pref_title_key"
+            app:useStockLayout="true" />
 
         <com.afollestad.materialdialogs.prefs.MaterialEditTextPreference
             android:key="value"
@@ -22,7 +23,8 @@
             android:inputType="text"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="@string/pref_title_value" />
+            android:title="@string/pref_title_value"
+            app:useStockLayout="true" />
 
         <com.afollestad.materialdialogs.prefs.MaterialEditTextPreference
             android:key="scatter"
@@ -32,7 +34,8 @@
             android:ems="10"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="@string/pref_title_scatter" />
+            android:title="@string/pref_title_scatter"
+            app:useStockLayout="true" />
 
         <CheckBoxPreference
             android:key="is_through"
@@ -47,7 +50,18 @@
             android:entryValues="@array/pref_command_action_category_values"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null"
-            android:title="@string/pref_title_command_action_category" />
+            android:title="@string/pref_title_command_action_category"
+            app:useStockLayout="true" />
+
+        <com.afollestad.materialdialogs.prefs.MaterialListPreference
+            android:key="action_navigation"
+            android:defaultValue="0"
+            android:entries="@array/pref_command_action_navigation_titles"
+            android:entryValues="@array/pref_command_action_navigation_values"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_command_action_navigation"
+            app:useStockLayout="true" />
 
         <com.afollestad.materialdialogs.prefs.MaterialListPreference
             android:key="action_volume"
@@ -56,7 +70,8 @@
             android:entryValues="@array/pref_command_action_volume_values"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null"
-            android:title="@string/pref_title_command_action_volume" />
+            android:title="@string/pref_title_command_action_volume"
+            app:useStockLayout="true" />
 
         <com.afollestad.materialdialogs.prefs.MaterialListPreference
             android:key="action_media"
@@ -65,7 +80,8 @@
             android:entryValues="@array/pref_command_action_media_values"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null"
-            android:title="@string/pref_title_command_action_media" />
+            android:title="@string/pref_title_command_action_media"
+            app:useStockLayout="true" />
 
         <kg.delletenebre.serialmanager.AppChooserPreference
             android:key="action_application"
