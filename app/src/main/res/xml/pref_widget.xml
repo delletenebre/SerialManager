@@ -1,0 +1,22 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:key="title"
+        android:defaultValue="Example"
+        android:title="@string/pref_title_scatter"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+
+    <EditTextPreference
+        android:key="fontSize"
+        android:defaultValue="24"
+        android:title="@string/pref_title_scatter"
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+
+
+</PreferenceScreen>

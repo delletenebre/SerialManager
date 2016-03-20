@@ -22,7 +22,6 @@ public class CommandSettingsActivity extends AppCompatActivity {
     private final String TAG = getClass().getSimpleName();
 
     protected static Activity activity;
-    private static Context mContext;
 
     public static CheckBoxPreference autosetPreference;
     public static EditTextPreference keyPreference, valuePreference;
@@ -93,8 +92,6 @@ public class CommandSettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
-
-        mContext = this;
 
         mGeneralPreferenceFragment = new GeneralPreferenceFragment();
         getFragmentManager().beginTransaction()
