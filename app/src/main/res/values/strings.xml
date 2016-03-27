@@ -122,6 +122,9 @@
 
     <string name="pref_title_key">Key</string>
     <string name="pref_title_value">Value</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="configure">Configure</string>
+    <string name="add_widget">Add widget</string>
 
     <!-- Widget -->
     <string name="top_left">Top Left</string>
