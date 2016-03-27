@@ -28,7 +28,7 @@
 
 <img src="https://cloud.githubusercontent.com/assets/3936845/14065233/ca29fd76-f443-11e5-9352-43e9c6050e1b.png" width="240"> <img src="https://cloud.githubusercontent.com/assets/3936845/14065234/ca2b695e-f443-11e5-85b1-f1dceb48b5a2.png" width="240">
 
-По умолчанию в виджетах используются шрифт Font Awesome и Вы можете совместно
+По умолчанию в виджетах используется шрифт Font Awesome и Вы можете совместно
 с текстом использовать иконки. Для вывода иконки необходимо использовать 
 следующий формат **`\uXXXX`**, где **XXXX** код Unicode. 
 Например для вывода иконки Android:
