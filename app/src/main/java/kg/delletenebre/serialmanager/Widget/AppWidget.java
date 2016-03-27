@@ -192,7 +192,18 @@ public class AppWidget extends AppWidgetProvider {
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
 
+        String key = "";
+        String val = "";
+
         if (intent.getAction().equals(SerialService.MY_BROADCAST_INTENT)) {
+            key = intent.getStringExtra("KEY");
+            val = intent.getStringExtra("VALUE");
+        } else if (intent.getAction().equals("org.kangaroo.rim.action.ACTION_DATA_RECEIVE")) {
+            key = intent.getStringExtra("org.kangaroo.rim.device.EXTRA_COMMAND");
+            val = intent.getStringExtra("org.kangaroo.rim.device.EXTRA_ARGS");
+        }
+
+        if ( !key.isEmpty() ) {
             context = context.getApplicationContext();
             AppWidgetManager appWidgetManager =
                     AppWidgetManager.getInstance(context);
@@ -205,9 +216,8 @@ public class AppWidget extends AppWidgetProvider {
                 SharedPreferences prefs = context.getSharedPreferences(
                         AppWidgetSettings.PREF_PREFIX_KEY + appWidgetId, Context.MODE_PRIVATE);
 
-                if (prefs.getString("key", "").equals(intent.getStringExtra("KEY"))) {
-                    updateAppWidget(context, appWidgetManager, appWidgetId,
-                            intent.getStringExtra("VALUE"));
+                if (prefs.getString("key", "").equals(key)) {
+                    updateAppWidget(context, appWidgetManager, appWidgetId, val);
                 }
             }
         }
