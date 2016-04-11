@@ -18,6 +18,33 @@
             android:negativeButtonText="@null"
             android:positiveButtonText="@null" />
 
+        <ListPreference
+            android:key="dataBits"
+            android:defaultValue="8"
+            android:title="@string/pref_title_data_bits"
+            android:entries="@array/pref_data_bits_titles"
+            android:entryValues="@array/pref_data_bits_values"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null" />
+
+        <ListPreference
+            android:key="stopBits"
+            android:defaultValue="1"
+            android:title="@string/pref_title_stop_bits"
+            android:entries="@array/pref_stop_bits_titles"
+            android:entryValues="@array/pref_stop_bits_values"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null" />
+
+        <ListPreference
+            android:key="parity"
+            android:defaultValue="0"
+            android:title="@string/pref_title_parity"
+            android:entries="@array/pref_parity_titles"
+            android:entryValues="@array/pref_parity_values"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

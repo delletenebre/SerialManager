@@ -28,13 +28,13 @@ import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 public class SerialService extends Service {
-    private final String TAG = getClass().getSimpleName();
-    private static boolean DEBUG;
+    private final static String TAG = "SerialService";
     public static final String MY_BROADCAST_INTENT = "kg.delletenebre.serial.NEW_DATA";
+    private static boolean DEBUG;
 
     protected static Service service;
 
-    private SharedPreferences _settings;
+    private SharedPreferences settings;
     private EventsReceiver receiver;
 
     private String firstPartString = "";
@@ -58,7 +58,7 @@ public class SerialService extends Service {
                 }
             };
 
-    private static UsbSerialPort sPort = null;
+    public static UsbSerialPort sPort = null;
     private static UsbDeviceConnection sConnection = null;
 
     public static void start(Context context, UsbDeviceConnection connection, UsbSerialPort port) {
@@ -72,8 +72,8 @@ public class SerialService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        _settings = PreferenceManager.getDefaultSharedPreferences(this);
-        DEBUG = _settings.getBoolean("debug", false);
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
+        DEBUG = settings.getBoolean("debug", false);
 
         service = this;
 
@@ -85,11 +85,17 @@ public class SerialService extends Service {
             Log.w(TAG, "No serial device or connection failed");
             stopSelf();
         } else {
+            int baudRate = Integer.parseInt(settings.getString("baudRate", "9600"));
+            int dataBits = Integer.parseInt(settings.getString("dataBits", "8"));
+            int stopBits = Integer.parseInt(settings.getString("stopBits", "1"));
+            int parity   = Integer.parseInt(settings.getString("parity", "0"));
+
+
             try {
                 sPort.open(sConnection);
-                sPort.setParameters(Integer.parseInt(_settings.getString("baudRate", "9600")), 8,
-                        UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-                sPort.setDTR(_settings.getBoolean("dtr", false));
+                sPort.setParameters(baudRate, dataBits, stopBits, parity);
+                        //UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+                sPort.setDTR(settings.getBoolean("dtr", false));
             } catch (IOException e) {
                 Log.e(TAG, "Error setting up device: " + e.getMessage(), e);
                 try {
@@ -172,8 +178,22 @@ public class SerialService extends Service {
         startIoManager();
     }
 
+    public static void setDTR(boolean state) {
+        if (sPort != null) {
+            try {
+                sPort.setDTR(state);
+            } catch (IOException e) {
+                Log.d(TAG, e.getLocalizedMessage());
+            }
+
+        }
+    }
+
+    public static void setDEBUG(boolean state) {
+        DEBUG = state;
+    }
+
     private void updateReceivedData(byte[] data) {
-        DEBUG = _settings.getBoolean("debug", false);
         String sData = new String(data, Charset.forName("UTF8"));
         int start = sData.indexOf("<");
         int end = sData.indexOf(">");
@@ -368,7 +388,7 @@ public class SerialService extends Service {
                         int actionCategoryId =
                                 Integer.parseInt(settings.getString("action_category", "0"));
 
-                        String actionNavigation = settings.getString("actionNavigation", "0");
+                        String actionNavigation = settings.getString("action_navigation", "0");
 
                         String actionVolume = settings.getString("action_volume", "0");
 

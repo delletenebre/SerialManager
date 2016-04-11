@@ -19,9 +19,7 @@ public class App {
     private Context context;
 
 
-    private static boolean muteState = false;
     private static final int VOLUME_STREAM = AudioManager.STREAM_MUSIC;
-    private static int currentVolume, maximumVolume;
     private static boolean volumeShowUI;
     private static AudioManager mAudioManager;
 
@@ -51,6 +49,9 @@ public class App {
     public static void updateSettings(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         volumeShowUI = settings.getBoolean("volumeShowUI", false);
+
+        SerialService.setDEBUG(settings.getBoolean("debug", false));
+        SerialService.setDTR(settings.getBoolean("dtr", false));
     }
 
     public static void initVolume(Context context) {
@@ -58,8 +59,6 @@ public class App {
             mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         }
 
-        maximumVolume = mAudioManager.getStreamMaxVolume(VOLUME_STREAM);
-        currentVolume = mAudioManager.getStreamVolume(VOLUME_STREAM);
         updateSettings(context);
     }
 

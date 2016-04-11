@@ -94,6 +94,9 @@ public class SettingsActivity extends AppCompatActivity {
             setHasOptionsMenu(true);
 
             bindPreferenceSummaryToValue(findPreference("baudRate"));
+            bindPreferenceSummaryToValue(findPreference("dataBits"));
+            bindPreferenceSummaryToValue(findPreference("stopBits"));
+            bindPreferenceSummaryToValue(findPreference("parity"));
         }
 
         @Override

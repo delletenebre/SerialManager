@@ -28,13 +28,11 @@ public class MainActivity extends AppCompatActivity {
     protected static final int REQ_EDIT_COMMAND = 101;
 
     protected static Activity activity;
-    private static Context mContext;
 
     private SharedPreferences _settings;
 
     private RecyclerView mRecyclerView;
     private static RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
     private static List<Command> commands;
 
 
@@ -44,8 +42,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mContext = this;
-
         _settings = PreferenceManager.getDefaultSharedPreferences(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -54,22 +50,24 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView = (RecyclerView) findViewById(R.id.tasks_list);
         //mRecyclerView.setHasFixedSize(true);
 
-        mLayoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         initializeData();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), CommandSettingsActivity.class);
-                int id = _settings.getInt("counter", 0);
-                intent.putExtra("pref_id", id);
-                intent.putExtra("pref_uuid", UUID.randomUUID().toString());
-                startActivityForResult(intent, REQ_NEW_COMMAND);
-            }
-        });
+        if (fab != null) {
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(view.getContext(), CommandSettingsActivity.class);
+                    int id = _settings.getInt("counter", 0);
+                    intent.putExtra("pref_id", id);
+                    intent.putExtra("pref_uuid", UUID.randomUUID().toString());
+                    startActivityForResult(intent, REQ_NEW_COMMAND);
+                }
+            });
+        }
     }
 
     @Override

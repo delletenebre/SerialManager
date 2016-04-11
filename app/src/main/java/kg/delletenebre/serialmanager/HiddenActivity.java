@@ -25,7 +25,7 @@ public class HiddenActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         if (isScreenOn()) {
-            SharedPreferences _settings = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 
             if (SerialService.service != null) {
                 SerialService.service.stopSelf();

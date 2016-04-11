@@ -9,6 +9,49 @@
     <string name="pref_title_dtr" translatable="false">DTR</string>
     <string name="pref_summ_dtr">Use DTR line to determine serial channel readiness</string>
 
+    <string name="pref_title_data_bits" translatable="false">Data Bits</string>
+    <string-array name="pref_data_bits_titles" translatable="false">
+        <item>5 data bits</item>
+        <item>6 data bits</item>
+        <item>7 data bits</item>
+        <item>8 data bits</item>
+    </string-array>
+    <string-array name="pref_data_bits_values" translatable="false">
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+
+    <string name="pref_title_stop_bits" translatable="false">Stop Bits</string>
+    <string-array name="pref_stop_bits_titles" translatable="false">
+        <item>1 stop bit</item>
+        <item>1.5 stop bits</item>
+        <item>2 stop bits</item>
+    </string-array>
+    <string-array name="pref_stop_bits_values" translatable="false">
+        <item>1</item>
+        <item>3</item>
+        <item>2</item>
+    </string-array>
+
+    <string name="pref_title_parity" translatable="false">Parity</string>
+    <string-array name="pref_parity_titles" translatable="false">
+        <item>No parity</item>
+        <item>Odd parity</item>
+        <item>Even parity</item>
+        <item>Mark parity</item>
+        <item>Space parity</item>
+    </string-array>
+    <string-array name="pref_parity_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+
     <string name="pref_title_baud_rate">Baud Rate</string>
     <string-array name="pref_baud_rate_titles" translatable="false">
         <item>1200</item>
