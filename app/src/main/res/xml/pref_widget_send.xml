@@ -23,7 +23,7 @@
     <EditTextPreference
         android:key="text"
         android:defaultValue="\uf0a6"
-        android:title="@string/pref_widget_title_prefix"
+        android:title="@string/pref_widget_send_title_title"
         android:inputType="text"
         android:selectAllOnFocus="true"
         android:singleLine="true" />

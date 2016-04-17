@@ -73,6 +73,7 @@
     <string name="pref_title_value">Значение</string>
 
     <!-- Widget -->
+    <string name="pref_widget_send_title_title">Текст / Иконка</string>
     <string name="top_left">Вверху слева</string>
     <string name="top_center">Вверху по центру</string>
     <string name="top_right">Вверху справа</string>

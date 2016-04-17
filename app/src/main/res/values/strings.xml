@@ -180,6 +180,7 @@
     <string name="pref_title_value">Value</string>
 
     <!-- Widget -->
+    <string name="pref_widget_send_title_title">Text / Icon</string>
     <string name="top_left">Top Left</string>
     <string name="top_center">Top Center</string>
     <string name="top_right">Top Right</string>

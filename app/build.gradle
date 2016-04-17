@@ -8,7 +8,7 @@ android {
         applicationId "kg.delletenebre.serialmanager"
         minSdkVersion 17
         targetSdkVersion 23
-        versionCode 17
+        versionCode 18
         versionName "1.4"
     }
     buildTypes {
