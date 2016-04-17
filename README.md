@@ -52,6 +52,5 @@
 * [Material Dialogs](https://github.com/afollestad/material-dialogs)
 * [colorpicker](https://github.com/martin-stone/hsv-alpha-color-picker-android)
 
-
 ## Альтернативы
 * [Remote Inputs Manager / Remote steering wheel control](http://forum.xda-developers.com/showthread.php?t=2635159)
