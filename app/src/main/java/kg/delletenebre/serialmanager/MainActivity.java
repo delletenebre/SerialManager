@@ -1,7 +1,6 @@
 package kg.delletenebre.serialmanager;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -11,7 +10,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     protected static Activity activity;
 
-    private SharedPreferences _settings;
+    private SharedPreferences settings;
 
     private RecyclerView mRecyclerView;
     private static RecyclerView.Adapter mAdapter;
@@ -42,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        _settings = PreferenceManager.getDefaultSharedPreferences(this);
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -61,13 +59,15 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(view.getContext(), CommandSettingsActivity.class);
-                    int id = _settings.getInt("counter", 0);
+                    int id = settings.getInt("counter", 0);
                     intent.putExtra("pref_id", id);
                     intent.putExtra("pref_uuid", UUID.randomUUID().toString());
                     startActivityForResult(intent, REQ_NEW_COMMAND);
                 }
             });
         }
+
+
     }
 
     @Override
@@ -93,6 +93,10 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         App.setAliveActivity(this);
         activity = this;
+
+        if (settings != null && settings.getBoolean("reconnect", false)) {
+            SerialService.restart(this);
+        }
     }
 
     @Override
@@ -149,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
     public void addCommand(int id, String uuid, String key, String value, String scatter,
                            boolean isThrough, int actionCategoryId, String action) {
 
-        SharedPreferences.Editor _settingEditor = _settings.edit();
+        SharedPreferences.Editor _settingEditor = settings.edit();
         _settingEditor.putInt("counter", id + 1);
         _settingEditor.apply();
 

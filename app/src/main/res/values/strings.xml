@@ -1,13 +1,20 @@
 <resources>
     <string name="app_name" translatable="false">Serial Manager</string>
+    <string name="widget_receive_name" translatable="false">Serial Manager Receive</string>
+    <string name="widget_send_name" translatable="false">Serial Manager Send</string>
     <string name="md_choose_label">Choose</string>
     <string name="settings">Settings</string>
+    <string name="toast_serial_send_warning">SerialManager: Connection error</string>
+    <string name="toast_serial_send_warning_empty_data">SerialManager: Data is null</string>
 
     <string name="pref_category_connection">Connection</string>
     <string name="pref_category_other">Other</string>
 
-    <string name="pref_title_dtr" translatable="false">DTR</string>
+    <string name="pref_title_dtr" translatable="false">DTR - Data Terminal Ready</string>
     <string name="pref_summ_dtr">Use DTR line to determine serial channel readiness</string>
+
+    <string name="pref_title_rts" translatable="false">RTS / CTS - Request To Send / Clear To Send</string>
+    <string name="pref_summ_rts" translatable="false">¯\\(°_o)/¯</string>
 
     <string name="pref_title_data_bits" translatable="false">Data Bits</string>
     <string-array name="pref_data_bits_titles" translatable="false">
@@ -66,6 +73,12 @@
         <item>57600</item>
         <item>115200</item>
     </string-array>
+
+    <string name="pref_title_crlf">Add CR&#38;LF</string>
+    <string name="pref_summ_crlf">Add Carriage Return and Line Feed symbols to end of sending data</string>
+
+    <string name="pref_title_reconnect">Reconnect on app start</string>
+    <string name="pref_summ_reconnect">Reconnect on app start</string>
 
     <string name="pref_title_volume_show_ui">Show volume UI on volume change</string>
 
@@ -206,6 +219,7 @@
     <string name="pref_widget_title_fontSize">Font Size (sp)</string>
     <string name="pref_widget_title_fontColor">Font Color</string>
     <string name="pref_widget_title_backgroundColor">Background Color</string>
+    <string name="pref_widget_title_exampleColor">Palette</string>
 
     <string name="pref_widget_title_multiline_align">Alignment of multiline text</string>
     <string name="left">Left</string>

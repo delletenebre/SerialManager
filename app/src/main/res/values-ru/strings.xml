@@ -2,70 +2,21 @@
 
     <string name="md_choose_label">Выбрать</string>
     <string name="settings">Настройки</string>
+    <string name="toast_serial_send_warning">SerialManager: Ошибка подключения</string>
+    <string name="toast_serial_send_warning_empty_data">SerialManager: Нет данных для отправки</string>
 
     <string name="pref_category_connection">Соединение</string>
     <string name="pref_category_other">Отладка</string>
 
-
     <string name="pref_summ_dtr">Использовать строку DTR для определения готовности последовательного канала</string>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     <string name="pref_title_baud_rate">Скорость передачи данных</string>
 
+    <string name="pref_title_crlf">Добавлять CR&#38;LF</string>
+    <string name="pref_summ_crlf">Добавлять управляющие символы CR и LF при отправке данных</string>
 
-
-
-
-
-
-
-
-
-
-
-
+    <string name="pref_title_reconnect">Переподключаться при запуске программы</string>
+    <string name="pref_summ_reconnect">Завершать текущее соединение и подключаться заново при открытии главного окна программы</string>
 
     <string name="pref_title_volume_show_ui">Показывать панель громкости при изменении громкости</string>
 
@@ -73,18 +24,10 @@
     <string name="pref_summ_debug">Включить всплывающие окна и отправлять дополнительную информацию в logcat</string>
 
 
-
-
-
     <!-- Dialog delete command -->
     <string name="dialog_content_delete_command">Вы действительно хотите удалить команду %1$s?</string>
     <string name="dialog_delete_positive">Удалить</string>
     <string name="dialog_negative">Отмена</string>
-
-
-
-
-
 
     <string name="pref_title_autoset">Определить ключ/значение автоматически</string>
 
@@ -101,43 +44,12 @@
     <string name="media">Плеер</string>
     <string name="application">Приложение</string>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     <string name="pref_title_command_action_volume">Звук</string>
     <string-array name="pref_command_action_volume_titles">
         <item>Увеличить</item>
         <item>Уменьшить</item>
         <item>Mute</item>
     </string-array>
-
-
-
-
-
 
     <string name="pref_title_command_action_media">Медиа</string>
     <string-array name="pref_command_action_media_titles">
@@ -147,13 +59,6 @@
         <item>Следующий</item>
         <item>Перемотать вперёд</item>
     </string-array>
-
-
-
-
-
-
-
 
     <string name="pref_title_command_action_application">Приложение / Ярлык</string>
 
@@ -183,44 +88,15 @@
     <string name="pref_widget_suffix_default_value"> ед.</string>
     <string name="pref_widget_title_position">Расположение текста</string>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     <string name="pref_widget_title_fontSize">Размер шрифта (sp)</string>
     <string name="pref_widget_title_fontColor">Цвет шрифта</string>
     <string name="pref_widget_title_backgroundColor">Цвет фона</string>
+    <string name="pref_widget_title_exampleColor">Палитра</string>
 
     <string name="pref_widget_title_multiline_align">Выравнивание текста</string>
     <string name="left">По левому краю</string>
     <string name="center">По центру</string>
     <string name="right">По правому краю</string>
-
-
-
-
-
-
-
-
-
 
     <string name="pref_widget_title_use_custom_font">Использовать свой шрифт</string>
     <string name="pref_widget_title_font_file">Файл шрифта (*.ttf)</string>

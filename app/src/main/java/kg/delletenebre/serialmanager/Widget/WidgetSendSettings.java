@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -30,13 +31,13 @@ import java.io.File;
 import kg.delletenebre.serialmanager.AppChooserPreference;
 import kg.delletenebre.serialmanager.R;
 
-public class AppWidgetSettings extends AppCompatActivity implements FileChooserDialog.FileCallback {
+public class WidgetSendSettings extends AppCompatActivity implements FileChooserDialog.FileCallback {
 
     private final String TAG = getClass().getSimpleName();
-    public static final String PREF_PREFIX_KEY = "appwidget_";
-    private static final int REQUEST_PERMISSION = 100;
+    public static final String PREF_PREFIX_KEY = "widget_send_";
+    private static final int REQUEST_PERMISSION = 101;
 
-    private GeneralPreferenceFragment mGeneralPreferenceFragment;
+    private GeneralPreferenceFragment preferenceFragment;
     private Preference fontFilePreference;
 
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener =
@@ -81,10 +82,10 @@ public class AppWidgetSettings extends AppCompatActivity implements FileChooserD
         super.onCreate(savedInstanceState);
         setupActionBar();
 
-        mGeneralPreferenceFragment = new GeneralPreferenceFragment();
-        mGeneralPreferenceFragment.setAppWidgetSettings(this);
+        preferenceFragment = new GeneralPreferenceFragment();
+        preferenceFragment.setAppWidgetSettings(this);
         getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, mGeneralPreferenceFragment).commit();
+                .replace(android.R.id.content, preferenceFragment).commit();
     }
 
     private void setupActionBar() {
@@ -96,8 +97,8 @@ public class AppWidgetSettings extends AppCompatActivity implements FileChooserD
 
     @Override
     public void onBackPressed() {
-        if (mGeneralPreferenceFragment != null) {
-            mGeneralPreferenceFragment.saveWidget();
+        if (preferenceFragment != null) {
+            preferenceFragment.saveWidget();
         }
 
         //super.onBackPressed();
@@ -142,7 +143,7 @@ public class AppWidgetSettings extends AppCompatActivity implements FileChooserD
     public void onFileSelection(@NonNull FileChooserDialog dialog, @NonNull File file) {
         if (fontFilePreference != null) {
             String filePath = file.getPath();
-            SharedPreferences.Editor prefs = mGeneralPreferenceFragment.getSharedPreference().edit();
+            SharedPreferences.Editor prefs = preferenceFragment.getSharedPreference().edit();
             prefs.putString("fontFile", filePath);
             prefs.apply();
             fontFilePreference.setSummary(filePath);
@@ -150,10 +151,10 @@ public class AppWidgetSettings extends AppCompatActivity implements FileChooserD
     }
 
     public static class GeneralPreferenceFragment extends PreferenceFragment {
-        private int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-        private AppWidgetSettings appWidgetSettings;
+        private int widgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+        private WidgetSendSettings appWidgetSettings;
 
-        public void setAppWidgetSettings(AppWidgetSettings appWidgetSettings) {
+        public void setAppWidgetSettings(WidgetSendSettings appWidgetSettings) {
             this.appWidgetSettings = appWidgetSettings;
         }
 
@@ -167,29 +168,29 @@ public class AppWidgetSettings extends AppCompatActivity implements FileChooserD
             Intent intent = getActivity().getIntent();
             Bundle extras = intent.getExtras();
             if (extras != null) {
-                mAppWidgetId = extras.getInt(
+                widgetId = extras.getInt(
                         AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
             }
 
             // If this activity was started with an intent without an app widget ID, finish with an error.
-            if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
+            if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
                 getActivity().finish();
                 return;
             } else {
-                getPreferenceManager().setSharedPreferencesName(PREF_PREFIX_KEY + mAppWidgetId);
+                getPreferenceManager().setSharedPreferencesName(PREF_PREFIX_KEY + widgetId);
                 getPreferenceManager().setSharedPreferencesMode(MODE_PRIVATE);
             }
 
-            addPreferencesFromResource(R.xml.pref_widget);
+            addPreferencesFromResource(R.xml.pref_widget_send);
             setHasOptionsMenu(true);
 
-            bindPreferenceSummaryToValue(findPreference("key"), mAppWidgetId);
-            bindPreferenceSummaryToValue(findPreference("prefix"), mAppWidgetId);
-            bindPreferenceSummaryToValue(findPreference("suffix"), mAppWidgetId);
-            bindPreferenceSummaryToValue(findPreference("position"), mAppWidgetId);
-            bindPreferenceSummaryToValue(findPreference("fontSize"), mAppWidgetId);
-            bindPreferenceSummaryToValue(findPreference("textAlign"), mAppWidgetId);
-            bindPreferenceSummaryToValue(findPreference("fontFile"), mAppWidgetId);
+            bindPreferenceSummaryToValue(findPreference("data"), widgetId);
+            bindPreferenceSummaryToValue(findPreference("text"), widgetId);
+            bindPreferenceSummaryToValue(findPreference("fontColor"), widgetId);
+            bindPreferenceSummaryToValue(findPreference("fontSize"), widgetId);
+            bindPreferenceSummaryToValue(findPreference("backgroundColor"), widgetId);
+//            bindPreferenceSummaryToValue(findPreference("textAlign"), widgetId);
+            bindPreferenceSummaryToValue(findPreference("fontFile"), widgetId);
 
             Preference fontFile = findPreference("fontFile");
             fontFile.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -199,6 +200,7 @@ public class AppWidgetSettings extends AppCompatActivity implements FileChooserD
                     return true;
                 }
             });
+
         }
 
         public SharedPreferences getSharedPreference() {
@@ -218,10 +220,10 @@ public class AppWidgetSettings extends AppCompatActivity implements FileChooserD
 
         public void saveWidget() {
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(getActivity());
-            AppWidget.updateAppWidget(getActivity(), appWidgetManager, mAppWidgetId, "---");
+            WidgetSend.updateAppWidget(getActivity(), appWidgetManager, widgetId);
 
             Intent resultValue = new Intent();
-            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
             getActivity().setResult(RESULT_OK, resultValue);
             getActivity().finish();
         }

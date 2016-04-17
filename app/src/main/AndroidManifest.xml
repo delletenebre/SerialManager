@@ -4,10 +4,9 @@
 
     <uses-feature android:name="android.hardware.usb.host" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <!--<uses-permission android:name="android.permission.INJECT_EVENTS"/>-->
-    <!--<uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />-->
 
     <application
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -38,6 +37,7 @@
             android:theme="@style/Theme.Transparent">
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
             </intent-filter>
 
             <meta-data
@@ -52,6 +52,9 @@
             <intent-filter>
                 <action android:name="android.intent.action.USER_PRESENT" />
                 <!-- <action android:name="android.intent.action.BOOT_COMPLETED" /> -->
+                <action android:name="kg.delletenebre.serial.usb_permission" />
+                <action android:name="kg.delletenebre.serial.usb_attached" />
+                <action android:name="kg.delletenebre.serial.usb_detached" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -74,7 +77,9 @@
                 android:value=".MainActivity" />
         </activity>
 
-        <receiver android:name=".Widget.AppWidget">
+        <receiver
+            android:name=".Widget.WidgetReceive"
+            android:label="@string/widget_receive_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="kg.delletenebre.serial.NEW_DATA" />
@@ -83,10 +88,27 @@
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/app_widget_info" />
+                android:resource="@xml/widget_receive_info" />
         </receiver>
+        <activity android:name=".Widget.WidgetReceiveSettings">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
 
-        <activity android:name=".Widget.AppWidgetSettings">
+        <receiver
+            android:name=".Widget.WidgetSend"
+            android:label="@string/widget_send_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="kg.delletenebre.serial.SEND_DATA_COMPLETE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_send_info" />
+        </receiver>
+        <activity android:name=".Widget.WidgetSendSettings">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>

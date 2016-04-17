@@ -27,11 +27,11 @@ import kg.delletenebre.serialmanager.SerialService;
 
 /**
  * Implementation of App Widget functionality.
- * App Widget Configuration implemented in {@link AppWidgetSettings AppWidgetSettings}
+ * App Widget Configuration implemented in {@link WidgetReceiveSettings WidgetReceiveSettings}
  */
-public class AppWidget extends AppWidgetProvider {
+public class WidgetReceive extends AppWidgetProvider {
 
-    private static final String TAG = "AppWidget";
+    private static final String TAG = "WidgetReceive";
     private static final int[] imageViewIds = {
             R.id.appwidget_image_text_top_left,
             R.id.appwidget_image_text_top_center,
@@ -44,10 +44,10 @@ public class AppWidget extends AppWidgetProvider {
             R.id.appwidget_image_text_bottom_right,
     };
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId, String value) {
+    static void updateAppWidget(Context context, AppWidgetManager widgetManager,
+                                int widgetId, String value) {
         SharedPreferences prefs = context.getSharedPreferences(
-                AppWidgetSettings.PREF_PREFIX_KEY + appWidgetId, Context.MODE_PRIVATE);
+                WidgetReceiveSettings.PREF_PREFIX_KEY + widgetId, Context.MODE_PRIVATE);
 
         int position = Integer.parseInt(prefs.getString("position", "4"));
 
@@ -55,7 +55,7 @@ public class AppWidget extends AppWidgetProvider {
 
         int backgroundColor = prefs.getInt("backgroundColor", Color.parseColor("#88000000"));
         // Construct the RemoteViews object
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.app_widget);
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_receive);
         //views.setTextViewText(R.id.appwidget_text, widgetText);
         views.setInt(R.id.appwidget_container, "setBackgroundColor", backgroundColor);
 
@@ -67,8 +67,8 @@ public class AppWidget extends AppWidgetProvider {
 
 
         // onClick open configure activity
-        Intent intent = new Intent(context, AppWidgetSettings.class);
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+        Intent intent = new Intent(context, WidgetReceiveSettings.class);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
@@ -77,13 +77,13 @@ public class AppWidget extends AppWidgetProvider {
 
 
         // Instruct the widget manager to update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, views);
+        widgetManager.updateAppWidget(widgetId, views);
     }
 
     @Override
-    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, "---");
+    public void onUpdate(Context context, AppWidgetManager widgetManager, int[] widgetIds) {
+        for (int widgetId : widgetIds) {
+            updateAppWidget(context, widgetManager, widgetId, "---");
         }
     }
 
@@ -92,7 +92,7 @@ public class AppWidget extends AppWidgetProvider {
         // When the user deletes the widget, delete the preference associated with it.
 
         for (int appWidgetId : appWidgetIds) {
-            String prefsName = AppWidgetSettings.PREF_PREFIX_KEY + String.valueOf(appWidgetId);
+            String prefsName = WidgetReceiveSettings.PREF_PREFIX_KEY + String.valueOf(appWidgetId);
             context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
                     .edit()
                     .clear()
@@ -205,19 +205,19 @@ public class AppWidget extends AppWidgetProvider {
 
         if ( !key.isEmpty() ) {
             context = context.getApplicationContext();
-            AppWidgetManager appWidgetManager =
+            AppWidgetManager widgetManager =
                     AppWidgetManager.getInstance(context);
 
             ComponentName thisWidget =
-                    new ComponentName(context, AppWidget.class);
+                    new ComponentName(context, WidgetReceive.class);
 
-            int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
-            for (int appWidgetId : appWidgetIds) {
+            int[] widgetIds = widgetManager.getAppWidgetIds(thisWidget);
+            for (int widgetId : widgetIds) {
                 SharedPreferences prefs = context.getSharedPreferences(
-                        AppWidgetSettings.PREF_PREFIX_KEY + appWidgetId, Context.MODE_PRIVATE);
+                        WidgetReceiveSettings.PREF_PREFIX_KEY + widgetId, Context.MODE_PRIVATE);
 
                 if (prefs.getString("key", "").equals(key)) {
-                    updateAppWidget(context, appWidgetManager, appWidgetId, val);
+                    updateAppWidget(context, widgetManager, widgetId, val);
                 }
             }
         }

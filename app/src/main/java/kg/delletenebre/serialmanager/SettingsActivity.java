@@ -72,7 +72,7 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         App.setAliveActivity(null);
-        App.updateSettings(this);
+        App.updateSettings();
         activity = null;
         super.onPause();
     }
