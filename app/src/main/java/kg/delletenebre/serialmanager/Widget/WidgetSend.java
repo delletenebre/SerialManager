@@ -288,17 +288,15 @@ public class WidgetSend extends AppWidgetProvider {
     public static String getCurrentValue(SharedPreferences prefs, String prefName, String defaultValue) {
         String value = prefs.getString(prefName, defaultValue);
 
-        if (prefs.getBoolean("switch", false)) {
-            if (!value.isEmpty() && value.contains("|")) {
-                String switchValues[] = value.split("\\|");
-                int switchDataId = prefs.getInt("switch_data_id", 0);
+        if (!value.isEmpty() && value.contains("|")) {
+            String switchValues[] = value.split("\\|");
+            int switchDataId = prefs.getInt("switch_data_id", 0);
 
-                if (switchDataId > switchValues.length - 1) {
-                    switchDataId = 0;
-                }
-
-                value = switchValues[switchDataId];
+            if (!prefs.getBoolean("switch", false) || switchDataId > switchValues.length - 1) {
+                switchDataId = 0;
             }
+
+            value = switchValues[switchDataId];
         }
 
         if (value.isEmpty()) {
