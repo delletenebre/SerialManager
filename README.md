@@ -47,11 +47,11 @@
 <img src="https://cloud.githubusercontent.com/assets/3936845/14065230/ca0e1e4e-f443-11e5-82cd-27a1007e1334.png" width="240"> <img src="https://cloud.githubusercontent.com/assets/3936845/14065229/ca0b7eb4-f443-11e5-9a56-0499ea4b3e47.png" width="240">
 
 ## Библиотеки
-* [usb-serial-for-android](https://github.com/mik3y/usb-serial-for-android)
-* [Font Awesome 4.5.0](http://fortawesome.github.io/Font-Awesome/)
+* [UsbSerial](https://github.com/felHR85/UsbSerial)
+* [Font Awesome 4.6.1](http://fortawesome.github.io/Font-Awesome/)
 * [Material Dialogs](https://github.com/afollestad/material-dialogs)
 * [colorpicker](https://github.com/martin-stone/hsv-alpha-color-picker-android)
 
-## Альтернативы
 
+## Альтернативы
 * [Remote Inputs Manager / Remote steering wheel control](http://forum.xda-developers.com/showthread.php?t=2635159)

@@ -1,0 +1,77 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:key="switch"
+        android:defaultValue="false"
+        android:title="Виджет-переключатель"
+        android:summary="Разделитель |\nНапример для поля Отправляемые данные: on|off"/>
+
+    <!--<CheckBoxPreference-->
+        <!--android:key="wait_confirmation"-->
+        <!--android:dependency="switch"-->
+        <!--android:defaultValue="false"-->
+        <!--android:title="Ожидать подтверждения состояния" />-->
+
+    <EditTextPreference
+        android:key="data"
+        android:defaultValue=""
+        android:title="Отправляемые данные"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+    <EditTextPreference
+        android:key="text"
+        android:defaultValue="\uf0a6"
+        android:title="@string/pref_widget_title_prefix"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+    <EditTextPreference
+        android:key="fontColor"
+        android:defaultValue="#ffffff"
+        android:title="@string/pref_widget_title_fontColor"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+    <EditTextPreference
+        android:key="fontSize"
+        android:defaultValue="24"
+        android:title="@string/pref_widget_title_fontSize"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+    <EditTextPreference
+        android:key="backgroundColor"
+        android:defaultValue="#88000000"
+        android:title="@string/pref_widget_title_backgroundColor"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+    <com.rarepebble.colorpicker.ColorPreference
+        android:key="exmpleColor"
+        android:title="@string/pref_widget_title_exampleColor" />
+
+    <!--<ListPreference-->
+        <!--android:key="textAlign"-->
+        <!--android:defaultValue="1"-->
+        <!--android:title="@string/pref_widget_title_multiline_align"-->
+        <!--android:entries="@array/pref_widget_multiline_align_titles"-->
+        <!--android:entryValues="@array/pref_widget_multiline_align_values"-->
+        <!--android:negativeButtonText="@null"-->
+        <!--android:positiveButtonText="@null" />-->
+
+    <CheckBoxPreference
+        android:key="useCustomFont"
+        android:title="@string/pref_widget_title_use_custom_font"
+        android:defaultValue="false" />
+    <Preference
+        android:key="fontFile"
+        android:dependency="useCustomFont"
+        android:title="@string/pref_widget_title_font_file" />
+
+</PreferenceScreen>

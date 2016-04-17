@@ -6,65 +6,99 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbManager;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.widget.Toast;
 
-import com.hoho.android.usbserial.driver.UsbSerialPort;
-import com.hoho.android.usbserial.util.SerialInputOutputManager;
+import com.felhr.usbserial.UsbSerialDevice;
+import com.felhr.usbserial.UsbSerialInterface;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import xdroid.toaster.Toaster;
 
 public class SerialService extends Service {
     private final static String TAG = "SerialService";
     public static final String MY_BROADCAST_INTENT = "kg.delletenebre.serial.NEW_DATA";
+    public static final String WIDGET_SEND_ACTION = "kg.delletenebre.serial.SEND_DATA";
+    public static final String SERVICE_SEND_ACTION_COMPLETE = "kg.delletenebre.serial.SEND_DATA_COMPLETE";
     private static boolean DEBUG;
 
-    protected static Service service;
+    protected static SerialService service;
 
     private SharedPreferences settings;
     private EventsReceiver receiver;
 
-    private String firstPartString = "";
-
     private static List<Command> commands;
 
-    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
-    private SerialInputOutputManager mSerialIoManager;
-    private final SerialInputOutputManager.Listener mListener =
-            new SerialInputOutputManager.Listener() {
+    private static JSONArray jsonDevices;
 
-                @Override
-                public void onRunError(Exception e) {
-                    Log.d(TAG, "Runner stopped");
-                    stopSelf();
+    private static UsbSerialDevice serial;
+
+
+    public static void start(Context context, UsbDevice device, UsbDeviceConnection connection) {
+        if (service != null) {
+            service.stopSelf();
+        }
+
+        if (device != null && connection != null) {
+            serial = UsbSerialDevice.createUsbSerialDevice(device, connection);
+
+            context.startService(new Intent(context, SerialService.class));
+        }
+    }
+
+
+
+    public static void restart(Context context) {
+        if (jsonDevices == null) {
+            getJSONDevices(context);
+        }
+
+        if (jsonDevices != null) {
+            try {
+                UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+                for (UsbDevice device: usbManager.getDeviceList().values()) {
+                    boolean vidCheck = false;
+                    boolean pidCheck = false;
+
+                    for (int i = 0; i < jsonDevices.length(); i++) {
+                        JSONObject json = jsonDevices.getJSONObject(i);
+
+                        vidCheck = !json.has("vid")||(device.getVendorId() == json.getInt("vid"));
+                        pidCheck = !json.has("pid")||(device.getProductId() == json.getInt("pid"));
+
+                        if (vidCheck && pidCheck) {
+                            break;
+                        }
+                    }
+
+                    if (vidCheck && pidCheck && usbManager.hasPermission(device)) {
+                        UsbDeviceConnection connection = usbManager.openDevice(device);
+                        if (connection != null) {
+                            start(context, device, connection);
+                            break;
+                        }
+                    }
                 }
-
-                @Override
-                public void onNewData(final byte[] data) {
-                    updateReceivedData(data);
-                }
-            };
-
-    public static UsbSerialPort sPort = null;
-    private static UsbDeviceConnection sConnection = null;
-
-    public static void start(Context context, UsbDeviceConnection connection, UsbSerialPort port) {
-        sConnection = connection;
-        sPort = port;
-        context.startService(new Intent(context, SerialService.class));
+            } catch (Exception e) {
+                Log.e(TAG, e.getLocalizedMessage());
+            }
+        }
     }
 
 
@@ -72,53 +106,50 @@ public class SerialService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        settings = PreferenceManager.getDefaultSharedPreferences(this);
-        DEBUG = settings.getBoolean("debug", false);
-
-        service = this;
-
-        receiver = new EventsReceiver();
-        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-        registerReceiver(receiver, intentFilter);
-
-        if (sPort == null || sConnection == null) {
+        if (serial == null) {//sPort == null || sConnection == null) {
             Log.w(TAG, "No serial device or connection failed");
+
             stopSelf();
         } else {
+            settings = PreferenceManager.getDefaultSharedPreferences(this);
+            DEBUG = settings.getBoolean("debug", false);
+
+            service = this;
+
+            receiver = new EventsReceiver();
+            IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+            registerReceiver(receiver, intentFilter);
+
             int baudRate = Integer.parseInt(settings.getString("baudRate", "9600"));
             int dataBits = Integer.parseInt(settings.getString("dataBits", "8"));
             int stopBits = Integer.parseInt(settings.getString("stopBits", "1"));
             int parity   = Integer.parseInt(settings.getString("parity", "0"));
+            boolean dtr  =  settings.getBoolean("dtr", false);
+            boolean rts  =  settings.getBoolean("rts", false);
 
+            serial.open();
+            serial.setBaudRate(baudRate);
+            serial.setDataBits(dataBits);
+            serial.setStopBits(stopBits);
+            serial.setParity(parity);
+            serial.setFlowControl(UsbSerialInterface.FLOW_CONTROL_OFF);
+            serial.setDTR(dtr);
+            serial.setRTS(rts);
 
             try {
-                sPort.open(sConnection);
-                sPort.setParameters(baudRate, dataBits, stopBits, parity);
-                        //UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-                sPort.setDTR(settings.getBoolean("dtr", false));
-            } catch (IOException e) {
-                Log.e(TAG, "Error setting up device: " + e.getMessage(), e);
-                try {
-                    sPort.close();
-                } catch (IOException e2) {
-                    // Ignore.
-                }
-                sConnection = null;
-                sPort = null;
-                stopSelf();
+                serial.read(readCallback);
+            } catch (Exception e) {
+                Log.e(TAG, e.getLocalizedMessage());
+                restart(this);
             }
-        }
 
-        if (commands == null) {
-            commands = initializeCommands(this);
-        }
+            if (commands == null) {
+                commands = initializeCommands(this);
+            }
 
-        App.initVolume(this);
-
-        onDeviceStateChange();
-
-        if (DEBUG) {
-            Log.d(TAG, "Service successfully CREATED");
+            if (DEBUG) {
+                Log.d(TAG, "Service successfully CREATED");
+            }
         }
     }
 
@@ -130,14 +161,8 @@ public class SerialService extends Service {
             unregisterReceiver(receiver);
         }
 
-        stopIoManager();
-        if (sPort != null) {
-            try {
-                sPort.close();
-            } catch (IOException e) {
-                // Ignore.
-            }
-            sPort = null;
+        if (serial != null) {
+            serial.close();
         }
 
         service = null;
@@ -157,35 +182,15 @@ public class SerialService extends Service {
         return START_STICKY;
     }
 
-    private void stopIoManager() {
-        if (mSerialIoManager != null) {
-            Log.i(TAG, "Stopping io manager ..");
-            mSerialIoManager.stop();
-            mSerialIoManager = null;
-        }
-    }
-
-    private void startIoManager() {
-        if (sPort != null) {
-            Log.i(TAG, "Starting io manager ..");
-            mSerialIoManager = new SerialInputOutputManager(sPort, mListener);
-            mExecutor.submit(mSerialIoManager);
-        }
-    }
-
-    private void onDeviceStateChange() {
-        stopIoManager();
-        startIoManager();
-    }
-
     public static void setDTR(boolean state) {
-        if (sPort != null) {
-            try {
-                sPort.setDTR(state);
-            } catch (IOException e) {
-                Log.d(TAG, e.getLocalizedMessage());
-            }
+        if (serial != null) {
+            serial.setDTR(state);
+        }
+    }
 
+    public static void setRTS(boolean state) {
+        if (serial != null) {
+            serial.setRTS(state);
         }
     }
 
@@ -193,44 +198,62 @@ public class SerialService extends Service {
         DEBUG = state;
     }
 
-    private void updateReceivedData(byte[] data) {
-        String sData = new String(data, Charset.forName("UTF8"));
-        int start = sData.indexOf("<");
-        int end = sData.indexOf(">");
-
-        if (DEBUG) {
-            Log.d("ReceivedData: ", sData);
-        }
-
-        if ( (start > -1 && end > -1 && start < end && (start + 1) != end)
-                || (!firstPartString.isEmpty() && end > -1) ) {
-
-            if (!firstPartString.isEmpty()) {
-                sData = firstPartString + sData;
-
-                start = sData.indexOf("<");
-                end = sData.indexOf(">");
-
-                firstPartString = "";
+    public void write(String data) {
+        if (serial != null && settings != null) {
+            if (DEBUG) {
+                Log.d(TAG, "Data to send: " + data);
             }
 
-            sData = sData.substring(start + 1, end);
+            if (settings.getBoolean("crlf", true)) {
+                data += "\r\n";
+            }
+            serial.write(data.getBytes());
 
-            if (sData.contains(":")) {
-                String[] key_val = sData.split(":");
-                final String key = key_val[0];
-                final String val = key_val[1];
+        } else if (DEBUG) {
+            Toaster.toast(R.string.toast_serial_send_warning);
+            Log.w(TAG, "Can not send data [" + data + "]. Service is null");
+        }
+    }
+
+    public void writeFromWidget(String data, int widgetId) {
+        String originalData = data;
+        if (serial != null && settings != null) {
+            if (DEBUG) {
+                Log.d(TAG, "Data to send: " + data);
+            }
+
+            if (settings.getBoolean("crlf", true)) {
+                data += "\r\n";
+            }
+            serial.write(data.getBytes());
+
+            Intent i = new Intent(SERVICE_SEND_ACTION_COMPLETE);
+            i.putExtra("data", originalData);
+            i.putExtra("widgetId", widgetId);
+            sendBroadcast(i);
+
+        } else if (DEBUG) {
+            Toaster.toast(R.string.toast_serial_send_warning);
+            Log.w(TAG, "Can not send data [" + data + "]. Service is null");
+        }
+    }
+
+    private UsbSerialInterface.UsbReadCallback readCallback = new UsbSerialInterface.UsbReadCallback() {
+        @Override
+        public void onReceivedData(byte[] arg0) {
+            String sData = new String(arg0, Charset.forName("UTF8"));
+            final Pattern pattern = Pattern.compile("<(.+?):(.+?)>");
+            final Matcher matcher = pattern.matcher(sData);
+            if (matcher.find()) {
+                final String key = matcher.group(1);
+                final String val = matcher.group(2);
 
                 final Activity activity = App.getAliveActivity();
 
                 if (activity != null) {
-                    activity.runOnUiThread(new Runnable() {
-                        public void run() {
-                            Toast.makeText(activity, String.format(
-                                    getResources().getString(R.string.toast_received_command),
-                                    key, val), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    Toaster.toast(String.format(
+                            getResources().getString(R.string.toast_received_command),
+                            key, val));
 
                     if (CommandSettingsActivity.autosetPreference != null
                             && CommandSettingsActivity.autosetPreference.isChecked()
@@ -254,12 +277,8 @@ public class SerialService extends Service {
                     }
                 }
             }
-        } else if (firstPartString.isEmpty() && start > -1) {
-            firstPartString = sData;
-        } else {
-            firstPartString = "";
         }
-    }
+    };
 
     private void sendCommandBroadcast(String key, String value) {
         Intent i = new Intent(MY_BROADCAST_INTENT);
@@ -435,5 +454,41 @@ public class SerialService extends Service {
         }
 
         return "";
+    }
+
+
+    public static JSONArray getJSONDevices(Context context) {
+        if (jsonDevices == null) {
+            try {
+                String jsonDevicesFromAssets = loadJSONFromAsset(context);
+                if (jsonDevicesFromAssets != null) {
+                    jsonDevices = new JSONArray(jsonDevicesFromAssets);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, e.getLocalizedMessage());
+                e.printStackTrace();
+            }
+        }
+
+        return jsonDevices;
+    }
+
+    public static String loadJSONFromAsset(Context context) {
+        String json = null;
+
+        if (context != null) {
+            try {
+                InputStream is = context.getAssets().open("devices.json");
+                int size = is.available();
+                byte[] buffer = new byte[size];
+                is.read(buffer);
+                is.close();
+                json = new String(buffer, "UTF-8");
+            } catch (Exception e) {
+                Log.e(TAG, e.getLocalizedMessage());
+                return null;
+            }
+        }
+        return json;
     }
 }

@@ -9,6 +9,12 @@
             android:title="@string/pref_title_dtr"
             android:summary="@string/pref_summ_dtr" />
 
+        <CheckBoxPreference
+            android:key="rts"
+            android:defaultValue="false"
+            android:title="@string/pref_title_rts"
+            android:summary="@string/pref_summ_rts" />
+
         <ListPreference
             android:key="baudRate"
             android:defaultValue="9600"
@@ -45,14 +51,25 @@
             android:negativeButtonText="@null"
             android:positiveButtonText="@null" />
 
+        <CheckBoxPreference
+            android:key="crlf"
+            android:defaultValue="true"
+            android:title="@string/pref_title_crlf"
+            android:summary="@string/pref_summ_crlf" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
         android:title="@string/pref_category_other" >
 
         <CheckBoxPreference
-            android:key="volumeShowUI"
+            android:key="reconnect"
             android:defaultValue="false"
+            android:title="@string/pref_title_reconnect" />
+
+        <CheckBoxPreference
+            android:key="volumeShowUI"
+            android:defaultValue="true"
             android:title="@string/pref_title_volume_show_ui" />
 
         <CheckBoxPreference
