@@ -282,8 +282,8 @@ public class SerialService extends Service {
 
     private void sendCommandBroadcast(String key, String value) {
         Intent i = new Intent(MY_BROADCAST_INTENT);
-        i.putExtra("KEY", key);
-        i.putExtra("VALUE", value);
+        i.putExtra("key", key);
+        i.putExtra("value", value);
         sendBroadcast(i);
     }
 
