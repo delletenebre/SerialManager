@@ -20,9 +20,9 @@ import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.File;
 
+import kg.delletenebre.serialmanager.App;
 import kg.delletenebre.serialmanager.EventsReceiver;
 import kg.delletenebre.serialmanager.R;
-import kg.delletenebre.serialmanager.SerialService;
 import xdroid.toaster.Toaster;
 
 public class WidgetSend extends AppWidgetProvider {
@@ -54,9 +54,10 @@ public class WidgetSend extends AppWidgetProvider {
         views.setOnClickPendingIntent(R.id.widget_settings_button, pendingIntent);
 
         intent = new Intent(context, EventsReceiver.class);
-        intent.setAction(SerialService.WIDGET_SEND_ACTION);
+        intent.setAction(App.ACTION_SEND_DATA);
         intent.putExtra("widgetId", widgetId);
         intent.putExtra("data", getCurrentValue(prefs, "data", ""));
+        intent.putExtra("sendTo", prefs.getString("sendTo", "0"));
         intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
         views.setOnClickPendingIntent(R.id.widget_text, PendingIntent.getBroadcast(context, 0, intent, 0));
 
@@ -121,7 +122,7 @@ public class WidgetSend extends AppWidgetProvider {
         paint.setColor(fontColor);
         paint.setTextSize(fontSizePX);
 
-        int textWidth = (int) (paint.measureText(getLongestString(textLines)) + textPadding * 2);
+        int textWidth = WidgetReceive.getLongestStringMeasure(paint, textLines) + textPadding * 2;
         int lineCount = textLines.length > 0 ? textLines.length : 1;
         int height = (int) (lineCount * fontSizePX / 0.85);
         Bitmap bitmap = Bitmap.createBitmap(textWidth, height, Bitmap.Config.ARGB_4444);
@@ -169,24 +170,12 @@ public class WidgetSend extends AppWidgetProvider {
         return bitmap;
     }
 
-    public static String getLongestString(String[] array) {
-        int maxLength = 0;
-        String longestString = null;
-        for (String s : array) {
-            if (s.length() > maxLength) {
-                maxLength = s.length();
-                longestString = s;
-            }
-        }
-        return longestString;
-    }
-
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
         Log.i(TAG, "****SERVICE_SEND_ACTION_COMPLETE****");
 
-        if (intent.getAction().equals(SerialService.SERVICE_SEND_ACTION_COMPLETE)) {
+        if (intent.getAction().equals(App.ACTION_SEND_DATA_COMPLETE)) {
             int widgetId = intent.getIntExtra("widgetId", -1);
 
             if (widgetId > -1) {

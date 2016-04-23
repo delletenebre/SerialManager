@@ -5,8 +5,18 @@
     <string name="toast_serial_send_warning">SerialManager: Ошибка подключения</string>
     <string name="toast_serial_send_warning_empty_data">SerialManager: Нет данных для отправки</string>
 
+    <string name="pref_bt_device_no_device">Не подключаться</string>
+
+    <string name="pref_usb_device_autoconnect">Автоподключение</string>
+
+    <string name="pref_category_connection_type">Тип соединения</string>
     <string name="pref_category_connection">Соединение</string>
     <string name="pref_category_other">Отладка</string>
+
+    <string name="pref_title_bluetooth_connection">Подключение по Bluetooth</string>
+    <string name="pref_title_bluetooth_devices_list">Bluetooth-устройство для подключения</string>
+    <string name="pref_title_usb_connection">Подключение по USB</string>
+    <string name="pref_title_usb_devices_list">USB-устройство для подключения</string>
 
     <string name="pref_summ_dtr">Использовать строку DTR для определения готовности последовательного канала</string>
 
@@ -14,6 +24,8 @@
 
     <string name="pref_title_crlf">Добавлять CR&#38;LF</string>
     <string name="pref_summ_crlf">Добавлять управляющие символы CR и LF при отправке данных</string>
+
+    <string name="pref_title_stop_service_when_screen_off">Останавливать сервис при отключении экрана</string>
 
     <string name="pref_title_reconnect">Переподключаться при запуске программы</string>
     <string name="pref_summ_reconnect">Завершать текущее соединение и подключаться заново при открытии главного окна программы</string>
@@ -101,5 +113,7 @@
 
     <string name="pref_widget_title_use_custom_font">Использовать свой шрифт</string>
     <string name="pref_widget_title_font_file">Файл шрифта (*.ttf)</string>
+
+    <string name="pref_widget_send_title_send_to">Отправить команду по&#8230;</string>
 
 </resources>

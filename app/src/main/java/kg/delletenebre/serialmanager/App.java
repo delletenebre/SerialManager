@@ -14,15 +14,30 @@ import java.io.IOException;
 
 public class App extends Application {
 
+    public static final String ACTION_NEW_DATA_RECEIVED = "kg.delletenebre.serial.NEW_DATA";
+    public static final String ACTION_SEND_DATA = "kg.delletenebre.serial.SEND_DATA";
+    public static final String ACTION_SEND_DATA_COMPLETE = "kg.delletenebre.serial.SEND_DATA_COMPLETE";
+
     protected static final String ACTION_USB_PERMISSION = "kg.delletenebre.serial.usb_permission";
     protected static final String ACTION_USB_ATTACHED = "kg.delletenebre.serial.usb_attached";
     protected static final String ACTION_USB_DETACHED = "kg.delletenebre.serial.usb_detached";
+    protected static final int START_SERVICE_DELAY = 1000;
 
     private static final int VOLUME_STREAM = AudioManager.STREAM_MUSIC;
     private static AudioManager audioManager;
     private static int lastVolumeLevel = 1;
 
     private static SharedPreferences settings;
+
+    private static Context appContext;
+    public static Context getAppContext() {
+        return appContext;
+    }
+
+    private static boolean debug;
+    public static boolean getDebug() {
+        return debug;
+    }
 
     private static Activity aliveActiviity;
 
@@ -32,6 +47,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        appContext = this;
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         updateSettings();
@@ -48,9 +64,11 @@ public class App extends Application {
     public static void updateSettings() {
         volumeShowUI = settings.getBoolean("volumeShowUI", true);
 
-        SerialService.setDEBUG(settings.getBoolean("debug", false));
-        SerialService.setDTR(settings.getBoolean("dtr", false));
-        SerialService.setRTS(settings.getBoolean("rts", false));
+        debug = settings.getBoolean("debug", false);
+        if(UsbService.service != null) {
+            UsbService.service.setDTR(settings.getBoolean("dtr", false));
+            UsbService.service.setRTS(settings.getBoolean("rts", false));
+        }
     }
 
     public static void changeVolume(String mode) {
@@ -80,7 +98,7 @@ public class App extends Application {
         }
     }
 
-    public static void emulateMediaButton(Context context, int buttonCode) {
+    public static void emulateMediaButton(int buttonCode) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             audioManager.dispatchMediaKeyEvent(
                     new KeyEvent(KeyEvent.ACTION_DOWN, buttonCode));
@@ -89,11 +107,11 @@ public class App extends Application {
         } else {
             Intent downIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
             downIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, buttonCode));
-            context.sendOrderedBroadcast(downIntent, null);
+            appContext.sendOrderedBroadcast(downIntent, null);
 
             Intent upIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
             upIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, buttonCode));
-            context.sendOrderedBroadcast(upIntent, null);
+            appContext.sendOrderedBroadcast(upIntent, null);
         }
     }
 

@@ -8,8 +8,8 @@ android {
         applicationId "kg.delletenebre.serialmanager"
         minSdkVersion 17
         targetSdkVersion 23
-        versionCode 18
-        versionName "1.4"
+        versionCode 22
+        versionName "1.5-beta-3"
     }
     buildTypes {
         release {
@@ -31,6 +31,7 @@ dependencies {
     compile 'com.android.support:support-v4:23.3.0'
     compile 'org.apache.commons:commons-lang3:3.0'
     compile 'com.rarepebble:colorpicker:1.6.0'
-    compile 'com.github.felHR85:UsbSerial:4.1.1'
+    compile 'com.github.felHR85:UsbSerial:4.2'
     compile 'com.shamanland:xdroid-toaster:0.0.10'
+    compile 'com.akexorcist:bluetoothspp:1.0.0'
 }

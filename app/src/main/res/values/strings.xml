@@ -7,8 +7,19 @@
     <string name="toast_serial_send_warning">SerialManager: Connection error</string>
     <string name="toast_serial_send_warning_empty_data">SerialManager: Data is null</string>
 
+    <string name="pref_bt_device_no_device">No device</string>
+    <string name="pref_bt_device_template" translatable="false">%1$s [ %2$s ]</string>
+
+    <string name="pref_usb_device_autoconnect">Autoconnect</string>
+
+    <string name="pref_category_connection_type">Connection type</string>
     <string name="pref_category_connection">Connection</string>
     <string name="pref_category_other">Other</string>
+
+    <string name="pref_title_bluetooth_connection">Enable bluetooth connection</string>
+    <string name="pref_title_bluetooth_devices_list">Bluetooth device</string>
+    <string name="pref_title_usb_connection">Enable USB connection</string>
+    <string name="pref_title_usb_devices_list">USB device</string>
 
     <string name="pref_title_dtr" translatable="false">DTR - Data Terminal Ready</string>
     <string name="pref_summ_dtr">Use DTR line to determine serial channel readiness</string>
@@ -76,6 +87,8 @@
 
     <string name="pref_title_crlf">Add CR&#38;LF</string>
     <string name="pref_summ_crlf">Add Carriage Return and Line Feed symbols to end of sending data</string>
+
+    <string name="pref_title_stop_service_when_screen_off">Stop Service when screen is off</string>
 
     <string name="pref_title_reconnect">Reconnect on app start</string>
     <string name="pref_summ_reconnect">Reconnect on app start</string>
@@ -238,5 +251,17 @@
     </string-array>
     <string name="pref_widget_title_use_custom_font">Use custom font</string>
     <string name="pref_widget_title_font_file">Font file (*.ttf)</string>
+
+    <string name="pref_widget_send_title_send_to">Send command over&#8230;</string>
+    <string-array name="pref_widget_send_send_to_titles" translatable="false">
+        <item>USB &#38; Bluetooth</item>
+        <item>USB</item>
+        <item>Bluetooth</item>
+    </string-array>
+    <string-array name="pref_widget_send_send_to_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
 
 </resources>

@@ -32,8 +32,6 @@ public class HiddenActivity extends Activity {
             }
         }
 
-        //Intent intentSend = new Intent(SerialService.WIDGET_SEND_BROADCAST_INTENT);
-
         finish();
     }
 }

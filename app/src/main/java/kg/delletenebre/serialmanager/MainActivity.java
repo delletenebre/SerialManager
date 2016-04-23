@@ -68,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+
+
     }
 
     @Override
@@ -95,7 +97,8 @@ public class MainActivity extends AppCompatActivity {
         activity = this;
 
         if (settings != null && settings.getBoolean("reconnect", false)) {
-            SerialService.restart(this);
+            UsbService.restart();
+            BluetoothService.start();
         }
     }
 
@@ -130,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
 
             String actionApplication = data.getStringExtra("actionApplication");
 
-            String action = SerialService.getActionByActionCategoryId(this, actionCategoryId,
+            String action = Commands.getActionByActionCategoryId(actionCategoryId,
                     actionNavigation, actionVolume, actionMedia, actionApplication);
 
             if (requestCode == REQ_NEW_COMMAND) {
@@ -143,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void initializeData() {
-        commands = SerialService.initializeCommands(this);
+        commands = Commands.getCommands();
 
         Collections.sort(commands);
         mAdapter = new CommandsAdapter(this, commands);
@@ -161,9 +164,8 @@ public class MainActivity extends AppCompatActivity {
                 new Command(id, uuid, key, value, scatter, isThrough, actionCategoryId, action));
         mAdapter.notifyDataSetChanged();
 
-        if (SerialService.service != null) {
-            SerialService.setCommands(commands);
-        }
+        Commands.setCommands(commands);
+
     }
 
     public void editCommand(int id, String key, String value, String scatter,
@@ -178,9 +180,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        if (SerialService.service != null) {
-            SerialService.setCommands(commands);
-        }
+        Commands.setCommands(commands);
     }
 
     public static void removeCommand(String uuid) {

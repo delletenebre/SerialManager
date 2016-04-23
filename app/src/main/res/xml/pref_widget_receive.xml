@@ -1,14 +1,13 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.afollestad.materialdialogs.prefs.MaterialEditTextPreference
+    <EditTextPreference
         android:key="key"
         android:defaultValue=""
         android:title="@string/pref_title_key"
         android:inputType="text"
         android:selectAllOnFocus="true"
-        android:singleLine="true"
-        app:useStockLayout="true" />
+        android:singleLine="true" />
 
     <EditTextPreference
         android:key="prefix"

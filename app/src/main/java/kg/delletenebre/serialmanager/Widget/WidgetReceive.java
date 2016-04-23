@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.util.Log;
@@ -22,8 +23,8 @@ import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.File;
 
+import kg.delletenebre.serialmanager.App;
 import kg.delletenebre.serialmanager.R;
-import kg.delletenebre.serialmanager.SerialService;
 
 /**
  * Implementation of App Widget functionality.
@@ -125,7 +126,7 @@ public class WidgetReceive extends AppWidgetProvider {
 
         int fontSizePX = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fontSize,
                 context.getResources().getDisplayMetrics());
-        int textPadding = (fontSizePX / 9);
+        int textPadding = (fontSizePX / 2);
         Paint paint = new Paint();
         Typeface typeface = Typeface.createFromAsset(context.getAssets(),
                 "fonts/fontawesome-webfont.ttf");
@@ -142,7 +143,8 @@ public class WidgetReceive extends AppWidgetProvider {
         paint.setColor(fontColor);
         paint.setTextSize(fontSizePX);
 
-        int textWidth = (int) (paint.measureText(getLongestString(textLines)) + textPadding * 2);
+        int textWidth = getLongestStringMeasure(paint, textLines) + textPadding * 2;//(int) (paint.measureText(getLongestString()) + textPadding * 4);
+
         int lineCount = textLines.length > 0 ? textLines.length : 1;
         int height = (int) (lineCount * fontSizePX / 0.85);
         Bitmap bitmap = Bitmap.createBitmap(textWidth, height, Bitmap.Config.ARGB_4444);
@@ -176,16 +178,16 @@ public class WidgetReceive extends AppWidgetProvider {
         return bitmap;
     }
 
-    public static String getLongestString(String[] array) {
-        int maxLength = 0;
-        String longestString = null;
+    public static int getLongestStringMeasure(Paint paint, String[] array) {
+        float maxWidth = 0;
         for (String s : array) {
-            if (s.length() > maxLength) {
-                maxLength = s.length();
-                longestString = s;
+            float textWidth = paint.measureText(s);
+            if (textWidth > maxWidth) {
+                maxWidth = textWidth;
             }
         }
-        return longestString;
+
+        return (int)maxWidth;
     }
 
     @Override
@@ -195,9 +197,9 @@ public class WidgetReceive extends AppWidgetProvider {
         String key = "";
         String val = "";
 
-        if (intent.getAction().equals(SerialService.MY_BROADCAST_INTENT)) {
-            key = intent.getStringExtra("KEY");
-            val = intent.getStringExtra("VALUE");
+        if (intent.getAction().equals(App.ACTION_NEW_DATA_RECEIVED)) {
+            key = intent.getStringExtra("key");
+            val = intent.getStringExtra("value");
         } else if (intent.getAction().equals("org.kangaroo.rim.action.ACTION_DATA_RECEIVE")) {
             key = intent.getStringExtra("org.kangaroo.rim.device.EXTRA_COMMAND");
             val = intent.getStringExtra("org.kangaroo.rim.device.EXTRA_ARGS");

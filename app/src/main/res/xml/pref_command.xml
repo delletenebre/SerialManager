@@ -6,27 +6,25 @@
             android:defaultValue="false"
             android:title="@string/pref_title_autoset" />
 
-        <com.afollestad.materialdialogs.prefs.MaterialEditTextPreference
+        <EditTextPreference
             android:key="key"
             android:defaultValue="@string/default_key"
             android:capitalize="none"
             android:inputType="text"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="@string/pref_title_key"
-            app:useStockLayout="true" />
+            android:title="@string/pref_title_key" />
 
-        <com.afollestad.materialdialogs.prefs.MaterialEditTextPreference
+        <EditTextPreference
             android:key="value"
             android:defaultValue=""
             android:capitalize="none"
             android:inputType="text"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="@string/pref_title_value"
-            app:useStockLayout="true" />
+            android:title="@string/pref_title_value" />
 
-        <com.afollestad.materialdialogs.prefs.MaterialEditTextPreference
+        <EditTextPreference
             android:key="scatter"
             android:defaultValue="0"
             android:capitalize="none"
@@ -34,8 +32,7 @@
             android:ems="10"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="@string/pref_title_scatter"
-            app:useStockLayout="true" />
+            android:title="@string/pref_title_scatter" />
 
         <CheckBoxPreference
             android:key="is_through"
@@ -43,45 +40,41 @@
             android:title="@string/pref_title_is_through"
             android:summary="@string/pref_summ_is_through" />
 
-        <com.afollestad.materialdialogs.prefs.MaterialListPreference
+        <ListPreference
             android:key="action_category"
             android:defaultValue="0"
             android:entries="@array/pref_command_action_category_titles"
             android:entryValues="@array/pref_command_action_category_values"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null"
-            android:title="@string/pref_title_command_action_category"
-            app:useStockLayout="true" />
+            android:title="@string/pref_title_command_action_category" />
 
-        <com.afollestad.materialdialogs.prefs.MaterialListPreference
+        <ListPreference
             android:key="action_navigation"
             android:defaultValue="0"
             android:entries="@array/pref_command_action_navigation_titles"
             android:entryValues="@array/pref_command_action_navigation_values"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null"
-            android:title="@string/pref_title_command_action_navigation"
-            app:useStockLayout="true" />
+            android:title="@string/pref_title_command_action_navigation" />
 
-        <com.afollestad.materialdialogs.prefs.MaterialListPreference
+        <ListPreference
             android:key="action_volume"
             android:defaultValue="0"
             android:entries="@array/pref_command_action_volume_titles"
             android:entryValues="@array/pref_command_action_volume_values"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null"
-            android:title="@string/pref_title_command_action_volume"
-            app:useStockLayout="true" />
+            android:title="@string/pref_title_command_action_volume" />
 
-        <com.afollestad.materialdialogs.prefs.MaterialListPreference
+        <ListPreference
             android:key="action_media"
             android:defaultValue="0"
             android:entries="@array/pref_command_action_media_titles"
             android:entryValues="@array/pref_command_action_media_values"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null"
-            android:title="@string/pref_title_command_action_media"
-            app:useStockLayout="true" />
+            android:title="@string/pref_title_command_action_media" />
 
         <kg.delletenebre.serialmanager.AppChooserPreference
             android:key="action_application"

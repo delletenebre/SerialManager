@@ -33,17 +33,17 @@ import xdroid.toaster.Toaster;
 
 public class SerialService extends Service {
     private final static String TAG = "SerialService";
-    public static final String MY_BROADCAST_INTENT = "kg.delletenebre.serial.NEW_DATA";
-    public static final String WIDGET_SEND_ACTION = "kg.delletenebre.serial.SEND_DATA";
-    public static final String SERVICE_SEND_ACTION_COMPLETE = "kg.delletenebre.serial.SEND_DATA_COMPLETE";
     private static boolean DEBUG;
 
     protected static SerialService service;
 
+    private static String connectedDevice;
+    public static String getConnectedDevice() {
+        return connectedDevice;
+    }
+
     private SharedPreferences settings;
     private EventsReceiver receiver;
-
-    private static List<Command> commands;
 
     private static JSONArray jsonDevices;
 
@@ -58,6 +58,7 @@ public class SerialService extends Service {
         if (device != null && connection != null) {
             serial = UsbSerialDevice.createUsbSerialDevice(device, connection);
 
+            connectedDevice = device.getDeviceName();
             context.startService(new Intent(context, SerialService.class));
         }
     }
@@ -72,25 +73,33 @@ public class SerialService extends Service {
         if (jsonDevices != null) {
             try {
                 UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-                for (UsbDevice device: usbManager.getDeviceList().values()) {
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                String connectionType = prefs.getString("connectionType", "USB");
+                String deviceToConnect = prefs.getString("device", "");
+
+                for (UsbDevice usbDevice: usbManager.getDeviceList().values()) {
                     boolean vidCheck = false;
                     boolean pidCheck = false;
 
                     for (int i = 0; i < jsonDevices.length(); i++) {
                         JSONObject json = jsonDevices.getJSONObject(i);
 
-                        vidCheck = !json.has("vid")||(device.getVendorId() == json.getInt("vid"));
-                        pidCheck = !json.has("pid")||(device.getProductId() == json.getInt("pid"));
+                        vidCheck = !json.has("vid")||(usbDevice.getVendorId() == json.getInt("vid"));
+                        pidCheck = !json.has("pid")||(usbDevice.getProductId() == json.getInt("pid"));
 
                         if (vidCheck && pidCheck) {
                             break;
                         }
                     }
 
-                    if (vidCheck && pidCheck && usbManager.hasPermission(device)) {
-                        UsbDeviceConnection connection = usbManager.openDevice(device);
+                    if (vidCheck && pidCheck
+                            && usbManager.hasPermission(usbDevice)
+                            && connectionType.equalsIgnoreCase("usb")
+                            && (deviceToConnect.isEmpty()
+                                || deviceToConnect.equals(usbDevice.getDeviceName()))) {
+                        UsbDeviceConnection connection = usbManager.openDevice(usbDevice);
                         if (connection != null) {
-                            start(context, device, connection);
+                            start(context, usbDevice, connection);
                             break;
                         }
                     }
@@ -143,10 +152,6 @@ public class SerialService extends Service {
                 restart(this);
             }
 
-            if (commands == null) {
-                commands = initializeCommands(this);
-            }
-
             if (DEBUG) {
                 Log.d(TAG, "Service successfully CREATED");
             }
@@ -165,6 +170,7 @@ public class SerialService extends Service {
             serial.close();
         }
 
+        connectedDevice = null;
         service = null;
 
         if (DEBUG) {
@@ -227,7 +233,7 @@ public class SerialService extends Service {
             }
             serial.write(data.getBytes());
 
-            Intent i = new Intent(SERVICE_SEND_ACTION_COMPLETE);
+            Intent i = new Intent(App.ACTION_SEND_DATA_COMPLETE);
             i.putExtra("data", originalData);
             i.putExtra("widgetId", widgetId);
             sendBroadcast(i);
@@ -272,190 +278,11 @@ public class SerialService extends Service {
                     }
 
                 } else {
-                    if (!detectCommand(key, val)) {
-                        sendCommandBroadcast(key, val);
-                    }
+                    Commands.detectCommand(key, val);
                 }
             }
         }
     };
-
-    private void sendCommandBroadcast(String key, String value) {
-        Intent i = new Intent(MY_BROADCAST_INTENT);
-        i.putExtra("key", key);
-        i.putExtra("value", value);
-        sendBroadcast(i);
-    }
-
-    private boolean detectCommand(String key, String value) {
-        boolean result = false;
-        if (commands != null) {
-            int i = 0;
-            for (; i < commands.size(); i++) {
-                Command command = commands.get(i);
-                boolean inRange = false;
-                if (NumberUtils.isNumber(command.value) && NumberUtils.isNumber(command.scatter) && NumberUtils.isNumber(value)) {
-                    float commandScatter = Float.parseFloat(command.scatter);
-                    float commandValue = Float.parseFloat(command.value);
-                    float receivedValue = Float.parseFloat(value);
-
-                    inRange = commandValue - commandScatter <= receivedValue && receivedValue <= commandValue + commandScatter;
-                }
-
-                if (command.key.equals(key) && (command.value.equals(value) || inRange)) {
-
-                    if (command.actionCategoryId == 0) { // No action
-                        // Nothing to do
-
-                    } else if (command.actionCategoryId == 1) { // Navigation
-
-                        switch (command.action) {
-                            case "0":
-                                App.emulateKeyEvent(KeyEvent.KEYCODE_BACK);
-                                break;
-
-                            case "1":
-                                App.emulateKeyEvent(KeyEvent.KEYCODE_HOME);
-                                break;
-
-                        }
-
-                    } else if (command.actionCategoryId == 2) { // Volume
-
-                        switch (command.action) {
-                            case "0":
-                                App.changeVolume("UP");
-                                break;
-
-                            case "1":
-                                App.changeVolume("DOWN");
-                                break;
-
-                            case "2":
-                                App.setMute();
-                                break;
-                        }
-
-                    } else if (command.actionCategoryId == 3) { // Media
-
-                        switch (command.action) {
-                            case "0":
-                                App.emulateMediaButton(this, KeyEvent.KEYCODE_MEDIA_REWIND);
-                                break;
-
-                            case "1":
-                                App.emulateMediaButton(this, KeyEvent.KEYCODE_MEDIA_PREVIOUS);
-                                break;
-
-                            case "2":
-                                App.emulateMediaButton(this, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
-                                break;
-
-                            case "3":
-                                App.emulateMediaButton(this, KeyEvent.KEYCODE_MEDIA_NEXT);
-                                break;
-
-                            case "4":
-                                App.emulateMediaButton(this, KeyEvent.KEYCODE_MEDIA_FAST_FORWARD);
-                                break;
-                        }
-
-                    } else if (command.actionCategoryId == 4) { // Application
-
-                        Intent intent = AppChooserPreference.getIntentValue(
-                                command.action, null);
-
-                        if (intent == null) {
-                            intent = new Intent(this, MainActivity.class);
-                        }
-
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-
-                    }
-
-                    result = !command.isThrough;
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    public static void setCommands(List<Command> commands) {
-        SerialService.commands = commands;
-    }
-
-    public static List<Command> initializeCommands(Context context) {
-        List<Command> commands = new ArrayList<>();
-
-        File prefsDir = new File(context.getFilesDir().getParent(), "/shared_prefs/");
-        if (prefsDir.exists()) {
-            for (File f : prefsDir.listFiles()) {
-                if (f.isFile()) {
-                    String uuid = f.getName();
-                    uuid = uuid.substring(0, uuid.length() - 4);
-                    if (Pattern.matches("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}", uuid)) {
-                        SharedPreferences settings = context.getSharedPreferences(uuid, MODE_PRIVATE);
-                        int id = settings.getInt("id", -1);
-
-                        String key = settings.getString("key", "");
-                        String value = settings.getString("value", "");
-                        String scatter = settings.getString("scatter", "");
-                        boolean isThrough = settings.getBoolean("is_through", false);
-                        int actionCategoryId =
-                                Integer.parseInt(settings.getString("action_category", "0"));
-
-                        String actionNavigation = settings.getString("action_navigation", "0");
-
-                        String actionVolume = settings.getString("action_volume", "0");
-
-                        String actionMedia = settings.getString("action_media", "0");
-
-
-                        String actionApp = settings.getString("action_application", "");
-                        String actionApplication = (!actionApp.isEmpty())
-                                ? actionApp
-                                : context.getString(R.string.pref_shortcut_default);
-
-                        String action = getActionByActionCategoryId(context, actionCategoryId,
-                                actionNavigation, actionVolume, actionMedia, actionApplication);
-
-                        commands.add(new Command(id, uuid, key, value, scatter, isThrough,
-                                actionCategoryId, action));
-                    }
-
-                }
-            }
-        }
-
-        return commands;
-    }
-
-    public static String getActionByActionCategoryId(Context context, int id,
-                                                     String navigation, String volume,
-                                                     String media, String app) {
-        switch (id) {
-            case 0:
-                return context.getString(R.string.no_action);
-
-            case 1:
-                return navigation;
-
-            case 2:
-                return volume;
-
-            case 3:
-                return media;
-
-            case 4:
-                return app;
-        }
-
-        return "";
-    }
-
 
     public static JSONArray getJSONDevices(Context context) {
         if (jsonDevices == null) {

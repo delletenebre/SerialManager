@@ -4,6 +4,8 @@
 
     <uses-feature android:name="android.hardware.usb.host" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <application
         android:name=".App"
@@ -25,8 +27,12 @@
         </activity>
 
         <service
-            android:name=".SerialService"
+            android:name=".UsbService"
             android:enabled="true" />
+        <service
+            android:name=".BluetoothService"
+            android:enabled="true" />
+
 
         <activity
             android:name=".HiddenActivity"
@@ -37,7 +43,6 @@
             android:theme="@style/Theme.Transparent">
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
             </intent-filter>
 
             <meta-data
@@ -54,10 +59,15 @@
                 <!-- <action android:name="android.intent.action.BOOT_COMPLETED" /> -->
                 <action android:name="kg.delletenebre.serial.usb_permission" />
                 <action android:name="kg.delletenebre.serial.usb_attached" />
-                <action android:name="kg.delletenebre.serial.usb_detached" />
+                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
+                <action android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_DETACHED"
+                android:resource="@xml/device_filter" />
         </receiver>
 
         <activity

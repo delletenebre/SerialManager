@@ -1,6 +1,33 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
+        android:title="@string/pref_category_connection_type" >
+
+        <CheckBoxPreference
+            android:key="bluetooth"
+            android:defaultValue="false"
+            android:title="@string/pref_title_bluetooth_connection" />
+
+        <kg.delletenebre.serialmanager.Preferences.BluetoothDevicesListPreference
+            android:key="bluetoothDevice"
+            android:dependency="bluetooth"
+            android:defaultValue=""
+            android:title="@string/pref_title_bluetooth_devices_list" />
+
+        <CheckBoxPreference
+            android:key="usb"
+            android:defaultValue="false"
+            android:title="@string/pref_title_usb_connection" />
+
+        <kg.delletenebre.serialmanager.Preferences.UsbDevicesListPreference
+            android:key="usbDevice"
+            android:dependency="usb"
+            android:defaultValue=""
+            android:title="@string/pref_title_usb_devices_list" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/pref_category_connection" >
 
         <CheckBoxPreference
@@ -61,6 +88,11 @@
 
     <PreferenceCategory
         android:title="@string/pref_category_other" >
+
+        <CheckBoxPreference
+            android:key="stopWhenScreenOff"
+            android:defaultValue="false"
+            android:title="@string/pref_title_stop_service_when_screen_off" />
 
         <CheckBoxPreference
             android:key="reconnect"

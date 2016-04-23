@@ -184,12 +184,12 @@ public class WidgetSendSettings extends AppCompatActivity implements FileChooser
             addPreferencesFromResource(R.xml.pref_widget_send);
             setHasOptionsMenu(true);
 
+            bindPreferenceSummaryToValue(findPreference("sendTo"), widgetId);
             bindPreferenceSummaryToValue(findPreference("data"), widgetId);
             bindPreferenceSummaryToValue(findPreference("text"), widgetId);
             bindPreferenceSummaryToValue(findPreference("fontColor"), widgetId);
             bindPreferenceSummaryToValue(findPreference("fontSize"), widgetId);
             bindPreferenceSummaryToValue(findPreference("backgroundColor"), widgetId);
-//            bindPreferenceSummaryToValue(findPreference("textAlign"), widgetId);
             bindPreferenceSummaryToValue(findPreference("fontFile"), widgetId);
 
             Preference fontFile = findPreference("fontFile");
