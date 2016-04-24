@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Build;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import java.io.IOException;
@@ -17,17 +19,20 @@ public class App extends Application {
     public static final String ACTION_NEW_DATA_RECEIVED = "kg.delletenebre.serial.NEW_DATA";
     public static final String ACTION_SEND_DATA = "kg.delletenebre.serial.SEND_DATA";
     public static final String ACTION_SEND_DATA_COMPLETE = "kg.delletenebre.serial.SEND_DATA_COMPLETE";
+    public static final String ACTION_SEND_DATA_SUCCESS = "kg.delletenebre.serial.SEND_DATA_SUCCESS";
 
     protected static final String ACTION_USB_PERMISSION = "kg.delletenebre.serial.usb_permission";
     protected static final String ACTION_USB_ATTACHED = "kg.delletenebre.serial.usb_attached";
     protected static final String ACTION_USB_DETACHED = "kg.delletenebre.serial.usb_detached";
+    public static final int REQUEST_CODE_ASK_PERMISSIONS = 666;
     protected static final int START_SERVICE_DELAY = 1000;
+    protected static final int BLUETOOTH_RECONNECT_DELAY = 3000;
 
     private static final int VOLUME_STREAM = AudioManager.STREAM_MUSIC;
     private static AudioManager audioManager;
     private static int lastVolumeLevel = 1;
 
-    private static SharedPreferences settings;
+    private static SharedPreferences prefs;
 
     private static Context appContext;
     public static Context getAppContext() {
@@ -35,7 +40,7 @@ public class App extends Application {
     }
 
     private static boolean debug;
-    public static boolean getDebug() {
+    public static boolean isDebug() {
         return debug;
     }
 
@@ -49,7 +54,7 @@ public class App extends Application {
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         appContext = this;
 
-        settings = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
         updateSettings();
     }
 
@@ -62,12 +67,21 @@ public class App extends Application {
 
 
     public static void updateSettings() {
-        volumeShowUI = settings.getBoolean("volumeShowUI", true);
+        volumeShowUI = prefs.getBoolean("volumeShowUI", true);
 
-        debug = settings.getBoolean("debug", false);
-        if(UsbService.service != null) {
-            UsbService.service.setDTR(settings.getBoolean("dtr", false));
-            UsbService.service.setRTS(settings.getBoolean("rts", false));
+        debug = prefs.getBoolean("debug", false);
+        UsbService.setDTR(prefs.getBoolean("dtr", false));
+        UsbService.setRTS(prefs.getBoolean("rts", false));
+
+        if (!prefs.getBoolean("usb", false)) {
+            UsbService.stop();
+        } else if (UsbService.service == null) {
+            UsbService.restart();
+        }
+        if (!prefs.getBoolean("bluetooth", false)) {
+            BluetoothService.stop();
+        } else if (BluetoothService.service == null) {
+            BluetoothService.start();
         }
     }
 
@@ -115,10 +129,11 @@ public class App extends Application {
         }
     }
 
-    public static void emulateKeyEvent(final int keyEvent) {
+    public static void emulateKeyEvent(final String keyEvent) {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                Log.d("*******", "input keyevent " + keyEvent);
                 try {
                     Runtime.getRuntime().exec(new String[] {"su", "-c", "input keyevent " + keyEvent});
                 } catch (IOException e) {
@@ -129,5 +144,16 @@ public class App extends Application {
 
     }
 
+    public static boolean isScreenOn() {
+        PowerManager powerManager = (PowerManager) getAppContext().getSystemService(POWER_SERVICE);
+        return  (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH
+                    && powerManager.isInteractive())
+                || (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT_WATCH
+                    && powerManager.isScreenOn());
+    }
+
+    public static boolean isScreenOff() {
+        return !isScreenOn();
+    }
 
 }

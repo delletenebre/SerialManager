@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import kg.delletenebre.serialmanager.Preferences.AppChooserPreference;
 import xdroid.toaster.Toaster;
 
 public class Commands {
@@ -159,17 +160,7 @@ public class Commands {
                     // Nothing to do
 
                 } else if (command.actionCategoryId == 1) { // Navigation
-
-                    switch (command.action) {
-                        case "0":
-                            App.emulateKeyEvent(KeyEvent.KEYCODE_BACK);
-                            break;
-
-                        case "1":
-                            App.emulateKeyEvent(KeyEvent.KEYCODE_HOME);
-                            break;
-
-                    }
+                    App.emulateKeyEvent(command.action);
 
                 } else if (command.actionCategoryId == 2) { // Volume
 

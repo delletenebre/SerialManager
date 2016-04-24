@@ -1,6 +1,5 @@
 package kg.delletenebre.serialmanager;
 
-import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +14,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.felhr.usbserial.CDCSerialDevice;
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
 
@@ -25,8 +23,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import xdroid.toaster.Toaster;
 
@@ -38,14 +34,12 @@ public class UsbService extends Service {
     private static String connectedDeviceName;
     private static UsbDevice connectedDevice;
 
-    private IBinder binder = new UsbBinder();
-
     private UsbDevice device;
     private UsbDeviceConnection connection;
     private UsbSerialDevice serialPort;
 
     private EventsReceiver receiver;
-    private SharedPreferences settings;
+    private SharedPreferences prefs;
 
 
 
@@ -164,24 +158,33 @@ public class UsbService extends Service {
     /*
      * This function will be called to write data through Serial Port
      */
-    public void sendFromWidget(String data, int widgetId) {
-        if (serialPort != null && settings != null) {
-            if (App.getDebug()) {
-                Log.d(TAG, "Data to send: " + data);
+    public static void sendFromWidget(String data, int widgetId) {
+        if (service != null) {
+            if (service.serialPort != null && service.prefs != null) {
+                if (App.isDebug()) {
+                    Log.d(TAG, "Data to send: " + data);
+                }
+
+                if (service.prefs.getBoolean("crlf", true)) {
+                    data += "\r\n";
+                }
+                service.serialPort.write(data.getBytes());
+
+                Intent i = new Intent(App.ACTION_SEND_DATA_SUCCESS);
+                i.putExtra("widgetId", widgetId);
+                i.putExtra("type", "usb");
+                service.sendBroadcast(i);
+            } else {
+                if (App.isDebug()) {
+                    Log.w(TAG, "Can't send data [" + data + "]. USB serial port is null");
+                }
+                Toaster.toast(R.string.toast_serial_send_warning);
             }
-
-            if (settings.getBoolean("crlf", true)) {
-                data += "\r\n";
+        } else {
+            if (App.isDebug()) {
+                Log.w(TAG, "Service is null");
             }
-            serialPort.write(data.getBytes());
-
-            Intent i = new Intent(App.ACTION_SEND_DATA_COMPLETE);
-            i.putExtra("widgetId", widgetId);
-            sendBroadcast(i);
-
-        } else if (App.getDebug()) {
             Toaster.toast(R.string.toast_serial_send_warning);
-            Log.w(TAG, "Can not send data [" + data + "]. Serial port is null");
         }
     }
 
@@ -194,7 +197,7 @@ public class UsbService extends Service {
         @Override
         public void onReceivedData(byte[] arg0) {
             String data = new String(arg0, Charset.forName("UTF8"));
-            if(App.getDebug()) {
+            if (App.isDebug()) {
                 Log.d("Receive USB", data);
             }
 
@@ -258,7 +261,7 @@ public class UsbService extends Service {
             stopSelf();
         } else {
             service = this;
-            settings = PreferenceManager.getDefaultSharedPreferences(this);
+            prefs = PreferenceManager.getDefaultSharedPreferences(this);
             receiver = new EventsReceiver();
             IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
             registerReceiver(receiver, intentFilter);
@@ -269,7 +272,7 @@ public class UsbService extends Service {
             connection = usbManager.openDevice(device);
             new ConnectionThread().run();
 
-            if (App.getDebug()) {
+            if (App.isDebug()) {
                 Log.d(TAG, "CREATED");
             }
         }
@@ -281,7 +284,7 @@ public class UsbService extends Service {
      */
     @Override
     public IBinder onBind(Intent intent) {
-        return binder;
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
@@ -304,7 +307,7 @@ public class UsbService extends Service {
         connectedDeviceName = null;
         service = null;
 
-        if (App.getDebug()) {
+        if (App.isDebug()) {
             Log.d(TAG, "DESTROYED");
         }
     }
@@ -335,12 +338,6 @@ public class UsbService extends Service {
 //            Toaster.toast("No USB connected");
 //    }
 
-    public class UsbBinder extends Binder {
-        public UsbService getService() {
-            return UsbService.this;
-        }
-    }
-
     /*
      * A simple thread to open a serial port.
      * Although it should be a fast operation. Moving usb operations away from UI thread is a good thing.
@@ -352,12 +349,12 @@ public class UsbService extends Service {
                 serialPort = UsbSerialDevice.createUsbSerialDevice(device, connection);
                 if (serialPort != null) {
                     if (serialPort.open()) {
-                        int baudRate = Integer.parseInt(settings.getString("baudRate", "9600"));
-                        int dataBits = Integer.parseInt(settings.getString("dataBits", "8"));
-                        int stopBits = Integer.parseInt(settings.getString("stopBits", "1"));
-                        int parity = Integer.parseInt(settings.getString("parity", "0"));
-                        boolean dtr = settings.getBoolean("dtr", false);
-                        boolean rts = settings.getBoolean("rts", false);
+                        int baudRate = Integer.parseInt(prefs.getString("baudRate", "9600"));
+                        int dataBits = Integer.parseInt(prefs.getString("dataBits", "8"));
+                        int stopBits = Integer.parseInt(prefs.getString("stopBits", "1"));
+                        int parity = Integer.parseInt(prefs.getString("parity", "0"));
+                        boolean dtr = prefs.getBoolean("dtr", false);
+                        boolean rts = prefs.getBoolean("rts", false);
 
                         serialPort.setBaudRate(baudRate);
                         serialPort.setDataBits(dataBits);
@@ -376,16 +373,17 @@ public class UsbService extends Service {
                         serialPort.getCTS(ctsCallback);
                         serialPort.getDSR(dsrCallback);
                         // Everything went as expected. Send an intent to MainActivity
-                        Toaster.toast("USB device connected");
-                    } else {
+                        Toaster.toast("USB device [" + device.getDeviceName() + "] connected");
+                    } else if(App.isDebug()) {
+
                         // Serial port could not be opened, maybe an I/O error or if CDC driver was chosen, it does not really fit
-                        if (serialPort instanceof CDCSerialDevice) {
+                        //if (serialPort instanceof CDCSerialDevice) {
 //                            Intent intent = new Intent(ACTION_CDC_DRIVER_NOT_WORKING);
 //                            context.sendBroadcast(intent);
-                        } else {
+                        //} else {
 //                            Intent intent = new Intent(ACTION_USB_DEVICE_NOT_WORKING);
 //                            context.sendBroadcast(intent);
-                        }
+                        //}
                     }
                 } else {
                     // No driver for given device, even generic CDC driver could not be loaded
@@ -397,15 +395,15 @@ public class UsbService extends Service {
         }
     }
 
-    public void setDTR(boolean state) {
-        if (serialPort != null) {
-            serialPort.setDTR(state);
+    public static void setDTR(boolean state) {
+        if (service != null && service.serialPort != null) {
+            service.serialPort.setDTR(state);
         }
     }
 
-    public void setRTS(boolean state) {
-        if (serialPort != null) {
-            serialPort.setRTS(state);
+    public static void setRTS(boolean state) {
+        if (service != null && service.serialPort != null) {
+            service.serialPort.setRTS(state);
         }
     }
 }

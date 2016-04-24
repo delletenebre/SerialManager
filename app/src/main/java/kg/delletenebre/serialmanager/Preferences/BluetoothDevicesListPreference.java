@@ -3,24 +3,15 @@ package kg.delletenebre.serialmanager.Preferences;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbManager;
 import android.preference.ListPreference;
-import android.preference.PreferenceManager;
 import android.util.AttributeSet;
-import android.util.Log;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import kg.delletenebre.serialmanager.R;
-import kg.delletenebre.serialmanager.SerialService;
 
 public class BluetoothDevicesListPreference extends ListPreference {
     private final static String TAG = "BluetoothDevicesListPreference";
@@ -28,23 +19,26 @@ public class BluetoothDevicesListPreference extends ListPreference {
     public BluetoothDevicesListPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        BluetoothAdapter bta = BluetoothAdapter.getDefaultAdapter();
-        Set<BluetoothDevice> pairedDevices = bta.getBondedDevices();
-        CharSequence[] entries = new CharSequence[pairedDevices.size() + 1];
-        CharSequence[] entryValues = new CharSequence[pairedDevices.size() + 1];
+        List<CharSequence> entriesList = new ArrayList<>();
+        List<CharSequence> entryValuesList = new ArrayList<>();
 
         Resources res = context.getResources();
-        entries[0] = res.getString(R.string.pref_bt_device_no_device);
-        entryValues[0] = "";
-        int i = 1;
-        for (BluetoothDevice dev : pairedDevices) {
-            entries[i] = String.format(res.getString(R.string.pref_bt_device_template),
-                    dev.getName(), dev.getAddress());
-            entryValues[i] = dev.getAddress();
-            i++;
+        entriesList.add(res.getString(R.string.pref_bt_device_no_device));
+        entryValuesList.add("");
+
+        BluetoothAdapter bta = BluetoothAdapter.getDefaultAdapter();
+        if (bta != null) {
+            Set<BluetoothDevice> pairedDevices = bta.getBondedDevices();
+
+            for (BluetoothDevice dev : pairedDevices) {
+                entriesList.add(String.format(res.getString(R.string.pref_bt_device_template),
+                        dev.getName(), dev.getAddress()));
+                entryValuesList.add(dev.getAddress());
+            }
         }
-        setEntries(entries);
-        setEntryValues(entryValues);
+
+        setEntries(entriesList.toArray(new CharSequence[entriesList.size()]));
+        setEntryValues(entryValuesList.toArray(new CharSequence[entryValuesList.size()]));
     }
 
     public BluetoothDevicesListPreference(Context context) {

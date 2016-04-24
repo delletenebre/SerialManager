@@ -9,12 +9,15 @@
 
     <string name="pref_usb_device_autoconnect">Автоподключение</string>
 
-    <string name="pref_category_connection_type">Тип соединения</string>
-    <string name="pref_category_connection">Соединение</string>
-    <string name="pref_category_other">Отладка</string>
+    <string name="pref_category_connection_bt">Тип соединения</string>
+    <string name="pref_category_connection_usb">USB-Соединение</string>
+    <string name="pref_category_send_commands">Отправка команд</string>
+    <string name="pref_category_other">Разное</string>
 
     <string name="pref_title_bluetooth_connection">Подключение по Bluetooth</string>
     <string name="pref_title_bluetooth_devices_list">Bluetooth-устройство для подключения</string>
+    <string name="pref_title_bluetooth_autoconnect">Восстанавливать соединение при потере связи</string>
+
     <string name="pref_title_usb_connection">Подключение по USB</string>
     <string name="pref_title_usb_devices_list">USB-устройство для подключения</string>
 
@@ -37,6 +40,7 @@
 
 
     <!-- Dialog delete command -->
+    <string name="dialog_title_confirm_delete_command">Удалить команду?</string>
     <string name="dialog_content_delete_command">Вы действительно хотите удалить команду %1$s?</string>
     <string name="dialog_delete_positive">Удалить</string>
     <string name="dialog_negative">Отмена</string>
@@ -50,8 +54,8 @@
 
     <string name="pref_title_command_action_category">Категория</string>
     <string name="no_action">Нет действия</string>
-    <string name="navigation_root">Навигация [ Root ]</string>
-    <string name="navigation">Навигация</string>
+    <string name="navigation_root">Эмуляция клавиатуры [ Root ]</string>
+    <string name="navigation">Эмуляция нажатия</string>
     <string name="volume">Звук</string>
     <string name="media">Плеер</string>
     <string name="application">Приложение</string>

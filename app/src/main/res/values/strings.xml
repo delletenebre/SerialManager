@@ -12,12 +12,15 @@
 
     <string name="pref_usb_device_autoconnect">Autoconnect</string>
 
-    <string name="pref_category_connection_type">Connection type</string>
-    <string name="pref_category_connection">Connection</string>
+    <string name="pref_category_connection_bt">Bluetooth connection</string>
+    <string name="pref_category_connection_usb">USB connection</string>
+    <string name="pref_category_send_commands">Sending commands</string>
     <string name="pref_category_other">Other</string>
 
     <string name="pref_title_bluetooth_connection">Enable bluetooth connection</string>
     <string name="pref_title_bluetooth_devices_list">Bluetooth device</string>
+    <string name="pref_title_bluetooth_autoconnect">Auto connect to bluetooth device</string>
+
     <string name="pref_title_usb_connection">Enable USB connection</string>
     <string name="pref_title_usb_devices_list">USB device</string>
 
@@ -71,19 +74,6 @@
 
 
     <string name="pref_title_baud_rate">Baud Rate</string>
-    <string-array name="pref_baud_rate_titles" translatable="false">
-        <item>1200</item>
-        <item>2400</item>
-        <item>4800</item>
-        <item>9600</item>
-        <item>14400</item>
-        <item>19200</item>
-        <item>28800</item>
-        <item>31250</item>
-        <item>38400</item>
-        <item>57600</item>
-        <item>115200</item>
-    </string-array>
 
     <string name="pref_title_crlf">Add CR&#38;LF</string>
     <string name="pref_summ_crlf">Add Carriage Return and Line Feed symbols to end of sending data</string>
@@ -103,6 +93,7 @@
     <string name="toast_received_command" translatable="false">&lt;%1$s:%2$s&gt;</string>
 
     <!-- Dialog delete command -->
+    <string name="dialog_title_confirm_delete_command">Delete command?</string>
     <string name="dialog_content_delete_command">Are you sure to delete command %1$s?</string>
     <string name="dialog_delete_positive">Delete</string>
     <string name="dialog_negative">Cancel</string>
@@ -114,16 +105,16 @@
 
     <string name="pref_title_autoset">Autoset key/value</string>
 
-    <string name="pref_title_scatter">Погрешность значения (±)</string>
+    <string name="pref_title_scatter">Value deviation (±)</string>
 
     <string name="pref_title_is_through">Through command</string>
-    <string name="pref_summ_is_through">Если команда была распознана, то всё равно создавать broadcast для других приложений</string>
+    <string name="pref_summ_is_through">If the command has been recognized, it is still to create a broadcast to other applications</string>
 
 
     <string name="pref_title_command_action_category">Action category</string>
     <string name="no_action">No action</string>
-    <string name="navigation_root">Navigation [ Root ]</string>
-    <string name="navigation">Navigation</string>
+    <string name="navigation_root">Keyboard key emulation [ Root ]</string>
+    <string name="navigation">Keyboard key</string>
     <string name="volume">Volume</string>
     <string name="media">Media</string>
     <string name="application">Application</string>
@@ -144,12 +135,98 @@
 
     <string name="pref_title_command_action_navigation" translatable="false">@string/navigation</string>
     <string-array name="pref_command_action_navigation_titles" translatable="false">
-        <item>Back</item>
-        <item>Home</item>
+        <item>UNKNOWN</item>
+        <item>APP_SWITCH</item>
+        <item>ASSIST</item>
+        <item>BACK</item>
+        <item>FORWARD</item>
+        <item>BRIGHTNESS_DOWN</item>
+        <item>BRIGHTNESS_UP</item>
+        <item>CALL</item>
+        <item>ENDCALL</item>
+        <item>CAMERA</item>
+        <item>CONTACTS</item>
+        <item>DPAD_CENTER</item>
+        <item>DPAD_DOWN</item>
+        <item>DPAD_LEFT</item>
+        <item>DPAD_RIGHT</item>
+        <item>DPAD_UP</item>
+        <item>ENTER</item>
+        <item>ESCAPE</item>
+        <item>EXPLORER</item>
+        <item>HEADSETHOOK</item>
+        <item>HOME</item>
+        <item>LANGUAGE_SWITCH</item>
+        <item>MEDIA_FAST_FORWARD</item>
+        <item>MEDIA_NEXT</item>
+        <item>MEDIA_PLAY_PAUSE</item>
+        <item>MEDIA_PREVIOUS</item>
+        <item>MEDIA_REWIND</item>
+        <item>MEDIA_RECORD</item>
+        <item>MEDIA_STOP</item>
+        <item>MENU</item>
+        <item>MUSIC</item>
+        <item>MUTE</item>
+        <item>NOTIFICATION</item>
+        <item>POWER</item>
+        <item>SEARCH</item>
+        <item>SETTINGS</item>
+        <item>SLEEP (>= 4.4W)</item>
+        <item>TAB</item>
+        <item>VOICE_ASSIST (>= 5.0)</item>
+        <item>VOLUME_DOWN</item>
+        <item>VOLUME_MUTE</item>
+        <item>VOLUME_UP</item>
+        <item>WAKEUP (>= 5.0)</item>
+        <item>ZOOM_IN</item>
+        <item>ZOOM_OUT</item>
     </string-array>
     <string-array name="pref_command_action_navigation_values" translatable="false">
         <item>0</item>
-        <item>1</item>
+        <item>187</item>
+        <item>219</item>
+        <item>4</item>
+        <item>125</item>
+        <item>220</item>
+        <item>221</item>
+        <item>5</item>
+        <item>6</item>
+        <item>27</item>
+        <item>207</item>
+        <item>23</item>
+        <item>20</item>
+        <item>21</item>
+        <item>22</item>
+        <item>19</item>
+        <item>66</item>
+        <item>111</item>
+        <item>64</item>
+        <item>79</item>
+        <item>3</item>
+        <item>204</item>
+        <item>90</item>
+        <item>87</item>
+        <item>85</item>
+        <item>88</item>
+        <item>89</item>
+        <item>130</item>
+        <item>86</item>
+        <item>82</item>
+        <item>209</item>
+        <item>91</item>
+        <item>83</item>
+        <item>26</item>
+        <item>84</item>
+        <item>176</item>
+        <item>223</item>
+        <item>61</item>
+        <item>231</item>
+        <item>25</item>
+        <item>164</item>
+        <item>24</item>
+        <item>224</item>
+        <item>168</item>
+        <item>169</item>
     </string-array>
 
     <string name="pref_title_command_action_volume">Volume</string>
@@ -259,9 +336,9 @@
         <item>Bluetooth</item>
     </string-array>
     <string-array name="pref_widget_send_send_to_values" translatable="false">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
+        <item>usb_bt</item>
+        <item>usb</item>
+        <item>bt</item>
     </string-array>
 
 </resources>

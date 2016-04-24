@@ -1,18 +1,18 @@
 package kg.delletenebre.serialmanager;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
-import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import kg.delletenebre.serialmanager.Widget.WidgetSendSettings;
 import xdroid.toaster.Toaster;
 
 public class EventsReceiver extends BroadcastReceiver {
@@ -26,41 +26,52 @@ public class EventsReceiver extends BroadcastReceiver {
         UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
         UsbDevice usbDevice;
 
-        boolean connectionUsb = prefs.getBoolean("usb", false);
+        final boolean connectionUsb = prefs.getBoolean("usb", false);
         String usbDeviceToConnect = prefs.getString("usbDevice", "");
-        boolean connectionBluetooth = prefs.getBoolean("bluetooth", false);
-        String bluetoothDeviceToConnect = prefs.getString("bluetoothDevice", "");
+        final boolean connectionBluetooth = prefs.getBoolean("bluetooth", false);
 
         switch (action) {
             case Intent.ACTION_USER_PRESENT:
-                if (App.getDebug()) {
+                if (App.isDebug()) {
                     Log.i(TAG, "****ACTION_USER_PRESENT****");
                 }
 
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        if (UsbService.service == null) {
-                            UsbService.restart();
+                        if (App.isScreenOn()) {
+                            if (connectionUsb && UsbService.service == null) {
+                                UsbService.restart();
+                            }
+                            if (connectionBluetooth && BluetoothService.service == null) {
+                                BluetoothService.start();
+                            }
                         }
                     }
                 }, 2000);
 
-
                 break;
 
             case Intent.ACTION_SCREEN_OFF:
-                if (App.getDebug()) {
+                if (App.isDebug()) {
                     Log.i(TAG, "****ACTION_SCREEN_OFF****");
                 }
 
                 if (prefs.getBoolean("stopWhenScreenOff", false)) {
-                    context.stopService(new Intent(context, UsbService.class));
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (App.isScreenOff()) {
+                                UsbService.stop();
+                                BluetoothService.stop();
+                            }
+                        }
+                    }, 2000);
                 }
                 break;
 
             case App.ACTION_USB_ATTACHED:
-                if (App.getDebug()) {
+                if (App.isDebug()) {
                     Log.i(TAG, "****ACTION_USB_DEVICE_ATTACHED****");
                 }
 
@@ -82,7 +93,7 @@ public class EventsReceiver extends BroadcastReceiver {
                 break;
 
             case UsbManager.ACTION_USB_DEVICE_DETACHED:
-                if (App.getDebug()) {
+                if (App.isDebug()) {
                     Log.i(TAG, "****ACTION_USB_DEVICE_DETACHED****");
                 }
 
@@ -90,12 +101,12 @@ public class EventsReceiver extends BroadcastReceiver {
                 String connectedDeviceName = UsbService.getConnectedDeviceName();
 
                 if (connectedDeviceName != null && connectedDeviceName.equals(usbDevice.getDeviceName())) {
-                    context.stopService(new Intent(context, UsbService.class));
+                    UsbService.stop();
                 }
                 break;
 
             case App.ACTION_SEND_DATA:
-                if (App.getDebug()) {
+                if (App.isDebug()) {
                     Log.i(TAG, "****WIDGET_SEND_ACTION****");
                 }
 
@@ -103,21 +114,32 @@ public class EventsReceiver extends BroadcastReceiver {
                 String data = intent.getStringExtra("data");
                 String sendTo = intent.getStringExtra("sendTo");
 
+                if (sendTo.equals("usb_bt")) {
+                    SharedPreferences widgetPrefs = context.getSharedPreferences(
+                            WidgetSendSettings.PREF_PREFIX_KEY + widgetId, Context.MODE_PRIVATE);
+
+                    SharedPreferences.Editor editor = widgetPrefs.edit();
+                    editor.putBoolean("status", false);
+                    editor.apply();
+                }
+
                 if (!data.isEmpty()) {
-                    if (UsbService.service != null) {
-                        UsbService.service.sendFromWidget(data, widgetId);
-                    } else {
-                        Toaster.toast(R.string.toast_serial_send_warning);
-                        Log.w(TAG, "Service is null");
+                    if ((sendTo.equals("usb_bt") || sendTo.equals("usb")) && connectionUsb) {
+                        UsbService.sendFromWidget(data, widgetId);
+                    }
+                    if ((sendTo.equals("usb_bt") || sendTo.equals("bt")) && connectionBluetooth) {
+                        BluetoothService.sendFromWidget(data, widgetId);
                     }
                 } else {
+                    if (App.isDebug()) {
+                        Log.w(TAG, "Data is empty");
+                    }
                     Toaster.toast(R.string.toast_serial_send_warning_empty_data);
-                    Log.w(TAG, "Data is empty");
                 }
                 break;
 
             case BluetoothAdapter.ACTION_STATE_CHANGED:
-                if (App.getDebug()) {
+                if (App.isDebug()) {
                     Log.i(TAG, "**** BluetoothAdapter.ACTION_STATE_CHANGED ****");
                 }
 

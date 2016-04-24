@@ -112,6 +112,7 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="kg.delletenebre.serial.SEND_DATA_COMPLETE" />
+                <action android:name="kg.delletenebre.serial.SEND_DATA_SUCCESS" />
             </intent-filter>
 
             <meta-data

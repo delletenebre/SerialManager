@@ -12,8 +12,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-import kg.delletenebre.serialmanager.Preferences.UsbDevicesListPreference;
-
 public class SettingsActivity extends AppCompatActivity {
 
     private final String TAG = getClass().getSimpleName();

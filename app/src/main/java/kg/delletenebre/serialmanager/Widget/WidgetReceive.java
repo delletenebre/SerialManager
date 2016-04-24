@@ -11,7 +11,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.util.Log;
@@ -26,10 +25,6 @@ import java.io.File;
 import kg.delletenebre.serialmanager.App;
 import kg.delletenebre.serialmanager.R;
 
-/**
- * Implementation of App Widget functionality.
- * App Widget Configuration implemented in {@link WidgetReceiveSettings WidgetReceiveSettings}
- */
 public class WidgetReceive extends AppWidgetProvider {
 
     private static final String TAG = "WidgetReceive";
@@ -101,8 +96,10 @@ public class WidgetReceive extends AppWidgetProvider {
 
             try {
                 Thread.sleep(250);
-                new File(context.getFilesDir().getParent(),
-                        "/shared_prefs/" + prefsName + ".xml").delete();
+                if (!new File(context.getFilesDir().getParent(),
+                        "/shared_prefs/" + prefsName + ".xml").delete() && App.isDebug()) {
+                    Log.w(TAG, "Error deleting preferences file");
+                }
             } catch (InterruptedException e) {
                 Log.e(TAG, e.getMessage());
             }
@@ -112,13 +109,14 @@ public class WidgetReceive extends AppWidgetProvider {
 
     public static Bitmap getFontBitmap(Context context, SharedPreferences prefs, String value) {
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(prefs.getString("prefix",
-                context.getString(R.string.pref_widget_prefix_default_value)));
-        sb.append(value);
-        sb.append(prefs.getString("suffix",
-                context.getString(R.string.pref_widget_suffix_default_value)));
-        String text = StringEscapeUtils.unescapeJava(sb.toString());
+        String text =
+                prefs.getString("prefix",
+                    context.getString(R.string.pref_widget_prefix_default_value))
+                + value
+                + prefs.getString("suffix",
+                    context.getString(R.string.pref_widget_suffix_default_value));
+
+        text = StringEscapeUtils.unescapeJava(text);
         String[] textLines = text.split("\n");
 
         int fontSize = Integer.parseInt(prefs.getString("fontSize", "24"));
@@ -126,7 +124,7 @@ public class WidgetReceive extends AppWidgetProvider {
 
         int fontSizePX = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fontSize,
                 context.getResources().getDisplayMetrics());
-        int textPadding = (fontSizePX / 2);
+        int textPadding = (fontSizePX / 5);
         Paint paint = new Paint();
         Typeface typeface = Typeface.createFromAsset(context.getAssets(),
                 "fonts/fontawesome-webfont.ttf");

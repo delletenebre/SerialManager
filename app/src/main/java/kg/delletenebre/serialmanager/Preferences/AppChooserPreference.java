@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package kg.delletenebre.serialmanager;
+package kg.delletenebre.serialmanager.Preferences;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -48,6 +48,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import kg.delletenebre.serialmanager.R;
 
 /**
  * A preference that allows the user to choose an application or shortcut.

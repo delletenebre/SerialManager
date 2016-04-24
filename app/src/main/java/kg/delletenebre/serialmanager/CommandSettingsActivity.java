@@ -16,6 +16,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
+import kg.delletenebre.serialmanager.Preferences.AppChooserPreference;
+
 public class CommandSettingsActivity extends AppCompatActivity {
 
     private final String TAG = getClass().getSimpleName();

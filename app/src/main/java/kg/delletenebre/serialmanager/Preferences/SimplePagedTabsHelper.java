@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package kg.delletenebre.serialmanager;
+package kg.delletenebre.serialmanager.Preferences;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import kg.delletenebre.serialmanager.R;
 
 /**
  * A helper class for creating swipeable tabs without the use of {@link android.app.ActionBar} APIs.

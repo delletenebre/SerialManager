@@ -2,21 +2,22 @@ package kg.delletenebre.serialmanager;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
-
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.File;
 import java.util.List;
+
+import kg.delletenebre.serialmanager.Preferences.AppChooserPreference;
 
 public class CommandsAdapter extends RecyclerView.Adapter<CommandsAdapter.ViewHolder> {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -85,34 +86,33 @@ public class CommandsAdapter extends RecyclerView.Adapter<CommandsAdapter.ViewHo
 
                 String name = ((TextView) parent.findViewById(R.id.command_key)).getText().toString();
                 final String uuid = ((TextView) parent.findViewById(R.id.command_uuid)).getText().toString();
-                new MaterialDialog.Builder(context)
-                        .content(String.format(
+
+                new AlertDialog.Builder(context)
+                        .setTitle(R.string.dialog_title_confirm_delete_command)
+                        .setMessage(String.format(
                                 context.getResources().getString(R.string.dialog_content_delete_command),
                                 name))
-                        .negativeText(R.string.dialog_negative)
-                        .positiveText(R.string.dialog_delete_positive)
-                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        .setNegativeButton(R.string.dialog_negative, null)
+                        .setPositiveButton(R.string.dialog_delete_positive,
+                                new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(@NonNull MaterialDialog dialog,
-                                                @NonNull DialogAction which) {
-
-                            }
-                        })
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            public void onClick(DialogInterface dialog, int which) {
                                 if (!uuid.isEmpty()) {
                                     context.getSharedPreferences(uuid, Context.MODE_PRIVATE)
                                             .edit()
                                             .clear()
                                             .commit();
                                     try { Thread.sleep(500); } catch (InterruptedException e) {}
-                                    new File(context.getFilesDir().getParent(),
-                                            "/shared_prefs/" + uuid + ".xml").delete();
+                                    if (!new File(context.getFilesDir().getParent(),
+                                            "/shared_prefs/" + uuid + ".xml").delete() && App.isDebug()) {
+                                        Log.w(TAG, "Error deleting " + "/shared_prefs/" + uuid + ".xml" + " file");
+                                    }
+
 
                                     MainActivity.removeCommand(uuid);
                                 }
                             }
+
                         })
                         .show();
             }
@@ -159,8 +159,22 @@ public class CommandsAdapter extends RecyclerView.Adapter<CommandsAdapter.ViewHo
         String action = commands.get(position).action;
         switch (actionCategoryId) {
             case 1:
-                action = (context.getResources()
-                        .getStringArray(R.array.pref_command_action_navigation_titles))[Integer.parseInt(action)];
+//                action = (context.getResources()
+//                        .getStringArray(R.array.pref_command_action_navigation_titles))[Integer.parseInt(action)];
+
+                CharSequence[] keys = context.getResources().getTextArray(R.array.pref_command_action_navigation_titles);
+                CharSequence[] values = context.getResources().getTextArray(R.array.pref_command_action_navigation_values);
+
+                //int len = values.length;
+                int i = 0;
+                for (CharSequence val: values) {
+                    if (val.equals(action)) {
+                        action = (String) keys[i];
+                        break;
+                    }
+                    i++;
+                }
+
                 break;
 
             case 2:

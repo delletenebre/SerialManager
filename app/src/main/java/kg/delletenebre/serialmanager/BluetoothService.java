@@ -1,14 +1,10 @@
 package kg.delletenebre.serialmanager;
 
 import android.app.Service;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.hardware.usb.UsbDevice;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -28,6 +24,29 @@ public class BluetoothService extends Service {
 
     private EventsReceiver receiver;
     private SharedPreferences prefs;
+
+
+    private final Handler reconnectHandler = new Handler();
+    private final Runnable reconnectRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (App.isDebug()) {
+                Log.d(TAG, "Reconnecting bluetooth");
+            }
+
+            if (service != null && prefs != null && bt.getConnectedDeviceAddress() == null) {
+                boolean enabled = prefs.getBoolean("bluetooth", false);
+                String address = prefs.getString("bluetoothDevice", "");
+
+                if (bt.isServiceAvailable() && enabled && !address.isEmpty()) {
+                    connectDeviceAddress = address;
+                    bt.connect(connectDeviceAddress);
+                }
+            } else {
+                reconnectHandler.removeCallbacks(this);
+            }
+        }
+    };
 
 
     public static void start() {
@@ -89,11 +108,48 @@ public class BluetoothService extends Service {
 
             bt.setOnDataReceivedListener(new BluetoothSPP.OnDataReceivedListener() {
                 public void onDataReceived(byte[] data, String message) {
-                    if (App.getDebug()) {
-                        Log.d("Receive BT ", message);
+                    if (App.isDebug()) {
+                        Log.d("Receive BT", message);
                     }
 
                     Commands.processReceivedData(message);
+                }
+            });
+
+
+            bt.setBluetoothConnectionListener(new BluetoothSPP.BluetoothConnectionListener() {
+                public void onDeviceConnected(String name, String address) {
+                    if (App.isDebug()) {
+                        Log.d(TAG, "Connected to " + name + " [" + address + "]");
+                        Log.d(TAG, "^^ " + String.valueOf(bt.getConnectedDeviceAddress()));
+                        Log.d(TAG, "^^ " + String.valueOf(bt.getServiceState()));
+                    }
+                }
+
+                public void onDeviceDisconnected() {
+                    if (App.isDebug()) {
+                        Log.d(TAG, "onDeviceDisconnected");
+                    }
+
+                    if ((!prefs.getBoolean("stopWhenScreenOff", true) || App.isScreenOn())
+                            && prefs.getBoolean("bluetooth_autoconnect", true)) {
+                        start();
+                    } else {
+                        stop();
+                    }
+                }
+
+                public void onDeviceConnectionFailed() {
+                    if (App.isDebug()) {
+                        Log.d(TAG, "onDeviceConnectionFailed");
+                    }
+
+                    if ((!prefs.getBoolean("stopWhenScreenOff", true) || App.isScreenOn())
+                            && prefs.getBoolean("bluetooth_autoconnect", true)) {
+                        start();
+                    } else {
+                        stop();
+                    }
                 }
             });
 
@@ -101,31 +157,45 @@ public class BluetoothService extends Service {
             IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
             registerReceiver(receiver, intentFilter);
 
-            if (App.getDebug()) {
+            if (App.isDebug()) {
                 Log.d(TAG, "CREATED");
             }
         }
     }
 
-    public void send(String message, boolean CRLF) {
-        bt.send("Message", CRLF);
+    public void send(String data, boolean CRLF) {
+        bt.send(data, CRLF);
     }
 
-    public void sendFromWidget(String data, int widgetId) {
-        if (bt != null && prefs != null) {
-            if (App.getDebug()) {
-                Log.d(TAG, "Data to send: " + data);
+    public static void sendFromWidget(String data, int widgetId) {
+        if (service != null) {
+            if (service.bt != null && service.prefs != null
+                    && service.bt.getConnectedDeviceAddress() != null) {
+                if (App.isDebug()) {
+                    Log.d(TAG, "Data to send: " + data);
+                }
+
+                service.bt.send(data, service.prefs.getBoolean("crlf", true));
+
+                Intent i = new Intent(App.ACTION_SEND_DATA_SUCCESS);
+                i.putExtra("widgetId", widgetId);
+                i.putExtra("type", "bluetooth");
+                service.sendBroadcast(i);
+
+            } else if (App.isDebug()) {
+                if (App.isDebug()) {
+                    Log.w(TAG, "Can't send data [" + data + "]. Bluetooth serial port is null or no communication with device");
+                }
+                Toaster.toast(R.string.toast_serial_send_warning);
+
             }
-
-            Intent i = new Intent(App.ACTION_SEND_DATA_COMPLETE);
-            i.putExtra("widgetId", widgetId);
-            sendBroadcast(i);
-
-            bt.send("Message", true);
-        } else if (App.getDebug()) {
-            Log.w(TAG, "Can not send data [" + data + "]. BT Serial port is null");
+        } else {
+            if (App.isDebug()) {
+                Log.w(TAG, "Service is null");
+            }
             Toaster.toast(R.string.toast_serial_send_warning);
         }
+
     }
 
     /* MUST READ about services
@@ -134,7 +204,7 @@ public class BluetoothService extends Service {
      */
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
@@ -147,10 +217,12 @@ public class BluetoothService extends Service {
         super.onDestroy();
 
         if (bt != null) {
-            int state = bt.getServiceState();
-            if (state == BluetoothState.STATE_CONNECTED) {
+            if (bt.getServiceState() == BluetoothState.STATE_CONNECTED) {
                 bt.disconnect();
             }
+
+            reconnectHandler.removeCallbacks(reconnectRunnable);
+            reconnectHandler.removeMessages(0);
 
             bt.stopService();
         }
@@ -161,7 +233,7 @@ public class BluetoothService extends Service {
         connectDeviceAddress = null;
         service = null;
 
-        if (App.getDebug()) {
+        if (App.isDebug()) {
             Log.d(TAG, "DESTROYED");
         }
     }

@@ -1,7 +1,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="@string/pref_category_connection_type" >
+        android:title="@string/pref_category_connection_bt" >
 
         <CheckBoxPreference
             android:key="bluetooth"
@@ -15,6 +15,17 @@
             android:title="@string/pref_title_bluetooth_devices_list" />
 
         <CheckBoxPreference
+            android:key="bluetooth_autoconnect"
+            android:dependency="bluetooth"
+            android:defaultValue="true"
+            android:title="@string/pref_title_bluetooth_autoconnect" />
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:title="@string/pref_category_connection_usb" >
+
+        <CheckBoxPreference
             android:key="usb"
             android:defaultValue="false"
             android:title="@string/pref_title_usb_connection" />
@@ -25,34 +36,32 @@
             android:defaultValue=""
             android:title="@string/pref_title_usb_devices_list" />
 
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/pref_category_connection" >
-
         <CheckBoxPreference
             android:key="dtr"
+            android:dependency="usb"
             android:defaultValue="false"
             android:title="@string/pref_title_dtr"
             android:summary="@string/pref_summ_dtr" />
 
         <CheckBoxPreference
             android:key="rts"
+            android:dependency="usb"
             android:defaultValue="false"
             android:title="@string/pref_title_rts"
             android:summary="@string/pref_summ_rts" />
 
-        <ListPreference
+        <EditTextPreference
             android:key="baudRate"
+            android:dependency="usb"
             android:defaultValue="9600"
             android:title="@string/pref_title_baud_rate"
-            android:entries="@array/pref_baud_rate_titles"
-            android:entryValues="@array/pref_baud_rate_titles"
-            android:negativeButtonText="@null"
-            android:positiveButtonText="@null" />
+            android:inputType="number"
+            android:selectAllOnFocus="true"
+            android:singleLine="true" />
 
         <ListPreference
             android:key="dataBits"
+            android:dependency="usb"
             android:defaultValue="8"
             android:title="@string/pref_title_data_bits"
             android:entries="@array/pref_data_bits_titles"
@@ -62,6 +71,7 @@
 
         <ListPreference
             android:key="stopBits"
+            android:dependency="usb"
             android:defaultValue="1"
             android:title="@string/pref_title_stop_bits"
             android:entries="@array/pref_stop_bits_titles"
@@ -71,12 +81,19 @@
 
         <ListPreference
             android:key="parity"
+            android:dependency="usb"
             android:defaultValue="0"
             android:title="@string/pref_title_parity"
             android:entries="@array/pref_parity_titles"
             android:entryValues="@array/pref_parity_values"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null" />
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:title="@string/pref_category_send_commands" >
 
         <CheckBoxPreference
             android:key="crlf"
@@ -86,12 +103,13 @@
 
     </PreferenceCategory>
 
+
     <PreferenceCategory
         android:title="@string/pref_category_other" >
 
         <CheckBoxPreference
             android:key="stopWhenScreenOff"
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:title="@string/pref_title_stop_service_when_screen_off" />
 
         <CheckBoxPreference

@@ -23,7 +23,6 @@ import java.io.File;
 import kg.delletenebre.serialmanager.App;
 import kg.delletenebre.serialmanager.EventsReceiver;
 import kg.delletenebre.serialmanager.R;
-import xdroid.toaster.Toaster;
 
 public class WidgetSend extends AppWidgetProvider {
 
@@ -86,8 +85,10 @@ public class WidgetSend extends AppWidgetProvider {
 
             try {
                 Thread.sleep(250);
-                new File(context.getFilesDir().getParent(),
-                        "/shared_prefs/" + prefsName + ".xml").delete();
+                if (!new File(context.getFilesDir().getParent(),
+                        "/shared_prefs/" + prefsName + ".xml").delete() && App.isDebug()) {
+                    Log.w(TAG, "Error deleting preferences file");
+                }
             } catch (InterruptedException e) {
                 Log.e(TAG, e.getMessage());
             }
@@ -105,7 +106,7 @@ public class WidgetSend extends AppWidgetProvider {
 
         int fontSizePX = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fontSize,
                 context.getResources().getDisplayMetrics());
-        int textPadding = (fontSizePX / 9);
+        int textPadding = (fontSizePX / 2);
         Paint paint = new Paint();
         Typeface typeface = Typeface.createFromAsset(context.getAssets(),
                 "fonts/fontawesome-webfont.ttf");
@@ -142,12 +143,12 @@ public class WidgetSend extends AppWidgetProvider {
     public static Bitmap getSettingsBitmap(Context context) {
         String text = "\uf013";
 
-        int fontSize = 18;
-        int fontColor = Color.parseColor("#889E9E9E");
+        int fontSize = 20;
+        int fontColor = Color.parseColor("#209E9E9E");
 
         int fontSizePX = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, fontSize,
                 context.getResources().getDisplayMetrics());
-        int textPadding = (fontSizePX / 9);
+        int textPadding = (fontSizePX / 5);
         Paint paint = new Paint();
         Typeface typeface = Typeface.createFromAsset(context.getAssets(),
                 "fonts/fontawesome-webfont.ttf");
@@ -173,106 +174,57 @@ public class WidgetSend extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
-        Log.i(TAG, "****SERVICE_SEND_ACTION_COMPLETE****");
 
-        if (intent.getAction().equals(App.ACTION_SEND_DATA_COMPLETE)) {
-            int widgetId = intent.getIntExtra("widgetId", -1);
 
-            if (widgetId > -1) {
-                SharedPreferences prefs = context.getSharedPreferences(
-                        WidgetSendSettings.PREF_PREFIX_KEY + widgetId, Context.MODE_PRIVATE);
+        int widgetId = intent.getIntExtra("widgetId", -1);
+        if (widgetId == -1) {
+            return;
+        }
 
-                if (prefs.getBoolean("switch", false)) {
-                    String switchData = prefs.getString("data", "");
-                    if (!switchData.isEmpty() && switchData.contains("|")) {
-                        String switchDataArray[] = switchData.split("\\|");
-                        int switchDataId = prefs.getInt("switch_data_id", 0);
+        SharedPreferences prefs = context.getSharedPreferences(
+                WidgetSendSettings.PREF_PREFIX_KEY + widgetId, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
 
-                        if (switchDataId < switchDataArray.length - 1) {
-                            switchDataId++;
-                        } else {
-                            switchDataId = 0;
-                        }
-
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.putInt("switch_data_id", switchDataId);
-                        editor.apply();
-                    }
-                }
-
-                context = context.getApplicationContext();
-                AppWidgetManager widgetManager =
-                        AppWidgetManager.getInstance(context);
-
-                updateAppWidget(context, widgetManager, widgetId);
+        if (intent.getAction().equals(App.ACTION_SEND_DATA_SUCCESS)) {
+            if (App.isDebug()) {
+                Log.i(TAG, "****SERVICE_SEND_ACTION_SUCCESS****");
             }
+
+            if (prefs.getString("sendTo", "usb_bt").equals("usb_bt")) {
+                boolean status = prefs.getBoolean("status", false);
+
+                if (!status) {
+                    editor.putBoolean("status", true);
+                    editor.apply();
+                } else {
+                    return;
+                }
+            }
+
+            if (prefs.getBoolean("switch", false)) {
+                String switchData = prefs.getString("data", "");
+                if (!switchData.isEmpty() && switchData.contains("|")) {
+                    String switchDataArray[] = switchData.split("\\|");
+                    int switchDataId = prefs.getInt("switch_data_id", 0);
+
+                    if (switchDataId < switchDataArray.length - 1) {
+                        switchDataId++;
+                    } else {
+                        switchDataId = 0;
+                    }
+
+                    editor.putInt("switch_data_id", switchDataId);
+                    editor.apply();
+                }
+            }
+
+            context = context.getApplicationContext();
+            AppWidgetManager widgetManager =
+                    AppWidgetManager.getInstance(context);
+
+            updateAppWidget(context, widgetManager, widgetId);
         }
     }
-
-//    public static String getCurrentSendingData(SharedPreferences prefs) {
-//        String data = prefs.getString("data", "");
-//
-//        if (prefs.getBoolean("switch", false)) {
-//            if (!data.isEmpty() && data.contains("|")) {
-//                String switchValues[] = data.split("\\|");
-//                int switchDataId = prefs.getInt("switch_data_id", 0);
-//
-//                if (switchDataId > switchValues.length - 1) {
-//                    switchDataId = 0;
-//                }
-//
-//                data = switchValues[switchDataId];
-//            }
-//        }
-//
-//        return data;
-//    }
-//
-//    public static String getCurrentText(SharedPreferences prefs) {
-//        String text = prefs.getString("text", DEFAULT_WIDGET_TEXT);
-//
-//        if (prefs.getBoolean("switch", false)) {
-//            if (!text.isEmpty() && text.contains("|")) {
-//                String switchValues[] = text.split("\\|");
-//                int switchDataId = prefs.getInt("switch_data_id", 0);
-//
-//                if (switchDataId > switchValues.length - 1) {
-//                    switchDataId = 0;
-//                }
-//
-//                text = switchValues[switchDataId];
-//            }
-//        }
-//
-//        if (text.isEmpty()) {
-//            text = DEFAULT_WIDGET_TEXT;
-//        }
-//
-//        return text;
-//    }
-//
-//    public static String getCurrentTextColor(SharedPreferences prefs) {
-//        String color = prefs.getString("fontColor", "");
-//
-//        if (prefs.getBoolean("switch", false)) {
-//            if (!color.isEmpty() && color.contains("|")) {
-//                String switchValues[] = color.split("\\|");
-//                int switchDataId = prefs.getInt("switch_data_id", 0);
-//
-//                if (switchDataId > switchValues.length - 1) {
-//                    switchDataId = 0;
-//                }
-//
-//                color = switchValues[switchDataId];
-//            }
-//        }
-//
-//        if (color.isEmpty()) {
-//            color = "#fff";
-//        }
-//
-//        return color;
-//    }
 
     public static String getCurrentValue(SharedPreferences prefs, String prefName, String defaultValue) {
         String value = prefs.getString(prefName, defaultValue);

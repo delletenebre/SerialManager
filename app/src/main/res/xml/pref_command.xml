@@ -76,7 +76,7 @@
             android:positiveButtonText="@null"
             android:title="@string/pref_title_command_action_media" />
 
-        <kg.delletenebre.serialmanager.AppChooserPreference
+        <kg.delletenebre.serialmanager.Preferences.AppChooserPreference
             android:key="action_application"
             android:title="@string/pref_title_command_action_application"
             app:allowUseDefault="false" />
