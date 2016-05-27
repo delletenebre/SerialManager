@@ -12,6 +12,7 @@ import android.util.Log;
 
 import app.akexorcist.bluetotohspp.library.BluetoothSPP;
 import app.akexorcist.bluetotohspp.library.BluetoothState;
+import kg.delletenebre.serialmanager.Commands.Commands;
 import xdroid.toaster.Toaster;
 
 public class BluetoothService extends Service {
@@ -24,6 +25,7 @@ public class BluetoothService extends Service {
 
     private EventsReceiver receiver;
     private SharedPreferences prefs;
+    private String receivedDataBuffer = "";
 
 
     private final Handler reconnectHandler = new Handler();
@@ -59,7 +61,7 @@ public class BluetoothService extends Service {
                 if (service != null) {
                     h.postDelayed(this, App.START_SERVICE_DELAY);
                 } else {
-                    Context context = App.getAppContext();
+                    Context context = App.getContext();
                     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
                     boolean enabled = prefs.getBoolean("bluetooth", false);
                     String address = prefs.getString("bluetoothDevice", "");
@@ -112,7 +114,12 @@ public class BluetoothService extends Service {
                         Log.d("Receive BT", message);
                     }
 
-                    Commands.processReceivedData(message);
+                    receivedDataBuffer += message;
+                    if (message.contains(App.NEW_LINE)
+                            || !prefs.getBoolean("bluetoothDetectCommandByNewLine", false)) {
+                        Commands.processReceivedData(receivedDataBuffer);
+                        receivedDataBuffer = "";
+                    }
                 }
             });
 

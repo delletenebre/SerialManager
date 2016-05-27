@@ -1,16 +1,25 @@
 <resources>
-
+    <string name="tap_to_open_main_activity">Нажмите чтобы открыть приложение</string>
+    <string name="notification_usb_connected_number">Подключено USB устройств: %1$d</string>
+    <string name="notification_bluetooth_connected_number">Подключено Bluetooth устройств: %1$d</string>
     <string name="md_choose_label">Выбрать</string>
     <string name="settings">Настройки</string>
     <string name="toast_serial_send_warning">SerialManager: Ошибка подключения</string>
     <string name="toast_serial_send_warning_empty_data">SerialManager: Нет данных для отправки</string>
+    <string name="delete_all_commands">Удалить все команды</string>
+    <string name="import_commands">Восстановить команды</string>
+    <string name="export_commands">Сохранить команды</string>
+    <string name="message_export_success">Команды успешно сохранены: %1$s</string>
+    <string name="message_commands_import_success">Команды успешно восстановлены</string>
+    <string name="message_commands_import_error">Произошла ошибка при восстановлении команд</string>
+    <string name="message_file_read_error">Ошибка чтения файла</string>
 
     <string name="pref_bt_device_no_device">Не подключаться</string>
 
     <string name="pref_usb_device_autoconnect">Автоподключение</string>
 
-    <string name="pref_category_connection_bt">Тип соединения</string>
-    <string name="pref_category_connection_usb">USB-Соединение</string>
+    <string name="pref_category_connection_bt">Bluetooth соединение</string>
+    <string name="pref_category_connection_usb">USB соединение</string>
     <string name="pref_category_send_commands">Отправка команд</string>
     <string name="pref_category_other">Разное</string>
 
@@ -21,6 +30,9 @@
     <string name="pref_title_usb_connection">Подключение по USB</string>
     <string name="pref_title_usb_devices_list">USB-устройство для подключения</string>
 
+    <string name="pref_title_detect_command_by_new_line">Распознавать команду по новой строке</string>
+    <string name="pref_summ_detect_command_by_new_line">Устройство должно присылать команду &lt;ключ:значение&gt; с символом новой строки [ \\n ]. Для Arduino: Serial.println();</string>
+
     <string name="pref_summ_dtr">Использовать строку DTR для определения готовности последовательного канала</string>
 
     <string name="pref_title_baud_rate">Скорость передачи данных</string>
@@ -28,10 +40,16 @@
     <string name="pref_title_crlf">Добавлять CR&#38;LF</string>
     <string name="pref_summ_crlf">Добавлять управляющие символы CR и LF при отправке данных</string>
 
+    <string name="pref_title_brightness_sensor">Отправлять данные датчика освещения</string>
+    <string name="pref_summ_brightness_sensor">Формат {lightsensormode:0&#8211;7}, где:\n7 - MAX, 6 - SUNLIGHT, 5 - SHADE, 4 - OVERCAST\n3 - SUNRISE, 2 - CLOUDY, 1 - FULLMOON, 0 - NO MOON</string>
+
+    <string name="pref_title_brightness_settings">Отправлять уровень яркости экрана</string>
+    <string name="pref_summ_brightness_settings">Формат {brightness:0&#8211;255}\nДанная опция не работает при включенной автоматической (адаптивной) регулировке яркости</string>
+
     <string name="pref_title_stop_service_when_screen_off">Останавливать сервис при отключении экрана</string>
 
-    <string name="pref_title_reconnect">Переподключаться при запуске программы</string>
-    <string name="pref_summ_reconnect">Завершать текущее соединение и подключаться заново при открытии главного окна программы</string>
+    <!--<string name="pref_title_reconnect">Переподключаться при запуске программы</string>-->
+    <!--<string name="pref_summ_reconnect">Завершать текущее соединение и подключаться заново при открытии главного окна программы</string>-->
 
     <string name="pref_title_volume_show_ui">Показывать панель громкости при изменении громкости</string>
 
@@ -44,6 +62,10 @@
     <string name="dialog_content_delete_command">Вы действительно хотите удалить команду %1$s?</string>
     <string name="dialog_delete_positive">Удалить</string>
     <string name="dialog_negative">Отмена</string>
+    <string name="dialog_import_positive">Восстановить</string>
+    <string name="dialog_delete">Удалить</string>
+    <string name="dialog_title_confirm_import_old_commands">Восстановить команды?</string>
+    <string name="dialog_content_import_old_commands">Обнаружены команды старого формата. Вы хотите восстановить их?</string>
 
     <string name="pref_title_autoset">Определить ключ/значение автоматически</string>
 
@@ -59,6 +81,8 @@
     <string name="volume">Звук</string>
     <string name="media">Плеер</string>
     <string name="application">Приложение</string>
+    <string name="send_command">Отправить команду</string>
+    <string name="system_management">Управление системой</string>
 
     <string name="pref_title_command_action_volume">Звук</string>
     <string-array name="pref_command_action_volume_titles">
@@ -77,6 +101,17 @@
     </string-array>
 
     <string name="pref_title_command_action_application">Приложение / Ярлык</string>
+
+    <string name="pref_title_command_action_run_shell">Shell команда</string>
+
+    <string name="pref_title_command_action_send">Отправляемая команда</string>
+
+    <string name="pref_title_command_action_system">Выберите функцию</string>
+    <string-array name="pref_command_action_system_titles">
+        <item>Выключение [Root]</item>
+        <item>Перезагрузка [Root]</item>
+        <item>Установить яркость экрана</item>
+    </string-array>
 
 
     <!-- Universal settings preferences -->

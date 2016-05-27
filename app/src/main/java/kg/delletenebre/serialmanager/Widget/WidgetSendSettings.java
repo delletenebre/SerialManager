@@ -139,7 +139,7 @@ public class WidgetSendSettings extends AppCompatActivity {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                             && ContextCompat.checkSelfPermission(getContext(),
                             Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                        requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, App.REQUEST_CODE_ASK_PERMISSIONS);
+                        requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, App.REQUEST_CODE_ASK_PERMISSIONS_READ);
                     } else {
                         new FileChooser(getActivity())
                                 .setExtension("ttf")
@@ -164,7 +164,7 @@ public class WidgetSendSettings extends AppCompatActivity {
         @Override
         public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
             switch (requestCode) {
-                case App.REQUEST_CODE_ASK_PERMISSIONS:
+                case App.REQUEST_CODE_ASK_PERMISSIONS_READ:
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         System.exit(0);
                     }

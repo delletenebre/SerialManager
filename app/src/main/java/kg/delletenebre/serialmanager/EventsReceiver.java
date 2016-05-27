@@ -1,7 +1,6 @@
 package kg.delletenebre.serialmanager;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,15 +18,11 @@ public class EventsReceiver extends BroadcastReceiver {
     private final String TAG = getClass().getName();
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
         String action = intent.getAction();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
-        UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-        UsbDevice usbDevice;
-
         final boolean connectionUsb = prefs.getBoolean("usb", false);
-        String usbDeviceToConnect = prefs.getString("usbDevice", "");
         final boolean connectionBluetooth = prefs.getBoolean("bluetooth", false);
 
         switch (action) {
@@ -40,8 +35,8 @@ public class EventsReceiver extends BroadcastReceiver {
                     @Override
                     public void run() {
                         if (App.isScreenOn()) {
-                            if (connectionUsb && UsbService.service == null) {
-                                UsbService.restart();
+                            if (connectionUsb) {
+                                context.startService(new Intent(context, UsbService.class));
                             }
                             if (connectionBluetooth && BluetoothService.service == null) {
                                 BluetoothService.start();
@@ -62,33 +57,11 @@ public class EventsReceiver extends BroadcastReceiver {
                         @Override
                         public void run() {
                             if (App.isScreenOff()) {
-                                UsbService.stop();
+                                context.stopService(new Intent(context, UsbService.class));
                                 BluetoothService.stop();
                             }
                         }
                     }, 2000);
-                }
-                break;
-
-            case App.ACTION_USB_ATTACHED:
-                if (App.isDebug()) {
-                    Log.i(TAG, "****ACTION_USB_DEVICE_ATTACHED****");
-                }
-
-                usbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                if (usbDevice != null) {
-                    if (usbManager.hasPermission(usbDevice)
-                            && connectionUsb
-                            && (usbDeviceToConnect.isEmpty()
-                                    || usbDeviceToConnect.equals(usbDevice.getDeviceName()))) {
-                        UsbService.start(usbDevice);
-                    }
-//                    } else {
-//                        Intent intentUsbPermission = new Intent(App.ACTION_USB_PERMISSION);
-//
-//                        usbManager.requestPermission(device,
-//                                PendingIntent.getBroadcast(context, 0, intentUsbPermission, 0));
-//                    }
                 }
                 break;
 
@@ -97,12 +70,8 @@ public class EventsReceiver extends BroadcastReceiver {
                     Log.i(TAG, "****ACTION_USB_DEVICE_DETACHED****");
                 }
 
-                usbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                String connectedDeviceName = UsbService.getConnectedDeviceName();
-
-                if (connectedDeviceName != null && connectedDeviceName.equals(usbDevice.getDeviceName())) {
-                    UsbService.stop();
-                }
+                UsbService.detachDevice(
+                        (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE));
                 break;
 
             case App.ACTION_SEND_DATA:
@@ -147,7 +116,6 @@ public class EventsReceiver extends BroadcastReceiver {
                         BluetoothAdapter.ERROR);
 
                 switch (state) {
-
                     case BluetoothAdapter.STATE_TURNING_OFF:
                         BluetoothService.stop();
                         break;

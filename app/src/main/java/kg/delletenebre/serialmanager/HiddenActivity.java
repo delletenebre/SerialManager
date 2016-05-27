@@ -25,10 +25,11 @@ public class HiddenActivity extends Activity {
             if (action != null && action.equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
                 UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
-                Intent broadcastIntent = new Intent(App.ACTION_USB_ATTACHED);
-                broadcastIntent.putExtra(UsbManager.EXTRA_DEVICE, device);
+                Intent i = new Intent(getApplicationContext(), UsbService.class);
+                i.putExtra(UsbManager.EXTRA_DEVICE, device);
 
-                sendBroadcast(broadcastIntent);
+                startService(i);
+                //sendBroadcast(broadcastIntent);
             }
         }
 

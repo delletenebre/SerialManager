@@ -1,39 +1,46 @@
 package kg.delletenebre.serialmanager;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.util.Collections;
+import java.io.File;
 import java.util.List;
-import java.util.UUID;
+
+import kg.delletenebre.serialmanager.Commands.Command;
+import kg.delletenebre.serialmanager.Commands.CommandSettingsActivity;
+import kg.delletenebre.serialmanager.Commands.Commands;
+import kg.delletenebre.serialmanager.Commands.CommandsListAdapter;
+import kg.delletenebre.serialmanager.helper.SimpleItemTouchHelperCallback;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final String TAG = getClass().getSimpleName();
-
-    protected static final int REQ_NEW_COMMAND = 100;
-    protected static final int REQ_EDIT_COMMAND = 101;
+    private static final String TAG = "MainActivity";
 
     protected static Activity activity;
 
     private SharedPreferences settings;
-
-    private RecyclerView mRecyclerView;
-    private static RecyclerView.Adapter mAdapter;
-    private static List<Command> commands;
-
-
+    public CommandsListAdapter commandsListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,31 +52,57 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.tasks_list);
-        //mRecyclerView.setHasFixedSize(true);
+        final List<String> oldCommands = Commands.checkCommandsPreferences();
+        if (!oldCommands.isEmpty()) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.dialog_title_confirm_import_old_commands)
+                    .setMessage(R.string.dialog_content_import_old_commands)
+                    .setNegativeButton(R.string.dialog_negative, null)
+                    .setNeutralButton(R.string.dialog_delete,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Commands.deleteOldCommands(oldCommands);
+                                }
+                            })
+                    .setPositiveButton(R.string.dialog_import_positive,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Commands.importOldCommands(oldCommands);
+                                }
+                            })
+                    .show();
+        }
 
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
 
-        initializeData();
+        commandsListAdapter = new CommandsListAdapter();
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.commands_list);
+        if (recyclerView != null) {
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            recyclerView.setAdapter(commandsListAdapter);
+
+            ItemTouchHelper touchHelper = new ItemTouchHelper(
+                    new SimpleItemTouchHelperCallback(commandsListAdapter));
+            touchHelper.attachToRecyclerView(recyclerView);
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         if (fab != null) {
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(view.getContext(), CommandSettingsActivity.class);
-                    int id = settings.getInt("counter", 0);
-                    intent.putExtra("pref_id", id);
-                    intent.putExtra("pref_uuid", UUID.randomUUID().toString());
-                    startActivityForResult(intent, REQ_NEW_COMMAND);
+                    Command command = commandsListAdapter.createItem();
+                    if (command != null) {
+                        Intent intent = new Intent(view.getContext(), CommandSettingsActivity.class);
+                        intent.putExtra("id", command.getId());
+                        intent.putExtra("command", command);
+                        startActivityForResult(intent, App.REQUEST_CODE_UPDATE_COMMAND);
+                    }
                 }
             });
         }
-
-
-
-
     }
 
     @Override
@@ -82,9 +115,41 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
+        switch (id) {
+            case R.id.action_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                break;
+
+            case R.id.action_delete_all_commands:
+                Commands.deleteAllCommands();
+                break;
+
+            case R.id.action_export_commands:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                        && ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, App.REQUEST_CODE_ASK_PERMISSIONS_WRITE);
+                } else {
+                    Commands.exportCommands();
+                }
+                break;
+
+            case R.id.action_import_commands:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                        && ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, App.REQUEST_CODE_ASK_PERMISSIONS_READ);
+                } else {
+                    new FileChooser(this)
+                            .setExtension("json")
+                            .setFileListener(new FileChooser.FileSelectedListener() {
+                                @Override public void fileSelected(final File file) {
+                                    Commands.importCommands(file);
+                                }
+                            })
+                            .showDialog();
+                }
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -96,10 +161,10 @@ public class MainActivity extends AppCompatActivity {
         App.setAliveActivity(this);
         activity = this;
 
-        if (settings != null && settings.getBoolean("reconnect", false)) {
-            UsbService.restart();
-            BluetoothService.start();
-        }
+//        if (settings != null && settings.getBoolean("reconnect", false)) {
+//            //UsbService.restart();
+//            BluetoothService.start();
+//        }
     }
 
     @Override
@@ -112,85 +177,34 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (data == null) {
+            if (App.isDebug()) {
+                Log.w(TAG, "onActivityResult(): empty data");
+            }
             return;
         }
 
         if (resultCode == RESULT_OK) {
-            int id = data.getIntExtra("id", -1);
-            String uuid = data.getStringExtra("uuid");
-            String key = data.getStringExtra("key");
-            String value = data.getStringExtra("value");
-            String scatter = data.getStringExtra("scatter");
-            boolean isThrough = data.getBooleanExtra("is_through", false);
-            String actionCategory = data.getStringExtra("actionCategory");
-            int actionCategoryId = Integer.parseInt(actionCategory);
-
-            String actionNavigation = data.getStringExtra("actionNavigation");
-
-            String actionVolume = data.getStringExtra("actionVolume");
-
-            String actionMedia = data.getStringExtra("actionMedia");
-
-            String actionApplication = data.getStringExtra("actionApplication");
-
-            String action = Commands.getActionByActionCategoryId(actionCategoryId,
-                    actionNavigation, actionVolume, actionMedia, actionApplication);
-
-            if (requestCode == REQ_NEW_COMMAND) {
-                addCommand(id, uuid, key, value, scatter, isThrough, actionCategoryId, action);
-            } else if (requestCode == REQ_EDIT_COMMAND) {
-                editCommand(id, key, value, scatter, isThrough, actionCategoryId, action);
+            if (requestCode == App.REQUEST_CODE_UPDATE_COMMAND) {
+                commandsListAdapter.updateItem((Command) data.getSerializableExtra("command"));
             }
         }
     }
 
-
-    private void initializeData() {
-        commands = Commands.getCommands();
-
-        Collections.sort(commands);
-        mAdapter = new CommandsAdapter(this, commands);
-        mRecyclerView.setAdapter(mAdapter);
-    }
-
-    public void addCommand(int id, String uuid, String key, String value, String scatter,
-                           boolean isThrough, int actionCategoryId, String action) {
-
-        SharedPreferences.Editor _settingEditor = settings.edit();
-        _settingEditor.putInt("counter", id + 1);
-        _settingEditor.apply();
-
-        commands.add(
-                new Command(id, uuid, key, value, scatter, isThrough, actionCategoryId, action));
-        mAdapter.notifyDataSetChanged();
-
-        Commands.setCommands(commands);
-
-    }
-
-    public void editCommand(int id, String key, String value, String scatter,
-                           boolean isThrough, int actionCategoryId, String action) {
-
-        int i = 0;
-        for (; i < commands.size(); i++) {
-            if (commands.get(i).getId() == id) {
-                commands.get(i).update(key, value, scatter, isThrough, actionCategoryId, action);
-                mAdapter.notifyDataSetChanged();
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case App.REQUEST_CODE_ASK_PERMISSIONS_READ:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    App.restartAliveActivity();
+                }
                 break;
-            }
-        }
 
-        Commands.setCommands(commands);
-    }
-
-    public static void removeCommand(String uuid) {
-        int i = 0;
-        for (; i < commands.size(); i++) {
-            if (commands.get(i).getUUID().equals(uuid)) {
-                commands.remove(i);
-                mAdapter.notifyDataSetChanged();
+            case App.REQUEST_CODE_ASK_PERMISSIONS_WRITE:
+                App.restartAliveActivity();
                 break;
-            }
+
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 }

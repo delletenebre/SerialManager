@@ -1,11 +1,21 @@
 <resources>
     <string name="app_name" translatable="false">Serial Manager</string>
+    <string name="tap_to_open_main_activity">Tap to open app</string>
+    <string name="notification_usb_connected_number">Connected USB devices: %1$d</string>
+    <string name="notification_bluetooth_connected_number">Connected Bluetooth devices: %1$d</string>
     <string name="widget_receive_name" translatable="false">Serial Manager Receive</string>
     <string name="widget_send_name" translatable="false">Serial Manager Send</string>
     <string name="md_choose_label">Choose</string>
     <string name="settings">Settings</string>
     <string name="toast_serial_send_warning">SerialManager: Connection error</string>
     <string name="toast_serial_send_warning_empty_data">SerialManager: Data is null</string>
+    <string name="delete_all_commands">Delete all commands</string>
+    <string name="import_commands">Import commands</string>
+    <string name="export_commands">Export commands</string>
+    <string name="message_export_success">Commands successfully saved: %1$s</string>
+    <string name="message_commands_import_success">Commands successfully imported</string>
+    <string name="message_commands_import_error">An error occurred during import</string>
+    <string name="message_file_read_error">File read error</string>
 
     <string name="pref_bt_device_no_device">No device</string>
     <string name="pref_bt_device_template" translatable="false">%1$s [ %2$s ]</string>
@@ -23,6 +33,9 @@
 
     <string name="pref_title_usb_connection">Enable USB connection</string>
     <string name="pref_title_usb_devices_list">USB device</string>
+
+    <string name="pref_title_detect_command_by_new_line">Detect received command by new line</string>
+    <string name="pref_summ_detect_command_by_new_line"> </string>
 
     <string name="pref_title_dtr" translatable="false">DTR - Data Terminal Ready</string>
     <string name="pref_summ_dtr">Use DTR line to determine serial channel readiness</string>
@@ -78,10 +91,16 @@
     <string name="pref_title_crlf">Add CR&#38;LF</string>
     <string name="pref_summ_crlf">Add Carriage Return and Line Feed symbols to end of sending data</string>
 
+    <string name="pref_title_brightness_sensor">Send light sensor data</string>
+    <string name="pref_summ_brightness_sensor">Format {lightsensormode:0&#8211;7} where:\n7 - MAX, 6 - SUNLIGHT, 5 - SHADE, 4 - OVERCAST\n3 - SUNRISE, 2 - CLOUDY, 1 - FULLMOON, 0 - NO MOON</string>
+
+    <string name="pref_title_brightness_settings">Send screen brightness data</string>
+    <string name="pref_summ_brightness_settings">When screen brightness change in manual mode, brightness level will send\nFormat {brightness:0&#8211;255}\nThis option does not work when the automatic (adaptive) brightness control is enabled</string>
+
     <string name="pref_title_stop_service_when_screen_off">Stop Service when screen is off</string>
 
-    <string name="pref_title_reconnect">Reconnect on app start</string>
-    <string name="pref_summ_reconnect">Reconnect on app start</string>
+    <!--<string name="pref_title_reconnect">Reconnect on app start</string>-->
+    <!--<string name="pref_summ_reconnect">Reconnect on app start</string>-->
 
     <string name="pref_title_volume_show_ui">Show volume UI on volume change</string>
 
@@ -97,6 +116,11 @@
     <string name="dialog_content_delete_command">Are you sure to delete command %1$s?</string>
     <string name="dialog_delete_positive">Delete</string>
     <string name="dialog_negative">Cancel</string>
+    <string name="dialog_import_positive">Import</string>
+    <string name="dialog_delete">Delete</string>
+    <string name="dialog_title_confirm_import_old_commands">Import commands?</string>
+    <string name="dialog_content_import_old_commands">Commands from the previous version have been found. Do you want to import it?</string>
+
 
     <string name="default_key" translatable="false">click</string>
 
@@ -118,19 +142,29 @@
     <string name="volume">Volume</string>
     <string name="media">Media</string>
     <string name="application">Application</string>
+    <string name="run_shell_root" translatable="false">Run Shell [ Root ]</string>
+    <string name="run_shell" translatable="false">Run Shell</string>
+    <string name="send_command">Send command</string>
+    <string name="system_management">System Management</string>
     <string-array name="pref_command_action_category_titles" translatable="false">
         <item>@string/no_action</item>
         <item>@string/navigation_root</item>
         <item>@string/volume</item>
         <item>@string/media</item>
         <item>@string/application</item>
+        <item>@string/run_shell_root</item>
+        <item>@string/send_command</item>
+        <item>@string/system_management</item>
     </string-array>
     <string-array name="pref_command_action_category_values" translatable="false">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
+        <item>none</item>
+        <item>navigation</item>
+        <item>volume</item>
+        <item>media</item>
+        <item>application</item>
+        <item>shell</item>
+        <item>send</item>
+        <item>system</item>
     </string-array>
 
     <string name="pref_title_command_action_navigation" translatable="false">@string/navigation</string>
@@ -236,9 +270,9 @@
         <item>Mute</item>
     </string-array>
     <string-array name="pref_command_action_volume_values" translatable="false">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
+        <item>up</item>
+        <item>down</item>
+        <item>mute</item>
     </string-array>
 
     <string name="pref_title_command_action_media">Media</string>
@@ -250,14 +284,30 @@
         <item>Fast Forward</item>
     </string-array>
     <string-array name="pref_command_action_media_values" translatable="false">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
+        <item>89</item>
+        <item>88</item>
+        <item>85</item>
+        <item>87</item>
+        <item>90</item>
     </string-array>
 
     <string name="pref_title_command_action_application">Application / Shortcut</string>
+
+    <string name="pref_title_command_action_run_shell">Shell command</string>
+
+    <string name="pref_title_command_action_send">Command to send</string>
+
+    <string name="pref_title_command_action_system">Choose function</string>
+    <string-array name="pref_command_action_system_titles">
+        <item>Shut down [Root]</item>
+        <item>Reboot [Root]</item>
+        <item>Set brightness</item>
+    </string-array>
+    <string-array name="pref_command_action_system_values" translatable="false">
+        <item>shutdown</item>
+        <item>reboot</item>
+        <item>set_brightness</item>
+    </string-array>
 
 
     <!-- Universal settings preferences -->

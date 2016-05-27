@@ -19,6 +19,13 @@
             android:dependency="bluetooth"
             android:defaultValue="true"
             android:title="@string/pref_title_bluetooth_autoconnect" />
+
+        <CheckBoxPreference
+            android:key="bluetoothDetectCommandByNewLine"
+            android:dependency="bluetooth"
+            android:defaultValue="false"
+            android:title="@string/pref_title_detect_command_by_new_line"
+            android:summary="@string/pref_summ_detect_command_by_new_line" />
     </PreferenceCategory>
 
 
@@ -35,6 +42,13 @@
             android:dependency="usb"
             android:defaultValue=""
             android:title="@string/pref_title_usb_devices_list" />
+
+        <CheckBoxPreference
+            android:key="usbDetectCommandByNewLine"
+            android:dependency="usb"
+            android:defaultValue="false"
+            android:title="@string/pref_title_detect_command_by_new_line"
+            android:summary="@string/pref_summ_detect_command_by_new_line" />
 
         <CheckBoxPreference
             android:key="dtr"
@@ -101,6 +115,18 @@
             android:title="@string/pref_title_crlf"
             android:summary="@string/pref_summ_crlf" />
 
+        <CheckBoxPreference
+            android:key="brightness_sensor"
+            android:defaultValue="false"
+            android:title="@string/pref_title_brightness_sensor"
+            android:summary="@string/pref_summ_brightness_sensor" />
+
+        <CheckBoxPreference
+            android:key="brightness_settings"
+            android:defaultValue="false"
+            android:title="@string/pref_title_brightness_settings"
+            android:summary="@string/pref_summ_brightness_settings" />
+
     </PreferenceCategory>
 
 
@@ -112,10 +138,10 @@
             android:defaultValue="true"
             android:title="@string/pref_title_stop_service_when_screen_off" />
 
-        <CheckBoxPreference
-            android:key="reconnect"
-            android:defaultValue="false"
-            android:title="@string/pref_title_reconnect" />
+        <!--<CheckBoxPreference-->
+            <!--android:key="reconnect"-->
+            <!--android:defaultValue="false"-->
+            <!--android:title="@string/pref_title_reconnect" />-->
 
         <CheckBoxPreference
             android:key="volumeShowUI"
