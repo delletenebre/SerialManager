@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,35 +17,42 @@ public class CommandsDatabase {
     private static final String TAG = "CommandsDatabase";
 
     public static final String KEY_ID = "_id";
-    public static final String KEY_KEY = "key";
-    public static final String KEY_VALUE = "value";
-    public static final String KEY_SCATTER = "scatter";
-    public static final String KEY_THROUGH = "through";//Boolean flag = (cursor.getInt(cursor.getColumnIndex("flag")) == 1);
-    public static final String KEY_CATEGORY = "category";
-    public static final String KEY_ACTION = "action";
-    public static final String KEY_ACTION_STRING = "action_string";
     public static final String KEY_POSITION = "position";
+    public static final String KEY_COMMAND = "command";
+
+//    public static final String KEY_KEY = "key";
+//    public static final String KEY_VALUE = "value";
+//    public static final String KEY_SCATTER = "scatter";
+//    public static final String KEY_THROUGH = "through";//Boolean flag = (cursor.getInt(cursor.getColumnIndex("flag")) == 1);
+//    public static final String KEY_CATEGORY = "category";
+//    public static final String KEY_ACTION = "action";
+//    public static final String KEY_ACTION_STRING = "action_string";
+//
+//    public static final String KEY_OVERLAY_ENABLED = "overlay_enabled";
+//    public static final String KEY_OVERLAY_TEXT = "overlay_text";
+//    public static final String KEY_OVERLAY_TIMER = "overlay_timer";
+//    public static final String KEY_OVERLAY_POSITION = "overlay_position";
+//    public static final String KEY_OVERLAY_FULLWIDTH = "overlay_fullwidth";
+//    public static final String KEY_OVERLAY_TEXT_SIZE = "overlay_text_size";
+//    public static final String KEY_OVERLAY_TEXT_ALIGN = "overlay_text_align";
+//    public static final String KEY_OVERLAY_TEXT_COLOR = "overlay_text_color";
+//    public static final String KEY_OVERLAY_BACKGROUND_COLOR = "overlay_background_color";
 
     private DatabaseHelper databaseHelper;
     private SQLiteDatabase database;
 
     private static final String DATABASE_NAME = "SerialManager";
-    private static final String SQLITE_TABLE = "commands";
-    private static final int DATABASE_VERSION = 2;
+    private static final String COMMANDS_TABLE = "commands";
+    private static final int DATABASE_VERSION = 3;
 
+    private final static Gson gson = new Gson();
     private final Context context;
 
-    private static final String DATABASE_CREATE =
-            "CREATE TABLE if not exists " + SQLITE_TABLE + " (" +
+    private static final String CREATE_TABLE_COMMANDS =
+            "CREATE TABLE if not exists " + COMMANDS_TABLE + " (" +
                     KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    KEY_KEY + "," +
-                    KEY_VALUE + "," +
-                    KEY_SCATTER + " REAL DEFAULT 0," +
-                    KEY_THROUGH + " INTEGER DEFAULT 0," +
-                    KEY_CATEGORY + "," +
-                    KEY_ACTION + "," +
-                    KEY_ACTION_STRING + "," +
-                    KEY_POSITION + " INTEGER DEFAULT 0" +
+                    KEY_POSITION + " INTEGER DEFAULT 0," +
+                    KEY_COMMAND + " TEXT NOT NULL DEFAULT ''" +
                     ");";
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
@@ -52,18 +61,17 @@ public class CommandsDatabase {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
-
         @Override
         public void onCreate(SQLiteDatabase db) {
-            Log.w(TAG, DATABASE_CREATE);
-            db.execSQL(DATABASE_CREATE);
+            Log.d(TAG, CREATE_TABLE_COMMANDS);
+            db.execSQL(CREATE_TABLE_COMMANDS);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
                     + newVersion + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS " + SQLITE_TABLE);
+            db.execSQL("DROP TABLE IF EXISTS " + COMMANDS_TABLE);
             onCreate(db);
         }
     }
@@ -84,51 +92,37 @@ public class CommandsDatabase {
         }
     }
 
-    public Command create(String key, String value, float scatter, boolean through, String category,
-                       String action, String actionString, int position) {
+    public Command create(Command command) {
 
         ContentValues initialValues = new ContentValues();
-        initialValues.put(KEY_KEY, key);
-        initialValues.put(KEY_VALUE, value);
-        initialValues.put(KEY_SCATTER, scatter);
-        initialValues.put(KEY_THROUGH, through ? 1 : 0);
-        initialValues.put(KEY_CATEGORY, category);
-        initialValues.put(KEY_ACTION, action);
-        initialValues.put(KEY_ACTION_STRING, actionString);
-        initialValues.put(KEY_POSITION, position);
 
-        long id = database.insert(SQLITE_TABLE, null, initialValues);
+
+        initialValues.put(KEY_POSITION, command.getPosition());
+        initialValues.put(KEY_COMMAND, gson.toJson(command));
+
+        long id = database.insert(COMMANDS_TABLE, null, initialValues);
         if (id > -1) {
-            return new Command(id, key, value, scatter, through, category, action,
-                    actionString, position);
+            command.setId(id);
+            return command;
         }
 
         return null;
     }
 
     public boolean deleteAll() {
-        int doneDelete = 0;
-        doneDelete = database.delete(SQLITE_TABLE, null , null);
-        Log.w(TAG, Integer.toString(doneDelete));
+        int doneDelete = database.delete(COMMANDS_TABLE, null , null);
         return doneDelete > 0;
-
     }
 
     public boolean delete(long id) {
-        return database.delete(SQLITE_TABLE, KEY_ID +  "=" + id, null) > 0;
+        return database.delete(COMMANDS_TABLE, KEY_ID +  "=" + id, null) > 0;
     }
 
     public int update(Command command) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(KEY_KEY, command.getKey());
-        contentValues.put(KEY_VALUE, command.getValue());
-        contentValues.put(KEY_SCATTER, command.getScatter());
-        contentValues.put(KEY_THROUGH, command.getThrough() ? 1 : 0);
-        contentValues.put(KEY_CATEGORY, command.getCategory());
-        contentValues.put(KEY_ACTION, command.getAction());
-        contentValues.put(KEY_ACTION_STRING, command.getActionString());
+        contentValues.put(KEY_COMMAND, gson.toJson(command));
 
-        return database.update(SQLITE_TABLE, contentValues,
+        return database.update(COMMANDS_TABLE, contentValues,
                 KEY_ID +  "=" + command.getId(), null);
     }
 
@@ -142,7 +136,7 @@ public class CommandsDatabase {
                 if (command.getPosition() != position) {
                     command.setPosition(position);
                     contentValues.put(KEY_POSITION, position);
-                    database.update(SQLITE_TABLE, contentValues,
+                    database.update(COMMANDS_TABLE, contentValues,
                             KEY_ID +  "=" + command.getId(), null);
                 }
                 position++;
@@ -161,26 +155,21 @@ public class CommandsDatabase {
     public List<Command> fetchAll() {
         List<Command> list = new ArrayList<>();
 
-        Cursor cursor = database.query(SQLITE_TABLE, new String[] {KEY_ID,
-                    KEY_KEY, KEY_VALUE, KEY_SCATTER, KEY_THROUGH, KEY_CATEGORY, KEY_ACTION,
-                    KEY_ACTION_STRING, KEY_POSITION},
+        Cursor cursor = database.query(COMMANDS_TABLE, new String[] {KEY_ID,
+                    KEY_COMMAND, KEY_POSITION},
                 null, null, null, null, KEY_POSITION);
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 long id = cursor.getLong(cursor.getColumnIndex(KEY_ID));
-                String key = cursor.getString(cursor.getColumnIndex(KEY_KEY));
-                String value = cursor.getString(cursor.getColumnIndex(KEY_VALUE));
-                float scatter = cursor.getFloat(cursor.getColumnIndex(KEY_SCATTER));
-                boolean through = cursor.getInt(cursor.getColumnIndex(KEY_THROUGH)) == 1;
-                String category = cursor.getString(cursor.getColumnIndex(KEY_CATEGORY));
-                String action = cursor.getString(cursor.getColumnIndex(KEY_ACTION));
-                String actionString = cursor.getString(cursor.getColumnIndex(KEY_ACTION_STRING));
                 int position = cursor.getInt(cursor.getColumnIndex(KEY_POSITION));
+                Command command = gson.fromJson(
+                        cursor.getString(cursor.getColumnIndex(KEY_COMMAND)), Command.class);
 
-                list.add(new Command(id, key, value, scatter, through, category, action,
-                                actionString, position));
+                list.add(command.setId(id).setPosition(position));
             }
+
+            cursor.close();
         }
 
         return list;

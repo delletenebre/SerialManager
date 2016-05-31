@@ -34,7 +34,7 @@
 
         <CheckBoxPreference
             android:key="usb"
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:title="@string/pref_title_usb_connection" />
 
         <kg.delletenebre.serialmanager.Preferences.UsbDevicesListPreference

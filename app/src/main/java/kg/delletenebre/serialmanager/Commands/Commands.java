@@ -4,8 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Environment;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.util.Log;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,16 +21,21 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import kg.delletenebre.serialmanager.App;
 import kg.delletenebre.serialmanager.MainActivity;
+import kg.delletenebre.serialmanager.Overlay;
 import kg.delletenebre.serialmanager.Preferences.AppChooserPreference;
 import kg.delletenebre.serialmanager.R;
 import kg.delletenebre.serialmanager.UsbService;
@@ -66,7 +77,6 @@ public class Commands {
         if (matcher.find()) {
             final String key = matcher.group(1);
             final String val = matcher.group(2);
-
             final Activity activity = App.getAliveActivity();
 
             if (activity != null) {
@@ -117,6 +127,11 @@ public class Commands {
             if (command.getKey().equals(key)
                     && (command.getValue().isEmpty()
                     || (command.getValue().equals(value) || inRange))) {
+
+                if (command.getOverlay().isEnabled() && (Build.VERSION.SDK_INT < 23
+                        || (Build.VERSION.SDK_INT >= 23 && Settings.canDrawOverlays(context)))) {
+                    Overlay.show(command, value);
+                }
 
                 if (category.equals("navigation")) {
                     App.emulateKeyEvent(command.getAction());
@@ -204,8 +219,11 @@ public class Commands {
 
     public static void deleteAllCommands() {
         if (commands != null && !commands.isEmpty()) {
-            database.deleteAll();
-            App.restartAliveActivity();
+            if (database.deleteAll()) {
+                commands.clear();
+                ((MainActivity) App.getAliveActivity())
+                        .commandsListAdapter.notifyDataSetChanged();
+            }
         }
     }
 
@@ -224,63 +242,31 @@ public class Commands {
         }
 
         if (!content.isEmpty()) {
-            try {
-                JSONArray jsonArray = new JSONArray(content);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    try {
-                        JSONObject json = jsonArray.getJSONObject(i);
-                        String key = json.getString("key");
-                        String value  = json.getString("value");
-                        float scatter = json.getInt("scatter");
-                        boolean through = json.getBoolean("through");
-                        String category = json.getString("category");
-                        String action  = json.getString("action");
-                        String actionString  = json.getString("actionString");
+            Gson gson = new Gson();
 
-                        ((MainActivity) App.getAliveActivity()).commandsListAdapter.createItem(
-                                key, value, scatter, through, category, action, actionString);
+            List<Command> commands = gson.fromJson(content,
+                    new TypeToken<Collection<Command>>(){}.getType());
 
-                    } catch (JSONException ex) {
-                        ex.printStackTrace();
-                    }
+            if (commands.size() > 0) {
+                for (Command command : commands) {
+                    ((MainActivity) App.getAliveActivity()).commandsListAdapter.createItem(command);
                 }
-
-                Toaster.toast(R.string.message_commands_import_success);
-            } catch (JSONException ex) {
-                Toaster.toast(R.string.message_commands_import_error);
-                ex.printStackTrace();
             }
+
+            Toaster.toast(R.string.message_commands_import_success);
         } else {
             Toaster.toast(R.string.message_file_read_error);
         }
     }
 
     public static void exportCommands() {
-        Log.d(TAG, "exportCommands");
         commands = loadCommands();
         if (commands != null && !commands.isEmpty()) {
-            JSONArray jsonArray = new JSONArray();
-            for (Command command: commands) {
-                Log.d(TAG, command.getKey());
-                try {
-                    JSONObject json = new JSONObject();
-                    json.put("key", command.getKey());
-                    json.put("value", command.getValue());
-                    json.put("scatter", command.getScatter());
-                    json.put("through", command.getThrough());
-                    json.put("category", command.getCategory());
-                    json.put("action", command.getAction());
-                    json.put("actionString", command.getActionString());
-
-                    jsonArray.put(json);
-                } catch (JSONException ex) {
-                    ex.printStackTrace();
-                }
-            }
+            Gson gson = new Gson();
 
             String fileName = "serial_manager_backup.json";
-            if (jsonArray.length() > 0
-                    && createAndSaveFile(fileName, jsonArray.toString())) {
+            if (commands.size() > 0
+                    && createAndSaveFile(fileName, gson.toJson(commands))) {
                 Toaster.toastLong(String.format(
                         App.getContext().getResources()
                                 .getString(R.string.message_export_success),
@@ -379,8 +365,15 @@ public class Commands {
                 }
             }
 
-            ((MainActivity) App.getAliveActivity()).commandsListAdapter.createItem(
-                    key, value, scatter, through, category, action, "");
+            Command command = new Command()
+                    .setKey(key)
+                    .setValue(value)
+                    .setScatter(scatter)
+                    .setThrough(through)
+                    .setCategory(category)
+                    .setAction(action);
+
+            ((MainActivity) App.getAliveActivity()).commandsListAdapter.createItem(command);
             deleteOldCommand(name);
             Toaster.toast(R.string.message_commands_import_success);
         }

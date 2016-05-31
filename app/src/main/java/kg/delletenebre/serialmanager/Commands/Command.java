@@ -1,6 +1,13 @@
 package kg.delletenebre.serialmanager.Commands;
 
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+
 import java.io.Serializable;
+
+import kg.delletenebre.serialmanager.App;
+import kg.delletenebre.serialmanager.R;
 
 public class Command implements Serializable {
     private long id;
@@ -12,19 +19,20 @@ public class Command implements Serializable {
     private String action;
     private String actionString;
     private int position;
+    private Overlay overlay;
 
 
-    public Command(long id, String key, String value, float scatter, boolean through,
-                   String category, String action, String actionString, int position) {
-        this.id = id;
-        this.key = key;
-        this.value = value;
-        this.scatter = scatter;
-        this.through = through;
-        this.category = category;
-        this.action = action;
-        this.actionString = actionString;
-        this.position = position;
+    public Command() {
+        this.id = -1;
+        this.key = "";
+        this.value = "";
+        this.scatter = 0.0f;
+        this.through = false;
+        this.category = "none";
+        this.action = "";
+        this.actionString = "";
+        this.position = -1;
+        this.overlay = new Overlay();
     }
 
     public long getId() {
@@ -96,5 +104,115 @@ public class Command implements Serializable {
     public Command setPosition(int position) {
         this.position = position;
         return this;
+    }
+
+    public Overlay getOverlay() {
+        return overlay;
+    }
+    public Command setOverlay(Overlay overlay) {
+        this.overlay = overlay;
+        return this;
+    }
+
+
+
+
+    public class Overlay implements Serializable {
+        private boolean enabled = false;
+        private String text = App.getContext().getString(R.string.pref_co_default_text);
+        private int timer = Integer.parseInt(App.getContext().getString(R.string.pref_co_default_timer));
+        private String position = App.getContext().getString(R.string.pref_co_default_position);
+        private int positionX = Integer.parseInt(App.getContext().getString(R.string.pref_co_default_position_x));
+        private int positionY = Integer.parseInt(App.getContext().getString(R.string.pref_co_default_position_y));
+        private boolean heightEqualsStatusBar = false;
+        private boolean widthEqualsScreen = false;
+        private String textAlign = App.getContext().getString(R.string.pref_co_default_text_align);
+        private int fontSize = Integer.parseInt(App.getContext().getString(R.string.pref_co_default_font_size));
+        private int fontColor = Color.WHITE;
+        private int backgroundColor = Color.parseColor("#88000000");
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getText() {
+            return text;
+        }
+        public void setText(String text) {
+            this.text = text;
+        }
+
+        public int getTimer() {
+            return timer;
+        }
+        public void setTimer(int timer) {
+            this.timer = timer;
+        }
+
+        public String getPosition() {
+            return position;
+        }
+        public void setPosition(String position) {
+            this.position = position;
+        }
+
+        public boolean isHeightEqualsStatusBar() {
+            return heightEqualsStatusBar;
+        }
+        public void setHeightEqualsStatusBar(boolean heightEqualsStatusBar) {
+            this.heightEqualsStatusBar = heightEqualsStatusBar;
+        }
+
+        public boolean isWidthEqualsScreen() {
+            return widthEqualsScreen;
+        }
+        public void setWidthEqualsScreen(boolean widthEqualsScreen) {
+            this.widthEqualsScreen = widthEqualsScreen;
+        }
+
+        public int getPositionX() {
+            return positionX;
+        }
+        public void setPositionX(int positionX) {
+            this.positionX = positionX;
+        }
+
+        public int getPositionY() {
+            return positionY;
+        }
+        public void setPositionY(int positionY) {
+            this.positionY = positionY;
+        }
+
+        public String getTextAlign() {
+            return textAlign;
+        }
+        public void setTextAlign(String textAlign) {
+            this.textAlign = textAlign;
+        }
+
+        public int getFontSize() {
+            return fontSize;
+        }
+        public void setFontSize(int fontSize) {
+            this.fontSize = fontSize;
+        }
+
+        public int getFontColor() {
+            return fontColor;
+        }
+        public void setFontColor(int fontColor) {
+            this.fontColor = fontColor;
+        }
+
+        public int getBackgroundColor() {
+            return backgroundColor;
+        }
+        public void setBackgroundColor(int backgroundColor) {
+            this.backgroundColor = backgroundColor;
+        }
     }
 }

@@ -14,10 +14,6 @@ import android.view.MenuItem;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    private final String TAG = getClass().getSimpleName();
-
-    protected static Activity activity;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,14 +28,12 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         App.setAliveActivity(this);
-        activity = this;
     }
 
     @Override
     protected void onPause() {
         App.setAliveActivity(null);
         App.updateSettings();
-        activity = null;
         super.onPause();
     }
 

@@ -1,10 +1,10 @@
 package kg.delletenebre.serialmanager.Commands;
 
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
@@ -17,6 +17,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+
+import com.rarepebble.colorpicker.ColorPreference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,12 +33,10 @@ public class CommandSettingsActivity extends AppCompatActivity {
 
     private static final String TAG = "CommandSettingsActivity";
 
-    protected static Activity activity;
-
     public static final String COMMAND_PREFERENCE_NAME = "command";
     public static CheckBoxPreference autosetPreference;
     public static EditTextPreference keyPreference, valuePreference;
-    private static Map<String, Preference> actionPreferences = new HashMap<>();
+    private static Map<String, Preference> actionPreferences;
     private static PreferenceScreen preferenceScreen;
 
     private GeneralPreferenceFragment preferenceFragment;
@@ -107,6 +107,19 @@ public class CommandSettingsActivity extends AppCompatActivity {
         editor.putBoolean("is_through", false);
         editor.putString("action_category", "none");
 
+        editor.putBoolean("overlay_enabled", false);
+        editor.putString("overlay_text", getString(R.string.pref_co_default_text));
+        editor.putString("overlay_timer", getString(R.string.pref_co_default_timer));
+        editor.putString("overlay_position", getString(R.string.pref_co_default_position));
+        editor.putString("overlay_position_x", getString(R.string.pref_co_default_position_x));
+        editor.putString("overlay_position_y", getString(R.string.pref_co_default_position_y));
+        editor.putBoolean("overlay_height_equals_status_bar", false);
+        editor.putBoolean("overlay_width_full", false);
+        editor.putString("overlay_text_align", getString(R.string.pref_co_default_text_align));
+        editor.putString("overlay_font_size", getString(R.string.pref_co_default_font_size));
+        editor.putInt("overlay_font_color", Color.WHITE);
+        editor.putInt("overlay_background_color", Color.BLACK);
+
         for (String action: actions) {
             editor.putString(action, "");
         }
@@ -142,6 +155,20 @@ public class CommandSettingsActivity extends AppCompatActivity {
             editor.putString("action_" + category, command.getAction());
             editor.putString("actionString", command.getActionString());
 
+            Command.Overlay overlay = command.getOverlay();
+            editor.putBoolean("overlay_enabled", overlay.isEnabled());
+            editor.putString("overlay_text", overlay.getText());
+            editor.putString("overlay_timer", String.valueOf(overlay.getTimer()));
+            editor.putString("overlay_position", overlay.getPosition());
+            editor.putString("overlay_position_x", String.valueOf(overlay.getPositionX()));
+            editor.putString("overlay_position_y", String.valueOf(overlay.getPositionY()));
+            editor.putBoolean("overlay_height_equals_status_bar", overlay.isHeightEqualsStatusBar());
+            editor.putBoolean("overlay_width_full", overlay.isWidthEqualsScreen());
+            editor.putString("overlay_text_align", overlay.getTextAlign());
+            editor.putString("overlay_font_size", String.valueOf(overlay.getFontSize()));
+            editor.putInt("overlay_font_color", overlay.getFontColor());
+            editor.putInt("overlay_background_color", overlay.getBackgroundColor());
+
             editor.apply();
         } else {
             finish();
@@ -156,13 +183,11 @@ public class CommandSettingsActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         App.setAliveActivity(this);
-        activity = this;
     }
 
     @Override
     protected void onPause() {
         App.setAliveActivity(null);
-        activity = null;
         super.onPause();
     }
 
@@ -182,6 +207,21 @@ public class CommandSettingsActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (actionPreferences != null) {
+            actionPreferences.clear();
+        }
+        actionPreferences = null;
+
+        autosetPreference = null;
+        keyPreference = null;
+        valuePreference = null;
+        preferenceScreen = null;
+    }
+
     public static class GeneralPreferenceFragment extends PreferenceFragment {
 
         @Override
@@ -192,6 +232,10 @@ public class CommandSettingsActivity extends AppCompatActivity {
 
             addPreferencesFromResource(R.xml.pref_command);
             setHasOptionsMenu(true);
+
+            if (actionPreferences == null) {
+                actionPreferences = new HashMap<>();
+            }
 
             preferenceScreen = getPreferenceScreen();
             autosetPreference = (CheckBoxPreference) findPreference("autoset");
@@ -212,6 +256,15 @@ public class CommandSettingsActivity extends AppCompatActivity {
             for (Map.Entry<String, Preference> entry : actionPreferences.entrySet()) {
                 bindPreferenceSummaryToValue(entry.getValue(), COMMAND_PREFERENCE_NAME);
             }
+
+            bindPreferenceSummaryToValue(findPreference("overlay_text"), COMMAND_PREFERENCE_NAME);
+            bindPreferenceSummaryToValue(findPreference("overlay_timer"), COMMAND_PREFERENCE_NAME);
+            bindPreferenceSummaryToValue(findPreference("overlay_position"), COMMAND_PREFERENCE_NAME);
+            bindPreferenceSummaryToValue(findPreference("overlay_position_x"), COMMAND_PREFERENCE_NAME);
+            bindPreferenceSummaryToValue(findPreference("overlay_position_y"), COMMAND_PREFERENCE_NAME);
+            bindPreferenceSummaryToValue(findPreference("overlay_text_align"), COMMAND_PREFERENCE_NAME);
+            bindPreferenceSummaryToValue(findPreference("overlay_font_size"), COMMAND_PREFERENCE_NAME);
+
         }
 
         @Override
@@ -276,6 +329,8 @@ public class CommandSettingsActivity extends AppCompatActivity {
                     getResources().getString(R.string.command_item_action_text),
                     categoryString, actionString);
 
+            Command.Overlay overlay = command.getOverlay();
+
             if (command != null) {
                 command.setKey(keyPreference.getText());
                 command.setValue(valuePreference.getText());
@@ -285,6 +340,31 @@ public class CommandSettingsActivity extends AppCompatActivity {
                 command.setCategory(category);
                 command.setAction(action);
                 command.setActionString(actionString);
+
+                overlay.setEnabled(
+                        ((CheckBoxPreference) findPreference("overlay_enabled")).isChecked());
+                overlay.setText(
+                        ((EditTextPreference) findPreference("overlay_text")).getText());
+                overlay.setTimer(Integer.parseInt(
+                        ((EditTextPreference) findPreference("overlay_timer")).getText()));
+                overlay.setPosition(
+                        ((ListPreference) findPreference("overlay_position")).getValue());
+                overlay.setPositionX(Integer.parseInt(
+                        ((EditTextPreference) findPreference("overlay_position_x")).getText()));
+                overlay.setPositionY(Integer.parseInt(
+                        ((EditTextPreference) findPreference("overlay_position_y")).getText()));
+                overlay.setHeightEqualsStatusBar(
+                        ((CheckBoxPreference) findPreference("overlay_height_equals_status_bar")).isChecked());
+                overlay.setWidthEqualsScreen(
+                        ((CheckBoxPreference) findPreference("overlay_width_full")).isChecked());
+                overlay.setTextAlign(
+                        ((ListPreference) findPreference("overlay_text_align")).getValue());
+                overlay.setFontSize(Integer.parseInt(
+                        ((EditTextPreference) findPreference("overlay_font_size")).getText()));
+                overlay.setFontColor(
+                        ((ColorPreference) findPreference("overlay_font_color")).getColor());
+                overlay.setBackgroundColor(
+                        ((ColorPreference) findPreference("overlay_background_color")).getColor());
             }
 
             autosetPreference.setChecked(false);

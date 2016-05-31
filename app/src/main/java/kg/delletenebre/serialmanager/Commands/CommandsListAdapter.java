@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,27 +65,12 @@ public class CommandsListAdapter extends RecyclerView.Adapter<CommandsListAdapte
 
 
 
-    public Command createItem() {
-        int position = getItemCount();
-        Command command = database.create("", "", 0, false, "none", "", "", position);
+    public Command createItem(Command command) {
+        command.setPosition(getItemCount());
+        command = database.create(command);
         if (command != null) {
             Commands.getCommands().add(command);
-            notifyItemInserted(position);
-
-            return command;
-        }
-
-        return null;
-    }
-
-    public Command createItem(String key, String value, float scatter, boolean through,
-                              String category, String action, String actionString) {
-        int position = getItemCount();
-        Command command = database.create(key, value, scatter, through, category, action,
-                actionString, position);
-        if (command != null) {
-            Commands.getCommands().add(command);
-            notifyItemInserted(position);
+            notifyItemInserted(command.getPosition());
 
             return command;
         }

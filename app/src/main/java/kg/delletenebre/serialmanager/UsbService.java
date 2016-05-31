@@ -1,5 +1,6 @@
 package kg.delletenebre.serialmanager;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -15,6 +16,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -128,6 +131,7 @@ public class UsbService extends Service implements SensorEventListener {
 
                 try {
                     serialPort.close();
+                    entry.setValue(null);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -153,7 +157,7 @@ public class UsbService extends Service implements SensorEventListener {
             sensorManager.unregisterListener(this);
         }
 
-        if(App.isDebug()) {
+        if (App.isDebug()) {
             Log.i(TAG, "Service: onDestroy");
         }
     }
@@ -209,6 +213,8 @@ public class UsbService extends Service implements SensorEventListener {
                     .setOnlyAlertOnce(true)
                     .setColor(Color.parseColor("#607d8b"))
                     .setSmallIcon(R.drawable.notification_icon)
+//                    .setPriority(Notification.PRIORITY_HIGH)
+//                    .setVibrate(new long[0])
                     .setContentTitle(context.getString(R.string.app_name))
                     .setContentText(context.getString(R.string.tap_to_open_main_activity))
                     .setContentIntent(
@@ -239,6 +245,21 @@ public class UsbService extends Service implements SensorEventListener {
         NotificationManager mNotificationManager =
                 (NotificationManager) App.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(NOTIFICATION_ID, notification.build());
+    }
+
+    private static int tickerIndex = 0;
+    public static void updateNotificationTickerText() {
+        Context context = App.getContext();
+
+//        if (Build.VERSION.SDK_INT < 23
+//                || (Build.VERSION.SDK_INT >= 23 && Settings.canDrawOverlays(context))) {
+//            context.startService(new Intent(context, HUD.class));
+//        }
+//
+//
+//        context.startService(new Intent(context, HUD.class));
+        //notification.setTicker("Some text " + String.valueOf(tickerIndex));
+        tickerIndex++;
     }
 
 
@@ -319,12 +340,15 @@ public class UsbService extends Service implements SensorEventListener {
                     Toaster.toast("CDC driver not working");
                 } else {
                     if (App.isDebug()) {
-                        Log.d(TAG, "");
+                        Log.d(TAG, "USB device not working");
                     }
                     Toaster.toast("USB device not working");
                 }
             }
         } else {
+            if (App.isDebug()) {
+                Log.d(TAG, "USB device not supported");
+            }
             // No driver for given device, even generic CDC driver could not be loaded
             Toaster.toast("USB device not supported");
         }
@@ -343,6 +367,8 @@ public class UsbService extends Service implements SensorEventListener {
             if (App.isDebug()) {
                 Log.d(TAG, "Received data: " + data);
             }
+
+            updateNotificationTickerText();
 
             receivedDataBuffer += data;
             if (data.contains(App.NEW_LINE)
@@ -399,6 +425,7 @@ public class UsbService extends Service implements SensorEventListener {
             if (openedSerialPorts.containsKey(detachedDeviceName)) {
                 try {
                     openedSerialPorts.get(detachedDeviceName).close();
+                    openedSerialPorts.put(detachedDeviceName, null);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -407,6 +434,7 @@ public class UsbService extends Service implements SensorEventListener {
             }
 
             updateNotificationText();
+            System.gc();
             stopServiceIfNoConnectedDevices();
         }
     }

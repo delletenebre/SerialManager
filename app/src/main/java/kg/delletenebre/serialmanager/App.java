@@ -14,6 +14,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 
+import com.squareup.leakcanary.LeakCanary;
+
 import java.io.IOException;
 
 public class App extends Application {
@@ -57,6 +59,8 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        LeakCanary.install(this);
+
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         context = this;
 
@@ -260,7 +264,19 @@ public class App extends Application {
     public static boolean isScreenBrightnessModeManual() {
         return (Settings.System.getInt(App.getContext().getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
-                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC) == Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+                Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC)
+                            == Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+    }
+
+    public static int getStatusBarHeight() {
+        Context context = App.getContext();
+        int result = 0;
+        int resourceId = context.getResources()
+                .getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = context.getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
     }
 
 }

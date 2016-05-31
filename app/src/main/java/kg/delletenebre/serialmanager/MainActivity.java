@@ -6,9 +6,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
@@ -36,8 +38,6 @@ import kg.delletenebre.serialmanager.helper.SimpleItemTouchHelperCallback;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-
-    protected static Activity activity;
 
     private SharedPreferences settings;
     public CommandsListAdapter commandsListAdapter;
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Command command = commandsListAdapter.createItem();
+                    Command command = commandsListAdapter.createItem(new Command());
                     if (command != null) {
                         Intent intent = new Intent(view.getContext(), CommandSettingsActivity.class);
                         intent.putExtra("id", command.getId());
@@ -103,6 +103,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
+        if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(this)) {
+            startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName())), 1);
+        }
+
     }
 
     @Override
@@ -159,7 +165,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         App.setAliveActivity(this);
-        activity = this;
+
+        // DELETE
+//        if (Build.VERSION.SDK_INT < 23
+//                || (Build.VERSION.SDK_INT >= 23 && Settings.canDrawOverlays(this))) {
+//            Log.d(TAG, "onResume abrakadabra");
+//            Overlay.show(Commands.getCommands().get(0), "abrakadabra");
+//        }
 
 //        if (settings != null && settings.getBoolean("reconnect", false)) {
 //            //UsbService.restart();
@@ -170,7 +182,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         App.setAliveActivity(null);
-        activity = null;
         super.onPause();
     }
 

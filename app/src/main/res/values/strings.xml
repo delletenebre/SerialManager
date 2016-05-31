@@ -391,4 +391,70 @@
         <item>bt</item>
     </string-array>
 
+
+
+
+    <!-- **** Command.Overlay preferences **** -->
+    <string name="pref_co_title_enabled">Show notification</string>
+
+    <string name="pref_co_title_text">Text</string>
+    <string name="pref_co_default_text" translatable="false">&lt;key&gt;: &lt;value&gt;</string>
+
+    <string name="pref_co_title_timer">Hide delay (in ms)</string>
+    <string name="pref_co_default_timer" translatable="false">2000</string>
+
+    <string name="pref_co_title_position">Position</string>
+    <string name="pref_co_default_position">topLeft</string>
+    <string-array name="pref_co_title_position_titles" translatable="false">
+        <item>@string/top_left</item>
+        <item>@string/top_center</item>
+        <item>@string/top_right</item>
+        <item>@string/middle_left</item>
+        <item>@string/middle_center</item>
+        <item>@string/middle_right</item>
+        <item>@string/bottom_left</item>
+        <item>@string/bottom_center</item>
+        <item>@string/bottom_right</item>
+    </string-array>
+    <string-array name="pref_co_title_position_values" translatable="false">
+        <item>topLeft</item>
+        <item>topCenter</item>
+        <item>topRight</item>
+        <item>middleLeft</item>
+        <item>middleCenter</item>
+        <item>middleRight</item>
+        <item>bottomLeft</item>
+        <item>bottomCenter</item>
+        <item>bottomRight</item>
+    </string-array>
+
+    <string name="pref_co_title_position_x">Left/Right margin</string>
+    <string name="pref_co_default_position_x">0</string>
+
+    <string name="pref_co_title_position_y">Up/Down margin</string>
+    <string name="pref_co_default_position_y">0</string>
+
+    <string name="pref_co_title_status_bar_height">Notification height equals status bar height</string>
+
+    <string name="pref_co_title_width_full">Notification width equals screen width</string>
+
+    <string name="pref_co_title_text_align">Text align</string>
+    <string name="pref_co_default_text_align">left</string>
+    <string-array name="pref_co_text_align_titles" translatable="false">
+        <item>@string/left</item>
+        <item>@string/center</item>
+        <item>@string/right</item>
+    </string-array>
+    <string-array name="pref_co_text_align_values" translatable="false">
+        <item>left</item>
+        <item>center</item>
+        <item>right</item>
+    </string-array>
+
+    <string name="pref_co_title_font_size">Font size (sp)</string>
+    <string name="pref_co_default_font_size">16</string>
+
+    <string name="pref_co_title_font_color">Font color</string>
+
+    <string name="pref_co_title_background_color">Background color</string>
 </resources>
