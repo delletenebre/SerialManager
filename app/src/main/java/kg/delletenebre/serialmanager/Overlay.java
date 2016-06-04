@@ -39,6 +39,10 @@ public class Overlay implements Handler.Callback {
     private static final WindowManager windowManager =
             (WindowManager) App.getContext().getSystemService(Context.WINDOW_SERVICE);
 
+    private View overlayView;
+    private int overlayHeight;
+    private int overlayTimer;
+
     private Overlay() {}
 
     public static void show(Command command, String value) {
@@ -85,12 +89,12 @@ public class Overlay implements Handler.Callback {
         params.gravity = getGravity(overlaySettings.getPosition());
         params.x = overlaySettings.getPositionX();
         params.y = overlaySettings.getPositionY();
-        final View overlay = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE))
+        overlayView = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE))
                 .inflate(R.layout.hud, null);
-        overlay.setBackgroundColor(overlaySettings.getBackgroundColor());
+        overlayView.setBackgroundColor(overlaySettings.getBackgroundColor());
 
-        int height = layoutHeight;
-        TextView textView = (TextView) overlay.findViewById(R.id.hudText);
+        overlayHeight = layoutHeight;
+        TextView textView = (TextView) overlayView.findViewById(R.id.hudText);
         if (textView != null) {
 
             if (overlaySettings.isWidthEqualsScreen()) {
@@ -107,71 +111,79 @@ public class Overlay implements Handler.Callback {
             int fontSize = (int) textView.getTextSize();
             int paddingLR = fontSize / 2;
             int paddingTB = overlaySettings.isHeightEqualsStatusBar() ? 0 : paddingLR;
-            overlay.setPadding(paddingLR, paddingTB, paddingLR, paddingTB);
+            overlayView.setPadding(paddingLR, paddingTB, paddingLR, paddingTB);
 
             if (!overlaySettings.isHeightEqualsStatusBar()) {
-                height = textView.getHeight() + fontSize +
-                        + overlay.getPaddingBottom() + overlay.getPaddingTop();
+                overlayHeight = textView.getHeight() + fontSize +
+                        + overlayView.getPaddingBottom() + overlayView.getPaddingTop();
             }
         }
 
-        int timer = overlaySettings.getTimer();
-        if (timer < 1) {
-            timer = 1000;
+        overlayTimer = overlaySettings.getTimer();
+        if (overlayTimer < 1) {
+            overlayTimer = 1000;
         }
 
-        overlay.setOnTouchListener(new View.OnTouchListener() {
+        windowManager.addView(overlayView, params);
+
+        overlayView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                //hide(overlay, timer, height);
+                hide();
                 return true;
             }
         });
 
-        windowManager.addView(overlay, params);
-
-        show(overlay, timer, height);
+        show();
 
         return true;
     }
 
-    private void show(final View overlay, final int timer, final int height) {
-        overlay.post(new Runnable() {
+    private void show() {
+        overlayView.post(new Runnable() {
             @Override
             public void run() {
-                overlay.setTranslationY(-height);
-                overlay.animate().translationY(0).setListener(new AnimatorListenerAdapter() {
+                overlayView.setTranslationY(-overlayHeight);
+                overlayView.animate().translationY(0).setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationStart(Animator animation) {
                         super.onAnimationStart(animation);
-                        overlay.setVisibility(View.VISIBLE);
+                        overlayView.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                hide();
+                            }
+                        }, overlayTimer);
                     }
                 });
-
-                hide(overlay, timer, height);
             }
         });
     }
 
-    private void hide(final View overlay, final int timer, final int height) {
-//        overlay.post(new Runnable() {
-//            @Override
-//            public void run() {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        overlay.animate().translationY(-height).setListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                super.onAnimationEnd(animation);
-                                overlay.setVisibility(View.GONE);
-                                windowManager.removeView(overlay);
+    private void hide() {
+        if (overlayView != null) {
+            overlayView.post(new Runnable() {
+                @Override
+                public void run() {
+                    overlayView.animate().translationY(-overlayHeight).setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            overlayView.setVisibility(View.GONE);
+
+                            if (overlayView.getWindowToken() != null) {
+                                windowManager.removeView(overlayView);
                             }
-                        });
-                    }
-                }, timer);
-//            }
-//        });
+                        }
+                    });
+                }
+            });
+        }
     }
 
     private int getGravity(String position) {

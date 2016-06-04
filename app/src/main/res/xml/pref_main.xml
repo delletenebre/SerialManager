@@ -14,11 +14,17 @@
             android:defaultValue=""
             android:title="@string/pref_title_bluetooth_devices_list" />
 
+        <!--<CheckBoxPreference-->
+            <!--android:key="bluetoothAutoConnect"-->
+            <!--android:dependency="bluetooth"-->
+            <!--android:defaultValue="true"-->
+            <!--android:title="@string/pref_title_bluetooth_autoconnect" />-->
+
         <CheckBoxPreference
-            android:key="bluetooth_autoconnect"
+            android:key="bluetoothAutoEnable"
             android:dependency="bluetooth"
             android:defaultValue="true"
-            android:title="@string/pref_title_bluetooth_autoconnect" />
+            android:title="@string/pref_title_enable_if_off" />
 
         <CheckBoxPreference
             android:key="bluetoothDetectCommandByNewLine"
@@ -42,6 +48,13 @@
             android:dependency="usb"
             android:defaultValue=""
             android:title="@string/pref_title_usb_devices_list" />
+
+        <CheckBoxPreference
+            android:key="usb_reset_hub"
+            android:dependency="usb"
+            android:defaultValue="false"
+            android:title="@string/pref_title_usb_reset_hub"
+            android:summary="@string/pref_summary_usb_reset_hub"/>
 
         <CheckBoxPreference
             android:key="usbDetectCommandByNewLine"
@@ -116,16 +129,22 @@
             android:summary="@string/pref_summ_crlf" />
 
         <CheckBoxPreference
-            android:key="brightness_sensor"
+            android:key="send_brightness_sensor"
             android:defaultValue="false"
-            android:title="@string/pref_title_brightness_sensor"
-            android:summary="@string/pref_summ_brightness_sensor" />
+            android:title="@string/pref_title_send_brightness_sensor"
+            android:summary="@string/pref_summary_send_brightness_sensor" />
 
         <CheckBoxPreference
-            android:key="brightness_settings"
+            android:key="send_brightness_settings"
             android:defaultValue="false"
-            android:title="@string/pref_title_brightness_settings"
-            android:summary="@string/pref_summ_brightness_settings" />
+            android:title="@string/pref_title_send_brightness_settings"
+            android:summary="@string/pref_summary_send_brightness_settings" />
+
+        <CheckBoxPreference
+            android:key="send_screen_state"
+            android:defaultValue="false"
+            android:title="@string/pref_title_send_screen_state"
+            android:summary="@string/pref_summary_send_screen_state" />
 
     </PreferenceCategory>
 

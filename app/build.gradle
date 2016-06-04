@@ -1,26 +1,35 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.model.application'
+model {
+    android {
+        compileSdkVersion 23
+        buildToolsVersion "23.0.3"
 
-android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
-
-    defaultConfig {
-        applicationId "kg.delletenebre.serialmanager"
-        minSdkVersion 14
-        targetSdkVersion 23
-        versionCode 30
-        versionName "1.6-beta-5"
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        defaultConfig {
+            applicationId "kg.delletenebre.serialmanager"
+            minSdkVersion.apiLevel 14
+            targetSdkVersion.apiLevel 23
+            versionCode 35
+            versionName "1.6-beta-7"
         }
+        buildTypes {
+            release {
+                minifyEnabled false
+                //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+                proguardFiles.add(file('proguard-android.txt'))
+            }
+        }
+
+        ndk {
+            moduleName = "serial-manager"
+            ldLibs.addAll(['android', 'log'])
+        }
+
+
     }
 }
-
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':android-bluetooth-spp')
 
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:design:23.4.0'
@@ -31,9 +40,5 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'com.rarepebble:colorpicker:1.7.0'
     compile 'com.github.felHR85:UsbSerial:4.3'
-    compile 'com.akexorcist:bluetoothspp:1.0.0'
 
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
 }

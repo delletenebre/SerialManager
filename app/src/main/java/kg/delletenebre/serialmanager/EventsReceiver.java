@@ -20,27 +20,22 @@ public class EventsReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, Intent intent) {
         String action = intent.getAction();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-
-        final boolean connectionUsb = prefs.getBoolean("usb", false);
-        final boolean connectionBluetooth = prefs.getBoolean("bluetooth", false);
+        String data;
 
         switch (action) {
+            case Intent.ACTION_BOOT_COMPLETED:
             case Intent.ACTION_USER_PRESENT:
                 if (App.isDebug()) {
-                    Log.i(TAG, "****ACTION_USER_PRESENT****");
+                    Log.i(TAG, "**** ACTION_USER_PRESENT || ACTION_BOOT_COMPLETED ****");
                 }
+
+                ConnectionService.sendInfoScreenState("on");
 
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         if (App.isScreenOn()) {
-                            if (connectionUsb) {
-                                context.startService(new Intent(context, UsbService.class));
-                            }
-                            if (connectionBluetooth && BluetoothService.service == null) {
-                                BluetoothService.start();
-                            }
+                            context.startService(new Intent(context, ConnectionService.class));
                         }
                     }
                 }, 2000);
@@ -52,13 +47,14 @@ public class EventsReceiver extends BroadcastReceiver {
                     Log.i(TAG, "****ACTION_SCREEN_OFF****");
                 }
 
-                if (prefs.getBoolean("stopWhenScreenOff", false)) {
+                ConnectionService.sendInfoScreenState("off");
+
+                if (App.getPrefs().getBoolean("stopWhenScreenOff", false)) {
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             if (App.isScreenOff()) {
-                                context.stopService(new Intent(context, UsbService.class));
-                                BluetoothService.stop();
+                                context.stopService(new Intent(context, ConnectionService.class));
                             }
                         }
                     }, 2000);
@@ -70,7 +66,7 @@ public class EventsReceiver extends BroadcastReceiver {
                     Log.i(TAG, "****ACTION_USB_DEVICE_DETACHED****");
                 }
 
-                UsbService.detachDevice(
+                ConnectionService.detachDevice(
                         (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE));
                 break;
 
@@ -80,7 +76,7 @@ public class EventsReceiver extends BroadcastReceiver {
                 }
 
                 int widgetId = intent.getIntExtra("widgetId", -1);
-                String data = intent.getStringExtra("data");
+                data = intent.getStringExtra("data");
                 String sendTo = intent.getStringExtra("sendTo");
 
                 if (sendTo.equals("usb_bt")) {
@@ -93,12 +89,7 @@ public class EventsReceiver extends BroadcastReceiver {
                 }
 
                 if (!data.isEmpty()) {
-                    if ((sendTo.equals("usb_bt") || sendTo.equals("usb")) && connectionUsb) {
-                        UsbService.sendFromWidget(data, widgetId);
-                    }
-                    if ((sendTo.equals("usb_bt") || sendTo.equals("bt")) && connectionBluetooth) {
-                        BluetoothService.sendFromWidget(data, widgetId);
-                    }
+                    ConnectionService.sendFromWidget(sendTo, data, widgetId);
                 } else {
                     if (App.isDebug()) {
                         Log.w(TAG, "Data is empty");
@@ -117,13 +108,31 @@ public class EventsReceiver extends BroadcastReceiver {
 
                 switch (state) {
                     case BluetoothAdapter.STATE_TURNING_OFF:
-                        BluetoothService.stop();
+                        ConnectionService.onBluetoothDisabled();
                         break;
 
                     case BluetoothAdapter.STATE_ON:
-                        BluetoothService.start();
+                        ConnectionService.onBluetoothEnabled();
                         break;
                 }
+
+                break;
+
+            case App.ACTION_EXTERNAL_SEND:
+                if (App.isDebug()) {
+                    Log.i(TAG, "**** App.ACTION_EXTERNAL_SEND ****");
+                }
+
+                if (intent.hasExtra("data")) {
+                    data = String.valueOf(intent.getExtras().get("data"));
+
+                    if (App.isDebug()) {
+                        Log.d(TAG, data);
+                    }
+
+                    ConnectionService.usbAndBluetoothSend(data, false);
+                }
+
 
                 break;
         }

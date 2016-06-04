@@ -109,7 +109,7 @@
             android:title="@string/pref_title_command_action_system" />
 
         <PreferenceCategory
-            android:title="Notification">
+            android:title="@string/pref_category_title_notification">
 
             <CheckBoxPreference
                 android:key="overlay_enabled"

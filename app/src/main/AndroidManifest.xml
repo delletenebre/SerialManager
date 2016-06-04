@@ -4,6 +4,7 @@
 
     <uses-feature android:name="android.hardware.usb.host" />
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -31,10 +32,8 @@
         </activity>
 
         <service
-            android:name=".UsbService"
-            android:enabled="true" />
-        <service
-            android:name=".BluetoothService"
+            android:name=".ConnectionService"
+            android:launchMode="singleTask"
             android:enabled="true" />
 
         <activity
@@ -55,15 +54,17 @@
 
         <receiver
             android:name=".EventsReceiver"
+            android:launchMode="singleTask"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.USER_PRESENT" />
-                <!-- <action android:name="android.intent.action.BOOT_COMPLETED" /> -->
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="kg.delletenebre.serial.usb_permission" />
                 <action android:name="kg.delletenebre.serial.usb_attached" />
                 <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
                 <action android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
+                <action android:name="serial.manager.send" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -72,6 +73,7 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/settings"
+            android:launchMode="singleTask"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -80,6 +82,7 @@
         <activity
             android:name=".Commands.CommandSettingsActivity"
             android:label="@string/command_settings"
+            android:launchMode="singleTask"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -125,10 +128,6 @@
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
-
-        <service
-            android:name=".HUD"
-            android:enabled="true" />
 
     </application>
 

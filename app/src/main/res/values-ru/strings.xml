@@ -1,7 +1,8 @@
 <resources>
     <string name="tap_to_open_main_activity">Нажмите чтобы открыть приложение</string>
     <string name="notification_usb_connected_number">Подключено USB устройств: %1$d</string>
-    <string name="notification_bluetooth_connected_number">Подключено Bluetooth устройств: %1$d</string>
+    <string name="notification_bluetooth_connected_device">Подключено Bluetooth устройство: %1$s</string>
+    <string name="notification_bluetooth_not_connected">Bluetooth устройство не подключено</string>
     <string name="md_choose_label">Выбрать</string>
     <string name="settings">Настройки</string>
     <string name="toast_serial_send_warning">SerialManager: Ошибка подключения</string>
@@ -26,9 +27,14 @@
     <string name="pref_title_bluetooth_connection">Подключение по Bluetooth</string>
     <string name="pref_title_bluetooth_devices_list">Bluetooth-устройство для подключения</string>
     <string name="pref_title_bluetooth_autoconnect">Восстанавливать соединение при потере связи</string>
+    <string name="pref_title_enable_if_off">Автоматически включать bluetooth</string>
 
     <string name="pref_title_usb_connection">Подключение по USB</string>
+
     <string name="pref_title_usb_devices_list">USB-устройство для подключения</string>
+
+    <string name="pref_title_usb_reset_hub">Переподключать USB-хаб [ Root ]</string>
+    <string name="pref_summary_usb_reset_hub">Переподключать USB-хаб, если USB-устройство не было распознано при запуске сервиса</string>
 
     <string name="pref_title_detect_command_by_new_line">Распознавать команду по новой строке</string>
     <string name="pref_summ_detect_command_by_new_line">Устройство должно присылать команду &lt;ключ:значение&gt; с символом новой строки [ \\n ]. Для Arduino: Serial.println();</string>
@@ -40,11 +46,14 @@
     <string name="pref_title_crlf">Добавлять CR&#38;LF</string>
     <string name="pref_summ_crlf">Добавлять управляющие символы CR и LF при отправке данных</string>
 
-    <string name="pref_title_brightness_sensor">Отправлять данные датчика освещения</string>
-    <string name="pref_summ_brightness_sensor">Формат {lightsensormode:0&#8211;7}, где:\n7 - MAX, 6 - SUNLIGHT, 5 - SHADE, 4 - OVERCAST\n3 - SUNRISE, 2 - CLOUDY, 1 - FULLMOON, 0 - NO MOON</string>
+    <string name="pref_title_send_brightness_sensor">Отправлять данные датчика освещения</string>
+    <string name="pref_summary_send_brightness_sensor">Формат {lightsensormode:0&#8211;7}, где:\n7 - MAX, 6 - SUNLIGHT, 5 - SHADE, 4 - OVERCAST\n3 - SUNRISE, 2 - CLOUDY, 1 - FULLMOON, 0 - NO MOON</string>
 
-    <string name="pref_title_brightness_settings">Отправлять уровень яркости экрана</string>
-    <string name="pref_summ_brightness_settings">Формат {brightness:0&#8211;255}\nДанная опция не работает при включенной автоматической (адаптивной) регулировке яркости</string>
+    <string name="pref_title_send_brightness_settings">Отправлять уровень яркости экрана</string>
+    <string name="pref_summary_send_brightness_settings">Формат {brightness:0&#8211;255}\nДанная опция не работает при включенной автоматической (адаптивной) регулировке яркости</string>
+
+    <string name="pref_title_send_screen_state">Отправлять состояние экрана</string>
+    <string name="pref_summary_send_screen_state">Отправлять состояние экрана включен/выключен\nФормат: {screen:on} {screen:off}</string>
 
     <string name="pref_title_stop_service_when_screen_off">Останавливать сервис при отключении экрана</string>
 
@@ -96,6 +105,9 @@
         <item>Перемотать назад</item>
         <item>Предыдущий</item>
         <item>Воспроизведение/Пауза</item>
+        <item>Воспроизведение</item>
+        <item>Пауза</item>
+        <item>Остановить</item>
         <item>Следующий</item>
         <item>Перемотать вперёд</item>
     </string-array>
@@ -155,4 +167,33 @@
 
     <string name="pref_widget_send_title_send_to">Отправить команду по&#8230;</string>
 
+
+
+
+    <!-- **** Command.Overlay preferences **** -->
+    <string name="pref_category_title_notification">Уведомление</string>
+
+    <string name="pref_co_title_enabled">Показывать уведомление</string>
+
+    <string name="pref_co_title_text">Текст уведомления</string>
+
+    <string name="pref_co_title_timer">Скрывать уведомление через (в мс)</string>
+
+    <string name="pref_co_title_position">Расположение на экране</string>
+
+    <string name="pref_co_title_position_x">Отступ левее(-)/правее(+) (в пикс.)</string>
+
+    <string name="pref_co_title_position_y">Отступ выше(-)/ниже(+) (в пикс.)</string>
+
+    <string name="pref_co_title_status_bar_height">Высота уведомления = высоте панели уведомлений</string>
+
+    <string name="pref_co_title_width_full">Ширина уведомления = ширине экрана</string>
+
+    <string name="pref_co_title_text_align">Выравнивание текста</string>
+
+    <string name="pref_co_title_font_size">Размер шрифта (sp)</string>
+
+    <string name="pref_co_title_font_color">Цвет текста</string>
+
+    <string name="pref_co_title_background_color">Цвет фона</string>
 </resources>

@@ -2,7 +2,8 @@
     <string name="app_name" translatable="false">Serial Manager</string>
     <string name="tap_to_open_main_activity">Tap to open app</string>
     <string name="notification_usb_connected_number">Connected USB devices: %1$d</string>
-    <string name="notification_bluetooth_connected_number">Connected Bluetooth devices: %1$d</string>
+    <string name="notification_bluetooth_connected_device">Connected Bluetooth device: %1$s</string>
+    <string name="notification_bluetooth_not_connected">Bluetooth device not connected</string>
     <string name="widget_receive_name" translatable="false">Serial Manager Receive</string>
     <string name="widget_send_name" translatable="false">Serial Manager Send</string>
     <string name="md_choose_label">Choose</string>
@@ -16,6 +17,7 @@
     <string name="message_commands_import_success">Commands successfully imported</string>
     <string name="message_commands_import_error">An error occurred during import</string>
     <string name="message_file_read_error">File read error</string>
+    <string name="send_data_screen_state" translatable="false">{screen:%1$s}</string>
 
     <string name="pref_bt_device_no_device">No device</string>
     <string name="pref_bt_device_template" translatable="false">%1$s [ %2$s ]</string>
@@ -30,9 +32,14 @@
     <string name="pref_title_bluetooth_connection">Enable bluetooth connection</string>
     <string name="pref_title_bluetooth_devices_list">Bluetooth device</string>
     <string name="pref_title_bluetooth_autoconnect">Auto connect to bluetooth device</string>
+    <string name="pref_title_enable_if_off">AutoEnable bluetooth adapter if off</string>
 
     <string name="pref_title_usb_connection">Enable USB connection</string>
+
     <string name="pref_title_usb_devices_list">USB device</string>
+
+    <string name="pref_title_usb_reset_hub">Reconnect USB-hub [ Root ]</string>
+    <string name="pref_summary_usb_reset_hub">Reconnect USB-hub if the USB-device is not recognized when service is started</string>
 
     <string name="pref_title_detect_command_by_new_line">Detect received command by new line</string>
     <string name="pref_summ_detect_command_by_new_line"> </string>
@@ -91,11 +98,14 @@
     <string name="pref_title_crlf">Add CR&#38;LF</string>
     <string name="pref_summ_crlf">Add Carriage Return and Line Feed symbols to end of sending data</string>
 
-    <string name="pref_title_brightness_sensor">Send light sensor data</string>
-    <string name="pref_summ_brightness_sensor">Format {lightsensormode:0&#8211;7} where:\n7 - MAX, 6 - SUNLIGHT, 5 - SHADE, 4 - OVERCAST\n3 - SUNRISE, 2 - CLOUDY, 1 - FULLMOON, 0 - NO MOON</string>
+    <string name="pref_title_send_brightness_sensor">Send light sensor data</string>
+    <string name="pref_summary_send_brightness_sensor">Format {lightsensormode:0&#8211;7} where:\n7 - MAX, 6 - SUNLIGHT, 5 - SHADE, 4 - OVERCAST\n3 - SUNRISE, 2 - CLOUDY, 1 - FULLMOON, 0 - NO MOON</string>
 
-    <string name="pref_title_brightness_settings">Send screen brightness data</string>
-    <string name="pref_summ_brightness_settings">When screen brightness change in manual mode, brightness level will send\nFormat {brightness:0&#8211;255}\nThis option does not work when the automatic (adaptive) brightness control is enabled</string>
+    <string name="pref_title_send_brightness_settings">Send screen brightness data</string>
+    <string name="pref_summary_send_brightness_settings">When screen brightness change in manual mode, brightness level will send\nFormat {brightness:0&#8211;255}\nThis option does not work when the automatic (adaptive) brightness control is enabled</string>
+
+    <string name="pref_title_send_screen_state">Send screen state data</string>
+    <string name="pref_summary_send_screen_state">Send screen on/off state\nFormat: {screen:on} {screen:off}</string>
 
     <string name="pref_title_stop_service_when_screen_off">Stop Service when screen is off</string>
 
@@ -280,6 +290,9 @@
         <item>Rewind</item>
         <item>Previous</item>
         <item>Play/Pause</item>
+        <item>Play</item>
+        <item>Pause</item>
+        <item>Stop</item>
         <item>Next</item>
         <item>Fast Forward</item>
     </string-array>
@@ -287,6 +300,9 @@
         <item>89</item>
         <item>88</item>
         <item>85</item>
+        <item>126</item>
+        <item>127</item>
+        <item>86</item>
         <item>87</item>
         <item>90</item>
     </string-array>
@@ -395,6 +411,8 @@
 
 
     <!-- **** Command.Overlay preferences **** -->
+    <string name="pref_category_title_notification">Notification</string>
+
     <string name="pref_co_title_enabled">Show notification</string>
 
     <string name="pref_co_title_text">Text</string>
@@ -404,7 +422,7 @@
     <string name="pref_co_default_timer" translatable="false">2000</string>
 
     <string name="pref_co_title_position">Position</string>
-    <string name="pref_co_default_position">topLeft</string>
+    <string name="pref_co_default_position" translatable="false">topLeft</string>
     <string-array name="pref_co_title_position_titles" translatable="false">
         <item>@string/top_left</item>
         <item>@string/top_center</item>
@@ -428,18 +446,18 @@
         <item>bottomRight</item>
     </string-array>
 
-    <string name="pref_co_title_position_x">Left/Right margin</string>
-    <string name="pref_co_default_position_x">0</string>
+    <string name="pref_co_title_position_x">Indent to the Left(-)/Right(+) (in px)</string>
+    <string name="pref_co_default_position_x" translatable="false">0</string>
 
-    <string name="pref_co_title_position_y">Up/Down margin</string>
-    <string name="pref_co_default_position_y">0</string>
+    <string name="pref_co_title_position_y">Indent Above(-)/Lower(+) (in px)</string>
+    <string name="pref_co_default_position_y" translatable="false">0</string>
 
     <string name="pref_co_title_status_bar_height">Notification height equals status bar height</string>
 
     <string name="pref_co_title_width_full">Notification width equals screen width</string>
 
     <string name="pref_co_title_text_align">Text align</string>
-    <string name="pref_co_default_text_align">left</string>
+    <string name="pref_co_default_text_align" translatable="false">left</string>
     <string-array name="pref_co_text_align_titles" translatable="false">
         <item>@string/left</item>
         <item>@string/center</item>
@@ -452,7 +470,7 @@
     </string-array>
 
     <string name="pref_co_title_font_size">Font size (sp)</string>
-    <string name="pref_co_default_font_size">16</string>
+    <string name="pref_co_default_font_size" translatable="false">16</string>
 
     <string name="pref_co_title_font_color">Font color</string>
 

@@ -28,6 +28,8 @@ import android.view.View;
 
 import java.io.File;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import kg.delletenebre.serialmanager.Commands.Command;
 import kg.delletenebre.serialmanager.Commands.CommandSettingsActivity;
@@ -39,15 +41,13 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    private SharedPreferences settings;
     public CommandsListAdapter commandsListAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        settings = PreferenceManager.getDefaultSharedPreferences(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -108,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                     Uri.parse("package:" + getPackageName())), 1);
         }
-
     }
 
     @Override
@@ -173,10 +172,6 @@ public class MainActivity extends AppCompatActivity {
 //            Overlay.show(Commands.getCommands().get(0), "abrakadabra");
 //        }
 
-//        if (settings != null && settings.getBoolean("reconnect", false)) {
-//            //UsbService.restart();
-//            BluetoothService.start();
-//        }
     }
 
     @Override

@@ -30,7 +30,7 @@ public class SettingsContentObserver extends ContentObserver {
             if (App.isDebug()) {
                 Log.d(TAG, "{brightness:" + String.valueOf(brightness) + "}");
             }
-            UsbService.usbSend("{brightness:" + String.valueOf(brightness) + "}");
+            ConnectionService.usbAndBluetoothSend("{brightness:" + String.valueOf(brightness) + "}", false);
             lastBrightness = brightness;
         }
     }

@@ -7,38 +7,31 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import kg.delletenebre.serialmanager.App;
+import kg.delletenebre.serialmanager.ConnectionService;
 import kg.delletenebre.serialmanager.MainActivity;
 import kg.delletenebre.serialmanager.Overlay;
 import kg.delletenebre.serialmanager.Preferences.AppChooserPreference;
 import kg.delletenebre.serialmanager.R;
-import kg.delletenebre.serialmanager.UsbService;
 import xdroid.toaster.Toaster;
 
 public class Commands {
@@ -46,9 +39,6 @@ public class Commands {
     private static List<Command> commands;
     private static CommandsDatabase database;
 
-    public static void setCommands(List<Command> commands) {
-        Commands.commands = commands;
-    }
     public static List<Command> getCommands() {
         if (commands == null) {
             commands = loadCommands();
@@ -72,6 +62,9 @@ public class Commands {
     }
 
     public static void processReceivedData(String data) {
+        if (App.isDebug()) {
+            Log.d("ProcessReceivedData", data);
+        }
         final Pattern pattern = Pattern.compile("<(.+?):(.+?)>");
         final Matcher matcher = pattern.matcher(data);
         if (matcher.find()) {
@@ -79,7 +72,16 @@ public class Commands {
             final String val = matcher.group(2);
             final Activity activity = App.getAliveActivity();
 
+            if (App.isDebug()) {
+                Log.d(TAG, "Key: " + key);
+                Log.d(TAG, "Value: " + val);
+            }
+
             if (activity != null) {
+                if (App.isDebug()) {
+                    Log.d(TAG, "Activity alive. Showing toast message");
+                }
+
                 Toaster.toast(String.format(
                         activity.getResources().getString(R.string.toast_received_command),
                         key, val));
@@ -111,6 +113,11 @@ public class Commands {
         boolean detected = false;
         commands = getCommands();
 
+        if (App.isDebug()) {
+            Log.d(TAG, "Trying to detect saved command for: key:" + key + " / value:" + value);
+            Log.d(TAG, "Saved commands size: " + String.valueOf(commands.size()));
+        }
+
         for (Command command: commands) {
             boolean inRange = false;
             if (App.isNumber(command.getValue()) && App.isNumber(value)) {
@@ -124,9 +131,18 @@ public class Commands {
             String category = command.getCategory();
             String action = command.getAction();
 
+            if (App.isDebug()) {
+                Log.d(TAG, "Current command [key:" + command.getKey() + "/value:" + command.getValue() + "]");
+                Log.d(TAG, "Current command [category:" + category + "/action:" + action + "]");
+            }
+
             if (command.getKey().equals(key)
                     && (command.getValue().isEmpty()
                     || (command.getValue().equals(value) || inRange))) {
+
+                if (App.isDebug()) {
+                    Log.d(TAG, "Command found. Category: " + category + " / Action: " + action);
+                }
 
                 if (command.getOverlay().isEnabled() && (Build.VERSION.SDK_INT < 23
                         || (Build.VERSION.SDK_INT >= 23 && Settings.canDrawOverlays(context)))) {
@@ -164,7 +180,7 @@ public class Commands {
                     App.runShellCommand(action);
 
                 } else if (category.equals("send")) { // Send Command
-                    UsbService.usbSend(action);
+                    ConnectionService.usbAndBluetoothSend(action, false);
 
                 } else if (category.equals("system")) { // System Management
                     switch (action) {
@@ -182,7 +198,6 @@ public class Commands {
                     }
                 }
 
-
                 detected = !command.getThrough();
                 break;
             }
@@ -190,6 +205,10 @@ public class Commands {
 
 
         if (!detected) {
+            if (App.isDebug()) {
+                Log.d(TAG, "Command not detected, sending broadcast");
+            }
+
             Intent intent = new Intent(App.ACTION_NEW_DATA_RECEIVED);
             intent.putExtra("key", key);
             intent.putExtra("value", value);

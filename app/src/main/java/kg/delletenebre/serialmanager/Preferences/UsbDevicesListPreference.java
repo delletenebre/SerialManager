@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import kg.delletenebre.serialmanager.R;
-import kg.delletenebre.serialmanager.UsbService;
+import kg.delletenebre.serialmanager.ConnectionService;
 
 public class UsbDevicesListPreference extends ListPreference {
     public UsbDevicesListPreference(Context context, AttributeSet attrs) {
@@ -27,7 +27,7 @@ public class UsbDevicesListPreference extends ListPreference {
         JSONArray jsonDevices = null;
 
         try {
-            String jsonDevicesFromAssets = UsbService.loadJsonFromAsset();
+            String jsonDevicesFromAssets = ConnectionService.loadJsonFromAsset();
             if (jsonDevicesFromAssets != null) {
                 jsonDevices = new JSONArray(jsonDevicesFromAssets);
             }

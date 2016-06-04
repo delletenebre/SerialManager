@@ -14,7 +14,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import com.squareup.leakcanary.LeakCanary;
+//import com.squareup.leakcanary.LeakCanary;
 
 import java.io.IOException;
 
@@ -24,6 +24,7 @@ public class App extends Application {
     public static final String ACTION_SEND_DATA = "kg.delletenebre.serial.SEND_DATA";
     public static final String ACTION_SEND_DATA_COMPLETE = "kg.delletenebre.serial.SEND_DATA_COMPLETE";
     public static final String ACTION_SEND_DATA_SUCCESS = "kg.delletenebre.serial.SEND_DATA_SUCCESS";
+    public static final String ACTION_EXTERNAL_SEND = "serial.manager.send";
 
     protected static final String ACTION_USB_PERMISSION = "kg.delletenebre.serial.usb_permission";
     protected static final String ACTION_USB_ATTACHED = "kg.delletenebre.serial.usb_attached";
@@ -34,13 +35,16 @@ public class App extends Application {
     protected static final int START_SERVICE_DELAY = 1000;
     protected static final int BLUETOOTH_RECONNECT_DELAY = 3000;
 
-    public static final String NEW_LINE = System.getProperty("line.separator");
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private static final int VOLUME_STREAM = AudioManager.STREAM_MUSIC;
     private static AudioManager audioManager;
     private static int lastVolumeLevel = 1;
 
     private static SharedPreferences prefs;
+    public static SharedPreferences getPrefs() {
+        return prefs;
+    }
 
     private static Context context;
     public static Context getContext() {
@@ -59,13 +63,15 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        LeakCanary.install(this);
+        //LeakCanary.install(this);
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         context = this;
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         updateSettings();
+
+        getContext().startService(new Intent(getContext(), ConnectionService.class));
     }
 
     public static Activity getAliveActivity() {
@@ -89,23 +95,10 @@ public class App extends Application {
         volumeShowUI = prefs.getBoolean("volumeShowUI", true);
 
         debug = prefs.getBoolean("debug", false);
-//        UsbService.setDTR(prefs.getBoolean("dtr", false));
-//        UsbService.setRTS(prefs.getBoolean("rts", false));
-
-        if (!prefs.getBoolean("usb", false)) {
-            getContext().stopService(new Intent(getContext(), UsbService.class));
-        } else {
-            getContext().startService(new Intent(getContext(), UsbService.class));
-        }
-        if (!prefs.getBoolean("bluetooth", false)) {
-            BluetoothService.stop();
-        } else if (BluetoothService.service == null) {
-            BluetoothService.start();
-        }
     }
 
-    public static boolean isNumber(String str) {
-        return str.matches("-?\\d+(\\.\\d+)?");
+    public static boolean isNumber(String string) {
+        return string.matches("-?\\d+(\\.\\d+)?");
     }
 
     public static void changeVolume(String mode) {
