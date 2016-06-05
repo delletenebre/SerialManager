@@ -25,8 +25,10 @@ public class EventsReceiver extends BroadcastReceiver {
         switch (action) {
             case Intent.ACTION_BOOT_COMPLETED:
             case Intent.ACTION_USER_PRESENT:
+            case Intent.ACTION_SCREEN_ON:
                 if (App.isDebug()) {
-                    Log.i(TAG, "**** ACTION_USER_PRESENT || ACTION_BOOT_COMPLETED ****");
+                    Log.i(TAG, "**** ACTION_USER_PRESENT || ACTION_BOOT_COMPLETED || ACTION_SCREEN_ON ****");
+                    Log.i(TAG, action);
                 }
 
                 ConnectionService.sendInfoScreenState("on");
@@ -44,12 +46,12 @@ public class EventsReceiver extends BroadcastReceiver {
 
             case Intent.ACTION_SCREEN_OFF:
                 if (App.isDebug()) {
-                    Log.i(TAG, "****ACTION_SCREEN_OFF****");
+                    Log.i(TAG, "**** ACTION_SCREEN_OFF ****");
                 }
 
                 ConnectionService.sendInfoScreenState("off");
 
-                if (App.getPrefs().getBoolean("stopWhenScreenOff", false)) {
+                if (App.getPrefs().getBoolean("stopWhenScreenOff", true)) {
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {

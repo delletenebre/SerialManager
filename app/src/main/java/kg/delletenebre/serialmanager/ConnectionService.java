@@ -50,18 +50,17 @@ public class ConnectionService extends Service implements SensorEventListener {
     private EventsReceiver eventsReceiver;
     private UsbManager usbManager;
     private static Map<String, UsbSerialDevice> openedSerialPorts;
-
-    private static NotificationCompat.Builder notification;
-
-    private SettingsContentObserver settingsContentObserver;
-
-    private SensorManager sensorManager;
-    private int sensorLightMode = 0;
+    protected static boolean usbRestartState = false;
 
     // **** BLUETOOTH **** //
     private static BluetoothSPP bt;
 
     // **** GENERAL **** //
+    private static NotificationCompat.Builder notification;
+    private SettingsContentObserver settingsContentObserver;
+    private SensorManager sensorManager;
+    private int sensorLightMode = 0;
+
     private static Map<String, String> receivedDataBuffer;
 
 
@@ -114,7 +113,9 @@ public class ConnectionService extends Service implements SensorEventListener {
         initializeJsonDevices();
 
         eventsReceiver = new EventsReceiver();
-        registerReceiver(eventsReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+        //intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(eventsReceiver, intentFilter);
 
 
         receivedDataBuffer = new HashMap<>();
@@ -150,27 +151,8 @@ public class ConnectionService extends Service implements SensorEventListener {
     public void onDestroy() {
         super.onDestroy();
 
-        if (openedSerialPorts != null) {
-            for (Map.Entry<String, UsbSerialDevice> entry : openedSerialPorts.entrySet()) {
-                UsbSerialDevice serialPort = entry.getValue();
-
-                try {
-                    serialPort.close();
-                    entry.setValue(null);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-            openedSerialPorts = null;
-        }
-
+        closeUsbConnections();
         onBluetoothDisabled();
-
-        if (notification != null) {
-            stopForeground(true);
-            notification = null;
-        }
-
 
         if (eventsReceiver != null) {
             unregisterReceiver(eventsReceiver);
@@ -181,6 +163,11 @@ public class ConnectionService extends Service implements SensorEventListener {
         }
         if (sensorManager != null) {
             sensorManager.unregisterListener(this);
+        }
+
+        if (notification != null) {
+            stopForeground(true);
+            notification = null;
         }
 
         if (App.isDebug()) {
@@ -315,9 +302,9 @@ public class ConnectionService extends Service implements SensorEventListener {
             notification.setSubText(null);
         }
 
-        NotificationManager mNotificationManager =
+        NotificationManager notificationManager =
                 (NotificationManager) App.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.notify(NOTIFICATION_ID, notification.build());
+        notificationManager.notify(NOTIFICATION_ID, notification.build());
     }
 
     private void initializeJsonDevices() {
@@ -410,7 +397,9 @@ public class ConnectionService extends Service implements SensorEventListener {
             }
 
             if (App.getPrefs().getBoolean("usb_reset_hub", false)) {
-                resetUsbHubs();
+                if (!usbRestartState) {
+                    resetUsbHubs();
+                }
             } else {
                 Toaster.toast("USB device not supported");
             }
@@ -579,6 +568,7 @@ public class ConnectionService extends Service implements SensorEventListener {
         try {
             File hubs = new File("/sys/bus/usb/devices").getCanonicalFile();
             if (hubs.isDirectory()) {
+                usbRestartState = true;
                 for (File element : hubs.listFiles()) {
                     if (!element.getName().startsWith("usb")) {
                         File cn = element.getCanonicalFile();
@@ -619,21 +609,44 @@ public class ConnectionService extends Service implements SensorEventListener {
                         }
                     }
                 }
+                usbRestartState = false;
             }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+
+        usbRestartState = false;
     }
 
 
 
 
 
+    public static void closeUsbConnections() {
+        if (openedSerialPorts != null) {
+            for (Map.Entry<String, UsbSerialDevice> entry : openedSerialPorts.entrySet()) {
+                UsbSerialDevice serialPort = entry.getValue();
+
+                try {
+                    serialPort.close();
+                    entry.setValue(null);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            openedSerialPorts = null;
+        }
+    }
 
 
     public static void onBluetoothDisabled() {
         if (bt != null) {
+            bt.stopAutoConnect();
+//            if (bt.getServiceState() == BluetoothState.STATE_CONNECTED) {
+//                bt.disconnect();
+//            }
             bt.stopService();
+
             bt = null;
         }
     }

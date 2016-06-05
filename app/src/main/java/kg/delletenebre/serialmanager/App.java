@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
@@ -12,6 +13,7 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 
 //import com.squareup.leakcanary.LeakCanary;
@@ -71,7 +73,9 @@ public class App extends Application {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         updateSettings();
 
-        getContext().startService(new Intent(getContext(), ConnectionService.class));
+        if (App.isScreenOn() || !App.getPrefs().getBoolean("stopWhenScreenOff", true)) {
+            context.startService(new Intent(context, ConnectionService.class));
+        }
     }
 
     public static Activity getAliveActivity() {
@@ -180,11 +184,24 @@ public class App extends Application {
     }
 
     public static boolean isScreenOn() {
-        PowerManager powerManager = (PowerManager) getContext().getSystemService(POWER_SERVICE);
-        return  (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH
-                    && powerManager.isInteractive())
-                || (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT_WATCH
-                    && powerManager.isScreenOn());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            DisplayManager dm = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
+            boolean screenOn = false;
+            for (Display display : dm.getDisplays()) {
+                if (display.getState() != Display.STATE_OFF) {
+                    screenOn = true;
+                }
+            }
+            return screenOn;
+        } else {
+            PowerManager powerManager = (PowerManager) getContext().getSystemService(POWER_SERVICE);
+            return powerManager.isScreenOn();
+        }
+
+//        return  (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH
+//                    && powerManager.isInteractive())
+//                || (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT_WATCH
+//                    && powerManager.isScreenOn());
     }
 
     public static boolean isScreenOff() {
