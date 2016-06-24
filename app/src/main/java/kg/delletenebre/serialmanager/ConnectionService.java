@@ -364,8 +364,8 @@ public class ConnectionService extends Service implements SensorEventListener {
                 serialPort.setRTS(rts);
 
                 serialPort.read(usbReceiveCallback);
-                serialPort.getCTS(usbCtsCallback);
-                serialPort.getDSR(usbDsrCallback);
+                //serialPort.getCTS(usbCtsCallback);
+                //serialPort.getDSR(usbDsrCallback);
 
                 openedSerialPorts.put(device.getDeviceName(), serialPort);
                 updateNotificationText();
@@ -412,18 +412,18 @@ public class ConnectionService extends Service implements SensorEventListener {
             onDataReceive("usb", arg0);
         }
     };
-    private UsbSerialInterface.UsbCTSCallback usbCtsCallback = new UsbSerialInterface.UsbCTSCallback() {
-        @Override
-        public void onCTSChanged(boolean state) {
-            //Toaster.toast("CTS_CHANGE");
-        }
-    };
-    private UsbSerialInterface.UsbDSRCallback usbDsrCallback = new UsbSerialInterface.UsbDSRCallback() {
-        @Override
-        public void onDSRChanged(boolean state) {
-            //Toaster.toast("DSR_CHANGE");
-        }
-    };
+//    private UsbSerialInterface.UsbCTSCallback usbCtsCallback = new UsbSerialInterface.UsbCTSCallback() {
+//        @Override
+//        public void onCTSChanged(boolean state) {
+//            //Toaster.toast("CTS_CHANGE");
+//        }
+//    };
+//    private UsbSerialInterface.UsbDSRCallback usbDsrCallback = new UsbSerialInterface.UsbDSRCallback() {
+//        @Override
+//        public void onDSRChanged(boolean state) {
+//            //Toaster.toast("DSR_CHANGE");
+//        }
+//    };
 
 
     private void findAttachedUsbDevice() {

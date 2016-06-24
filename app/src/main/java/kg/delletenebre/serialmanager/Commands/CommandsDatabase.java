@@ -20,24 +20,6 @@ public class CommandsDatabase {
     public static final String KEY_POSITION = "position";
     public static final String KEY_COMMAND = "command";
 
-//    public static final String KEY_KEY = "key";
-//    public static final String KEY_VALUE = "value";
-//    public static final String KEY_SCATTER = "scatter";
-//    public static final String KEY_THROUGH = "through";//Boolean flag = (cursor.getInt(cursor.getColumnIndex("flag")) == 1);
-//    public static final String KEY_CATEGORY = "category";
-//    public static final String KEY_ACTION = "action";
-//    public static final String KEY_ACTION_STRING = "action_string";
-//
-//    public static final String KEY_OVERLAY_ENABLED = "overlay_enabled";
-//    public static final String KEY_OVERLAY_TEXT = "overlay_text";
-//    public static final String KEY_OVERLAY_TIMER = "overlay_timer";
-//    public static final String KEY_OVERLAY_POSITION = "overlay_position";
-//    public static final String KEY_OVERLAY_FULLWIDTH = "overlay_fullwidth";
-//    public static final String KEY_OVERLAY_TEXT_SIZE = "overlay_text_size";
-//    public static final String KEY_OVERLAY_TEXT_ALIGN = "overlay_text_align";
-//    public static final String KEY_OVERLAY_TEXT_COLOR = "overlay_text_color";
-//    public static final String KEY_OVERLAY_BACKGROUND_COLOR = "overlay_background_color";
-
     private DatabaseHelper databaseHelper;
     private SQLiteDatabase database;
 
@@ -96,7 +78,6 @@ public class CommandsDatabase {
 
         ContentValues initialValues = new ContentValues();
 
-
         initialValues.put(KEY_POSITION, command.getPosition());
         initialValues.put(KEY_COMMAND, gson.toJson(command));
 
@@ -110,7 +91,7 @@ public class CommandsDatabase {
     }
 
     public boolean deleteAll() {
-        int doneDelete = database.delete(COMMANDS_TABLE, null , null);
+        int doneDelete = database.delete(COMMANDS_TABLE, null, null);
         return doneDelete > 0;
     }
 
