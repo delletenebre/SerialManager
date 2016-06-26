@@ -117,7 +117,6 @@ public class ConnectionService extends Service implements SensorEventListener {
         //intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         registerReceiver(eventsReceiver, intentFilter);
 
-
         receivedDataBuffer = new HashMap<>();
         receivedDataBuffer.put("usb", "");
         receivedDataBuffer.put("bluetooth", "");
@@ -137,6 +136,8 @@ public class ConnectionService extends Service implements SensorEventListener {
                 sensorManager.registerListener(this, sensorLight, SensorManager.SENSOR_DELAY_NORMAL);
             }
         }
+
+        App.createUinput();
 
         onBluetoothEnabled();
 
@@ -169,6 +170,8 @@ public class ConnectionService extends Service implements SensorEventListener {
             stopForeground(true);
             notification = null;
         }
+
+        App.destroyUinput();
 
         if (App.isDebug()) {
             Log.i(TAG, "Service: onDestroy");

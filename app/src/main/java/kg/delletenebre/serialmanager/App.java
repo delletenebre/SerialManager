@@ -1,7 +1,10 @@
 package kg.delletenebre.serialmanager;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.Application;
+import android.app.Instrumentation;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,7 +21,17 @@ import android.view.KeyEvent;
 
 //import com.squareup.leakcanary.LeakCanary;
 
+import com.stericson.RootShell.RootShell;
+import com.stericson.RootShell.execution.Command;
+
+import java.io.Externalizable;
 import java.io.IOException;
+import java.io.StreamCorruptedException;
+import java.util.HashMap;
+import java.util.Map;
+
+import kg.delletenebre.serialmanager.Commands.Commands;
+import xdroid.toaster.Toaster;
 
 public class App extends Application {
     public static final String TAG = "SerialManagerApp";
@@ -62,6 +75,33 @@ public class App extends Application {
 
     private static boolean volumeShowUI;
 
+    private static String uinputDevice;
+    private static Integer uinputId;
+    public static void createUinput() {
+        if (uinputId == null) {
+            uinputId = initializateUinput();
+            if (uinputId > 0 && isDebug()) {
+                Toaster.toast("Виртуальная клавиатура создана");
+                Log.d(TAG, "Virtual keyboard (uinput) id: " + String.valueOf(uinputId));
+            }
+        }
+    }
+    public static void destroyUinput() {
+        if (uinputId != null) {
+            destroyUinput(uinputId);
+            uinputId = null;
+            uinputDevice = null;
+        }
+    }
+
+    static {
+        System.loadLibrary("serial-manager");
+    }
+    private static native int initializateUinput();
+    private static native int destroyUinput(int fd);
+    private static native void sendEvent(int fd, int code);
+    private static native void sendEventDouble(int fd, int code1, int code2);
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -72,6 +112,14 @@ public class App extends Application {
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         updateSettings();
+
+        initializeKeymap();
+
+        if (RootShell.isRootAvailable() && RootShell.isAccessGiven()) {
+            Log.d(TAG, "Root access granted");
+        } else {
+            Log.d(TAG, "Root not available or access didn't grant");
+        }
 
         if (App.isScreenOn() || !App.getPrefs().getBoolean("stopWhenScreenOff", true)) {
             context.startService(new Intent(context, ConnectionService.class));
@@ -84,15 +132,25 @@ public class App extends Application {
     public static void setAliveActivity(Activity activity) {
         aliveActiviity = activity;
     }
-    public static void restartAliveActivity() {
-        Activity activity = aliveActiviity;
-        if (activity != null) {
-            activity.finish();
-            Intent intent = new Intent(getContext(), activity.getClass());
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            getContext().startActivity(intent);
-        }
-    }
+//    public static void restart() {
+//        Activity activity = aliveActiviity;
+//        if (activity != null) {
+////            activity.finish();
+////            Intent intent = new Intent(getContext(), activity.getClass());
+////            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+////            getContext().startActivity(intent);
+//            // Schedule start
+//            PendingIntent pi = PendingIntent.getActivity(
+//                    context, 0, activity.getIntent(), PendingIntent.FLAG_CANCEL_CURRENT);
+//            ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).set(
+//                    AlarmManager.RTC, System.currentTimeMillis() + 500, pi);
+//
+//            // Stop now
+//            System.exit(0);
+//        }
+//
+//
+//    }
 
 
     public static void updateSettings() {
@@ -149,16 +207,62 @@ public class App extends Application {
         }
     }
 
-    public static void emulateKeyEvent(final String keyEvent) {
+    public static void emulateKeyEvent(final String keyName) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 if (isDebug()) {
-                    Log.d(TAG, "input keyevent " + keyEvent);
+                    Log.d(TAG, "Emulated key is " + keyName);
+                }
+
+                KeyboardCode keyboardCode = keymap.get(keyName);
+                if (keyboardCode != null) {
+                    int linuxCode = keyboardCode.linuxCode;
+                    int[] linuxCodes = keyboardCode.linuxCodes;
+                    int androidCode = keyboardCode.androidCode;
+
+                    if (uinputId != null && (linuxCode > 0 || linuxCodes != null)) {
+                        if (linuxCode > 0) {
+                            if (isDebug()) {
+                                Log.d(TAG, "Emulated key in fast mode");
+                            }
+                            sendEvent(uinputId, linuxCode);
+                        } else {
+                            if (isDebug()) {
+                                Log.d(TAG, "Emulated shortcut in fast mode");
+                            }
+                            sendEventDouble(uinputId, linuxCodes[0], linuxCodes[1]);
+                        }
+                    } else if (androidCode > 0) {
+                        if (isDebug()) {
+                            Log.d(TAG, "Emulated key in slow mode");
+                        }
+                        try {
+                            RootShell.getShell(true).add(
+                                    new Command(0, "input keyevent " + String.valueOf(androidCode)));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else if (isDebug()) {
+                    Log.d(TAG, "Emulated key not found");
+                }
+            }
+        }).start();
+
+    }
+
+    public static void sendKeyEvent(final String keyEvent) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (isDebug()) {
+                    Log.d(TAG, "inject keyevent " + keyEvent);
                 }
                 try {
-                    Runtime.getRuntime().exec(new String[] {"su", "-c", "input keyevent " + keyEvent});
-                } catch (IOException e) {
+                    Instrumentation instrumentation = new Instrumentation();
+                    instrumentation.sendKeyDownUpSync(Integer.parseInt(keyEvent));
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -166,16 +270,20 @@ public class App extends Application {
 
     }
 
-    public static void runShellCommand(final String command) {
+
+
+    public static void runShellCommand(final String commandToExecute) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 if (isDebug()) {
-                    Log.d(TAG, "run shell: " + command);
+                    Log.d(TAG, "run shell: " + commandToExecute);
                 }
                 try {
-                    Runtime.getRuntime().exec(new String[] {"su", "-c", command});
-                } catch (IOException e) {
+                    //Runtime.getRuntime().exec(new String[] {"su", "-c", commandToExecute});
+                    Command command = new Command(0, commandToExecute);
+                    RootShell.getShell(true).add(command);
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -287,6 +395,98 @@ public class App extends Application {
             result = context.getResources().getDimensionPixelSize(resourceId);
         }
         return result;
+    }
+
+
+
+
+
+
+
+
+
+
+    private static Map<String, KeyboardCode> keymap;
+    private void initializeKeymap() {
+        keymap = new HashMap<>();
+        keymap.put("UNKNOWN", new KeyboardCode(240, 0));
+
+        keymap.put("APP_SWITCH", new KeyboardCode(580, 187));
+        keymap.put("ALT + TAB", new KeyboardCode(new int[] {56, 15}));
+        keymap.put("TAB", new KeyboardCode(15, 61));
+
+        keymap.put("ASSIST", new KeyboardCode(-1, 219));
+        keymap.put("VOICE_ASSIST (>= 5.0)", new KeyboardCode(582, 231));
+        keymap.put("SEARCH", new KeyboardCode(217, 84));
+
+        keymap.put("MENU", new KeyboardCode(139, 82));
+        keymap.put("HOME", new KeyboardCode(102, 3));
+        keymap.put("BACK", new KeyboardCode(158, 4));
+        keymap.put("FORWARD", new KeyboardCode(159, 125));
+
+        keymap.put("BRIGHTNESS_DOWN", new KeyboardCode(224, 220));
+        keymap.put("BRIGHTNESS_UP", new KeyboardCode(225, 221));
+
+        keymap.put("CALL", new KeyboardCode(169, 5));
+        keymap.put("ENDCALL", new KeyboardCode(-1, 6));
+        keymap.put("HEADSETHOOK", new KeyboardCode(226, 79));
+
+        keymap.put("DPAD_UP", new KeyboardCode(103, 19));
+        keymap.put("DPAD_DOWN", new KeyboardCode(108, 20));
+        keymap.put("DPAD_LEFT", new KeyboardCode(105, 21));
+        keymap.put("DPAD_RIGHT", new KeyboardCode(106, 22));
+        keymap.put("DPAD_CENTER", new KeyboardCode(353, 23));
+
+        keymap.put("ENTER", new KeyboardCode(28, 66));
+        keymap.put("ESCAPE", new KeyboardCode(1, 111));
+
+        keymap.put("MEDIA_FAST_FORWARD", new KeyboardCode(208, 90));
+        keymap.put("MEDIA_NEXT", new KeyboardCode(163, 87));
+        keymap.put("MEDIA_PLAY_PAUSE", new KeyboardCode(164, 85));
+        keymap.put("MEDIA_PLAY", new KeyboardCode(207, 126));
+        keymap.put("MEDIA_PAUSE", new KeyboardCode(119, 127));
+        keymap.put("MEDIA_STOP", new KeyboardCode(128, 86));
+        keymap.put("MEDIA_PREVIOUS", new KeyboardCode(165, 88));
+        keymap.put("MEDIA_REWIND", new KeyboardCode(168, 89));
+        keymap.put("MEDIA_RECORD", new KeyboardCode(167, 130));
+
+        keymap.put("VOLUME_DOWN", new KeyboardCode(114, 25));
+        keymap.put("VOLUME_UP", new KeyboardCode(115, 24));
+        keymap.put("VOLUME_MUTE", new KeyboardCode(113, 164));
+        keymap.put("MUTE_MICROPHONE", new KeyboardCode(248, 91));
+
+        keymap.put("NOTIFICATION", new KeyboardCode(-1, 83));
+
+        keymap.put("MUSIC", new KeyboardCode(213, 209));
+        keymap.put("CAMERA", new KeyboardCode(212, 27));
+        keymap.put("CONTACTS", new KeyboardCode(429, 207));
+        keymap.put("BROWSER", new KeyboardCode(150, 64));
+        keymap.put("SETTINGS", new KeyboardCode(-1, 176));
+
+        keymap.put("POWER", new KeyboardCode(116, 26));
+        keymap.put("POWER2", new KeyboardCode(356, -1));
+        keymap.put("SLEEP (>= 4.4W)", new KeyboardCode(142, 223));
+        keymap.put("WAKEUP (>= 5.0)", new KeyboardCode(143, 224));
+
+        keymap.put("ZOOM_IN", new KeyboardCode(418, 168));
+        keymap.put("ZOOM_OUT", new KeyboardCode(419, 169));
+
+    }
+
+    private class KeyboardCode {
+        protected int linuxCode = -1;
+        protected int[] linuxCodes = null;
+        protected int androidCode = -1;
+
+
+        public KeyboardCode(int linuxCode, int androidCode) {
+            this.linuxCode = linuxCode;
+            this.androidCode = androidCode;
+        }
+
+        public KeyboardCode(int[] linuxCodes) {
+            this.linuxCodes = linuxCodes;
+        }
     }
 
 }

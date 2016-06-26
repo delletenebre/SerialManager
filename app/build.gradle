@@ -7,9 +7,9 @@ model {
         defaultConfig {
             applicationId "kg.delletenebre.serialmanager"
             minSdkVersion.apiLevel 14
-            targetSdkVersion.apiLevel 23
-            versionCode 36
-            versionName "1.6.0"
+            targetSdkVersion.apiLevel 24
+            versionCode 37
+            versionName "1.6.1"
         }
         buildTypes {
             release {
@@ -28,9 +28,9 @@ model {
     }
 }
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':android-bluetooth-spp')
-
+    compile files('libs/RootShell.jar')
     compile 'com.android.support:appcompat-v7:24.0.0'
     compile 'com.android.support:design:24.0.0'
     compile 'com.android.support:cardview-v7:24.0.0'

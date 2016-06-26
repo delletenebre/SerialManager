@@ -151,6 +151,7 @@ public class Commands {
 
                 if (category.equals("navigation")) {
                     App.emulateKeyEvent(command.getAction());
+                    //App.sendKeyEvent(command.getAction());
 
                 } else if (category.equals("volume")) {
                     if (action.equals("up") || action.equals("down")) {

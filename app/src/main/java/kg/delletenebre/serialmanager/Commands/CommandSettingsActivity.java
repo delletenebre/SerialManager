@@ -294,7 +294,7 @@ public class CommandSettingsActivity extends AppCompatActivity {
             try {
                 scatter = Float.parseFloat(
                         ((EditTextPreference) findPreference("scatter")).getText());
-            } catch (Exception ex) {
+            } catch (NumberFormatException e) {
                 if (App.isDebug()) {
                     Log.w(TAG, "Can not cast [scatter] to float");
                 }

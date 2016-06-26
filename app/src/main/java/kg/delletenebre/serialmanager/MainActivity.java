@@ -2,6 +2,9 @@ package kg.delletenebre.serialmanager;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -201,16 +204,25 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case App.REQUEST_CODE_ASK_PERMISSIONS_READ:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    App.restartAliveActivity();
+                    restart();
                 }
                 break;
 
             case App.REQUEST_CODE_ASK_PERMISSIONS_WRITE:
-                App.restartAliveActivity();
+                restart();
                 break;
 
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+    }
+
+    public void restart() {
+        PendingIntent pi = PendingIntent.getActivity(
+                this, 0, getIntent(), PendingIntent.FLAG_CANCEL_CURRENT);
+        ((AlarmManager) getSystemService(Context.ALARM_SERVICE)).set(
+                AlarmManager.RTC, System.currentTimeMillis() + 500, pi);
+
+        System.exit(0);
     }
 }

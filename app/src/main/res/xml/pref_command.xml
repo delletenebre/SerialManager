@@ -51,9 +51,9 @@
 
         <ListPreference
             android:key="action_navigation"
-            android:defaultValue="0"
-            android:entries="@array/pref_command_action_navigation_titles"
-            android:entryValues="@array/pref_command_action_navigation_values"
+            android:defaultValue=""
+            android:entries="@array/pref_command_action_navigation_titles_values"
+            android:entryValues="@array/pref_command_action_navigation_titles_values"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null"
             android:title="@string/pref_title_command_action_navigation" />
