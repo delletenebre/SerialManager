@@ -148,6 +148,39 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="@string/pref_category_gpio" >
+
+        <CheckBoxPreference
+            android:key="gpio_as_io"
+            android:defaultValue="true"
+            android:title="@string/pref_title_gpio_as_io"
+            android:summary="@string/pref_summary_gpio_as_io" />
+
+        <CheckBoxPreference
+            android:key="gpio_as_button"
+            android:defaultValue="true"
+            android:title="@string/pref_title_gpio_as_buttons"
+            android:summary="@string/pref_summary_gpio_as_buttons" />
+
+        <EditTextPreference
+            android:key="gpio_debounce"
+            android:defaultValue="20"
+            android:title="@string/pref_title_gpio_debounce"
+            android:inputType="number"
+            android:selectAllOnFocus="true"
+            android:singleLine="true" />
+
+        <EditTextPreference
+            android:key="gpio_long_press_delay"
+            android:dependency="gpio_as_button"
+            android:defaultValue="500"
+            android:title="@string/pref_title_long_press_delay"
+            android:inputType="number"
+            android:selectAllOnFocus="true"
+            android:singleLine="true" />
+
+    </PreferenceCategory>
 
     <PreferenceCategory
         android:title="@string/pref_category_other" >

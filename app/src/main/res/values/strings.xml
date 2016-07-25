@@ -27,6 +27,7 @@
     <string name="pref_category_connection_bt">Bluetooth connection</string>
     <string name="pref_category_connection_usb">USB connection</string>
     <string name="pref_category_send_commands">Sending commands</string>
+    <string name="pref_category_gpio" translatable="false">GPIO</string>
     <string name="pref_category_other">Other</string>
 
     <string name="pref_title_bluetooth_connection">Enable bluetooth connection</string>
@@ -431,4 +432,15 @@
     <string name="pref_co_title_font_color">Font color</string>
 
     <string name="pref_co_title_background_color">Background color</string>
+
+
+
+
+    <!-- CATEGORY GPIO -->
+    <string name="pref_title_gpio_as_io">Generate state change events</string>
+    <string name="pref_summary_gpio_as_io">If enabled, the GPIO state change generate:\n&lt;gpioX:0&gt; and &lt;gpioX:1&gt;</string>
+    <string name="pref_title_gpio_as_buttons">Generate button events</string>
+    <string name="pref_summary_gpio_as_buttons">If enabled, the GPIO state change generate:\n&lt;gpioX:click&gt; and &lt;gpioX:longPress&gt;\nthat allows to use GPIO ports as buttons</string>
+    <string name="pref_title_gpio_debounce">Debounce delay (ms)</string>
+    <string name="pref_title_long_press_delay">Long press delay (ms)</string>
 </resources>

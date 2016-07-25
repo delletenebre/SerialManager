@@ -7,6 +7,7 @@ import android.app.Instrumentation;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
@@ -22,6 +23,7 @@ import android.view.KeyEvent;
 //import com.squareup.leakcanary.LeakCanary;
 
 import com.stericson.RootShell.RootShell;
+import com.stericson.RootShell.exceptions.RootDeniedException;
 import com.stericson.RootShell.execution.Command;
 
 import java.io.Externalizable;
@@ -29,6 +31,7 @@ import java.io.IOException;
 import java.io.StreamCorruptedException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 import kg.delletenebre.serialmanager.Commands.Commands;
 import xdroid.toaster.Toaster;
@@ -74,6 +77,8 @@ public class App extends Application {
     private static Activity aliveActiviity;
 
     private static boolean volumeShowUI;
+
+    EventsReceiver eventsReceiver;
 
     private static String uinputDevice;
     private static Integer uinputId;
@@ -124,7 +129,13 @@ public class App extends Application {
         if (App.isScreenOn() || !App.getPrefs().getBoolean("stopWhenScreenOff", true)) {
             context.startService(new Intent(context, ConnectionService.class));
         }
+
+        eventsReceiver = new EventsReceiver();
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(eventsReceiver, intentFilter);
     }
+
 
     public static Activity getAliveActivity() {
         return aliveActiviity;
@@ -154,8 +165,12 @@ public class App extends Application {
 
 
     public static void updateSettings() {
-        volumeShowUI = prefs.getBoolean("volumeShowUI", true);
+        Gpio.setDebounce(Integer.parseInt(prefs.getString("gpio_debounce", "20")));
+        Gpio.setLongPressDelay(Integer.parseInt(prefs.getString("gpio_long_press_delay", "500")));
+        Gpio.setGenerateIOEvents(prefs.getBoolean("gpio_as_io", true));
+        Gpio.setGenerateButtonEvents(prefs.getBoolean("gpio_as_button", true));
 
+        volumeShowUI = prefs.getBoolean("volumeShowUI", true);
         debug = prefs.getBoolean("debug", false);
     }
 
@@ -252,26 +267,6 @@ public class App extends Application {
 
     }
 
-    public static void sendKeyEvent(final String keyEvent) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (isDebug()) {
-                    Log.d(TAG, "inject keyevent " + keyEvent);
-                }
-                try {
-                    Instrumentation instrumentation = new Instrumentation();
-                    instrumentation.sendKeyDownUpSync(Integer.parseInt(keyEvent));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
-    }
-
-
-
     public static void runShellCommand(final String commandToExecute) {
         new Thread(new Runnable() {
             @Override
@@ -281,8 +276,7 @@ public class App extends Application {
                 }
                 try {
                     //Runtime.getRuntime().exec(new String[] {"su", "-c", commandToExecute});
-                    Command command = new Command(0, commandToExecute);
-                    RootShell.getShell(true).add(command);
+                    RootShell.getShell(true).add(new Command(0, commandToExecute));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

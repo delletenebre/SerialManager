@@ -47,7 +47,6 @@ public class ConnectionService extends Service implements SensorEventListener {
 
     // *** USB **** //
     private static JSONArray jsonDevices;
-    private EventsReceiver eventsReceiver;
     private UsbManager usbManager;
     private static Map<String, UsbSerialDevice> openedSerialPorts;
     protected static boolean usbRestartState = false;
@@ -62,6 +61,8 @@ public class ConnectionService extends Service implements SensorEventListener {
     private int sensorLightMode = 0;
 
     private static Map<String, String> receivedDataBuffer;
+
+    Gpio gpio99;
 
 
     static {
@@ -112,11 +113,6 @@ public class ConnectionService extends Service implements SensorEventListener {
 
         initializeJsonDevices();
 
-        eventsReceiver = new EventsReceiver();
-        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-        //intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        registerReceiver(eventsReceiver, intentFilter);
-
         receivedDataBuffer = new HashMap<>();
         receivedDataBuffer.put("usb", "");
         receivedDataBuffer.put("bluetooth", "");
@@ -143,6 +139,9 @@ public class ConnectionService extends Service implements SensorEventListener {
 
         sendInfoScreenState(null);
 
+        gpio99 = new Gpio(99, "in");
+        gpio99.start();
+
         if (App.isDebug()) {
             Log.d(TAG, "CREATED");
         }
@@ -152,12 +151,11 @@ public class ConnectionService extends Service implements SensorEventListener {
     public void onDestroy() {
         super.onDestroy();
 
+        gpio99.interrupt();
+
         closeUsbConnections();
         onBluetoothDisabled();
 
-        if (eventsReceiver != null) {
-            unregisterReceiver(eventsReceiver);
-        }
         if (settingsContentObserver != null) {
             getApplicationContext().getContentResolver()
                     .unregisterContentObserver(settingsContentObserver);

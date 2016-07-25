@@ -196,4 +196,15 @@
     <string name="pref_co_title_font_color">Цвет текста</string>
 
     <string name="pref_co_title_background_color">Цвет фона</string>
+
+
+
+
+    <!-- CATEGORY GPIO -->
+    <string name="pref_title_gpio_as_io">Генерировать события изменения состояния</string>
+    <string name="pref_summary_gpio_as_io">Если опция включена, то при изменении состояния GPIO будут сгенерированы команды:\n&lt;gpioX:0&gt; и &lt;gpioX:1&gt;</string>
+    <string name="pref_title_gpio_as_buttons">Генерировать события кнопки</string>
+    <string name="pref_summary_gpio_as_buttons">Если опция включена, то при изменении состояния GPIO будут сгенерированы команды:\n&lt;gpioX:click&gt; и &lt;gpioX:longPress&gt;\nчто позволяет использовать порты GPIO в виде кнопок</string>
+    <string name="pref_title_gpio_debounce">(debounce) Задержка ложного срабатывания (мс)</string>
+    <string name="pref_title_long_press_delay">(longPress) Задержка для определения удержания кнопки (мс)</string>
 </resources>

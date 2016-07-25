@@ -59,6 +59,8 @@ public class SettingsActivity extends AppCompatActivity {
             bindPreferenceSummaryToValue(findPreference("dataBits"));
             bindPreferenceSummaryToValue(findPreference("stopBits"));
             bindPreferenceSummaryToValue(findPreference("parity"));
+            bindPreferenceSummaryToValue(findPreference("gpio_debounce"));
+            bindPreferenceSummaryToValue(findPreference("gpio_long_press_delay"));
         }
 
         @Override
