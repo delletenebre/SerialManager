@@ -6,7 +6,6 @@ import android.app.Service;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.hardware.Sensor;
@@ -34,9 +33,12 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import app.akexorcist.bluetoothspp.library.BluetoothSPP;
 import app.akexorcist.bluetoothspp.library.BluetoothState;
+import kg.delletenebre.serialmanager.Commands.Command;
 import kg.delletenebre.serialmanager.Commands.Commands;
 import kg.delletenebre.serialmanager.helper.FileUtils;
 import xdroid.toaster.Toaster;
@@ -61,9 +63,6 @@ public class ConnectionService extends Service implements SensorEventListener {
     private int sensorLightMode = 0;
 
     private static Map<String, String> receivedDataBuffer;
-
-    Gpio gpio99;
-
 
     static {
         System.loadLibrary("serial-manager");
@@ -139,8 +138,7 @@ public class ConnectionService extends Service implements SensorEventListener {
 
         sendInfoScreenState(null);
 
-        gpio99 = new Gpio(99, "in");
-        gpio99.start();
+        Gpio.createGpiosFromCommands();
 
         if (App.isDebug()) {
             Log.d(TAG, "CREATED");
@@ -151,7 +149,7 @@ public class ConnectionService extends Service implements SensorEventListener {
     public void onDestroy() {
         super.onDestroy();
 
-        gpio99.interrupt();
+        Gpio.destroyGpios();
 
         closeUsbConnections();
         onBluetoothDisabled();

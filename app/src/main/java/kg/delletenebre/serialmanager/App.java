@@ -1,10 +1,7 @@
 package kg.delletenebre.serialmanager;
 
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.Application;
-import android.app.Instrumentation;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -23,17 +20,11 @@ import android.view.KeyEvent;
 //import com.squareup.leakcanary.LeakCanary;
 
 import com.stericson.RootShell.RootShell;
-import com.stericson.RootShell.exceptions.RootDeniedException;
 import com.stericson.RootShell.execution.Command;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.StreamCorruptedException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 
-import kg.delletenebre.serialmanager.Commands.Commands;
 import xdroid.toaster.Toaster;
 
 public class App extends Application {
@@ -77,8 +68,6 @@ public class App extends Application {
     private static Activity aliveActiviity;
 
     private static boolean volumeShowUI;
-
-    EventsReceiver eventsReceiver;
 
     private static String uinputDevice;
     private static Integer uinputId;
@@ -130,7 +119,7 @@ public class App extends Application {
             context.startService(new Intent(context, ConnectionService.class));
         }
 
-        eventsReceiver = new EventsReceiver();
+        EventsReceiver eventsReceiver = new EventsReceiver();
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         registerReceiver(eventsReceiver, intentFilter);

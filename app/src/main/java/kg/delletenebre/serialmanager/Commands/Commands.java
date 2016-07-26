@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -221,17 +222,21 @@ public class Commands {
         Context context = App.getContext();
         List<String> preferences = new ArrayList<>();
 
-        File prefsDir = new File(context.getFilesDir().getParent(), "/shared_prefs/");
-        if (prefsDir.exists()) {
-            for (File f : prefsDir.listFiles()) {
-                if (f.isFile()) {
-                    String uuid = f.getName();
-                    uuid = uuid.substring(0, uuid.length() - 4);
-                    if (Pattern.matches("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}", uuid)) {
-                        preferences.add(uuid);
+        try {
+            File prefsDir = new File(context.getFilesDir().getParent(), "/shared_prefs/");
+            if (prefsDir.exists()) {
+                for (File f : prefsDir.listFiles()) {
+                    if (f.isFile()) {
+                        String uuid = f.getName();
+                        uuid = uuid.substring(0, uuid.length() - 4);
+                        if (Pattern.matches("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}", uuid)) {
+                            preferences.add(uuid);
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return preferences;

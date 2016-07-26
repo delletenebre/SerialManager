@@ -15,6 +15,8 @@ import android.widget.TextView;
 import java.util.Collections;
 
 import kg.delletenebre.serialmanager.App;
+import kg.delletenebre.serialmanager.ConnectionService;
+import kg.delletenebre.serialmanager.Gpio;
 import kg.delletenebre.serialmanager.R;
 import kg.delletenebre.serialmanager.helper.ItemTouchHelperAdapter;
 
@@ -82,6 +84,9 @@ public class CommandsListAdapter extends RecyclerView.Adapter<CommandsListAdapte
         int position = getItemPositionById(command.getId());
         if (position > -1) {
             if (database.update(command) > 0) {
+                Gpio.destroyGpioByKey(Commands.getCommands().get(position).getKey(), false);
+                Gpio.createGpioByKey(command.getKey());
+
                 Commands.getCommands().set(position, command);
                 notifyItemChanged(position);
             }
@@ -92,7 +97,10 @@ public class CommandsListAdapter extends RecyclerView.Adapter<CommandsListAdapte
         database.updatePositions(Commands.getCommands());
         int position = getItemPositionById(id);
         if (position > -1) {
+            Gpio.destroyGpioByKey(Commands.getCommands().get(position).getKey(), false);
+
             Commands.getCommands().remove(position);
+
             notifyItemRemoved(position);
             notifyItemRangeChanged(position, getItemCount());
         }

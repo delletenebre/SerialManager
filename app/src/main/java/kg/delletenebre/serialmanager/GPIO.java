@@ -1,22 +1,26 @@
 package kg.delletenebre.serialmanager;
 
+import android.content.Intent;
+import android.os.Handler;
 import android.util.Log;
-
-import com.stericson.RootShell.RootShell;
-import com.stericson.RootShell.execution.Command;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import kg.delletenebre.serialmanager.Commands.Command;
 import kg.delletenebre.serialmanager.Commands.Commands;
 
 public class Gpio extends Thread {
+    private final static String TAG = "GPIO";
 
     public String port;
     public int pin;
-    public String direction = "";
     int activeValue = 0;
     int lastValue = 1;
 
@@ -32,9 +36,11 @@ public class Gpio extends Thread {
     private static boolean generateIOEvents = true;
     private static boolean generateButtonEvents = true;
 
+    private static Map<String, Gpio> gpios = new HashMap<>();
+
     public Gpio(int pin, String direction) {
-        this.port = "gpio" + pin;
         this.pin = pin;
+        this.port = "gpio" + pin;
 
         initPin(direction);
     }
@@ -45,41 +51,47 @@ public class Gpio extends Thread {
 
             if (currentValue == activeValue) {
                 pressedTime = System.currentTimeMillis();
-                if (!buttonActive && (System.currentTimeMillis() - releasedTime) > debounce) {
-                    buttonActive = true;
-                    buttonTimer = System.currentTimeMillis();
-                    if (generateIOEvents) {
-                        Commands.processReceivedData(
-                                String.format(Locale.getDefault(), "<%s:%d>", port, currentValue));
-                    }
-                }
 
-                if (System.currentTimeMillis() - buttonTimer > longPressDelay
-                        && !longPressActive) {
-
-                    longPressActive = true;
-                    if (generateButtonEvents) {
-                        Commands.processReceivedData(
-                                String.format(Locale.getDefault(), "<%s:%s>", port, "longPress"));
+                if ((System.currentTimeMillis() - releasedTime) > debounce) {
+                    if (!buttonActive) {
+                        buttonActive = true;
+                        buttonTimer = System.currentTimeMillis();
+                        if (generateIOEvents) {
+                            Commands.processReceivedData(
+                                    String.format(Locale.getDefault(), "<%s:%d>", port, currentValue));
+                        }
                     }
 
+                    if (System.currentTimeMillis() - buttonTimer > longPressDelay
+                            && !longPressActive) {
+
+                        longPressActive = true;
+                        if (generateButtonEvents) {
+                            Commands.processReceivedData(
+                                    String.format(Locale.getDefault(), "<%s:%s>", port, "hold"));
+                        }
+
+                    }
                 }
 
             } else {
                 releasedTime = System.currentTimeMillis();
-                if (buttonActive && (System.currentTimeMillis() - pressedTime) > debounce) {
-                    if (longPressActive) {
-                        longPressActive = false;
-                    } else if (generateButtonEvents) {
-                        Commands.processReceivedData(
-                                String.format(Locale.getDefault(), "<%s:%s>", port, "click"));
-                    }
 
-                    if (generateIOEvents) {
-                        Commands.processReceivedData(
-                                String.format(Locale.getDefault(), "<%s:%d>", port, currentValue));
+                if ((System.currentTimeMillis() - pressedTime) > debounce) {
+                    if (buttonActive) {
+                        if (longPressActive) {
+                            longPressActive = false;
+                        } else if (generateButtonEvents) {
+                            Commands.processReceivedData(
+                                    String.format(Locale.getDefault(), "<%s:%s>", port, "click"));
+                        }
+
+                        if (generateIOEvents) {
+                            Commands.processReceivedData(
+                                    String.format(Locale.getDefault(), "<%s:%d>", port, currentValue));
+                        }
+                        buttonActive = false;
                     }
-                    buttonActive = false;
                 }
             }
         }
@@ -106,23 +118,19 @@ public class Gpio extends Thread {
     //get direction of gpio
     public String getDirection()
     {
+        String command = String.format("cat /sys/class/gpio/%s/direction",this.port);
         try {
-            Command command = new Command(0, String.format("cat /sys/class/gpio/%s/direction",this.port)) {
-                @Override
-                public void commandOutput(int id, String line) {
-                    direction = line;
+            Process p = Runtime.getRuntime().exec(new String[] {"su", "-c", command});
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            StringBuilder text = new StringBuilder();
+            String line;
+            while((line = reader.readLine()) != null) {
+                text.append(line);
+                text.append("\n");
+            }
 
-                    //MUST call the super method when overriding!
-                    super.commandOutput(id, line);
-                }
-            };
-
-            RootShell.getShell(true).add(command);
-
-            return direction;
-        } catch (Exception e) {
-            e.printStackTrace();
-            direction = "";
+            return text.toString();
+        } catch (IOException e) {
             return "";
         }
     }
@@ -131,9 +139,8 @@ public class Gpio extends Thread {
     // test if gpio is configure
     public int getValue()
     {
-        String command = String.format("cat /sys/class/gpio/%s/value",this.port);
         try {
-            Process p = Runtime.getRuntime().exec(new String[] {"su", "-c", command});
+            Process p = Runtime.getRuntime().exec(String.format("cat /sys/class/gpio/%s/value", this.port));
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
             StringBuilder text = new StringBuilder();
             String line;
@@ -143,7 +150,7 @@ public class Gpio extends Thread {
             }
             try {
                 String retour= text.toString();
-                if(retour.equals("")){
+                if (retour.equals("")){
                     return -1;
                 } else 	{
                     return Integer.parseInt(retour.substring(0, 1));
@@ -181,9 +188,11 @@ public class Gpio extends Thread {
 
     //export gpio
     public boolean activatePin(){
-        String command = String.format("echo %d > /sys/class/gpio/export", this.pin);
         try {
-            Runtime.getRuntime().exec(new String[] {"su", "-c", command});
+            Runtime.getRuntime().exec(new String[] {"su", "-c",
+                    String.format("echo %d > /sys/class/gpio/export", this.pin)});
+            Runtime.getRuntime().exec(new String[] {"su", "-c",
+                    String.format("chmod 0777 /sys/class/gpio/%s", this.port)});
             return true;
         } catch (IOException e) {
             return false;
@@ -244,5 +253,119 @@ public class Gpio extends Thread {
         generateButtonEvents = App.getPrefs().getBoolean("gpio_as_button", true);
 
         return retour;
+    }
+
+
+
+    public static void createGpiosFromCommands() {
+        for (Command command: Commands.getCommands()) {
+            createGpioByKey(command.getKey());
+        }
+    }
+
+    public static void createGpioByKey(final String key) {
+        final int pin = getGpioNumberFromCommandKey(key);
+
+        if (pin > -1 && !gpios.containsKey(key)) {
+            gpios.put(key, new Gpio(pin, "in"));
+            gpios.get(key).start();
+
+            if (App.isDebug()) {
+                Log.d(TAG, "pin created: " + String.valueOf(pin));
+            }
+        }
+    }
+
+    private static int getGpioNumberFromCommandKey(String key) {
+        final Pattern pattern = Pattern.compile("^gpio(\\d+?)$");
+        final Matcher matcher = pattern.matcher(key);
+        if (matcher.find()) {
+            if (App.isDebug()) {
+                Log.d(TAG, "pin parsed: " + matcher.group(1));
+            }
+
+            try {
+                return Integer.parseInt(matcher.group(1));
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return -1;
+    }
+
+//    public static void createGpioByKey(String key) { // for geekbox
+//        final Pattern pattern = Pattern.compile("^gpio(\\d+?)\\_([a-d]+?)(\\d+?)$",
+//                Pattern.CASE_INSENSITIVE);
+//        final Matcher matcher = pattern.matcher(key);
+//        if (matcher.find()) {
+//            if (App.isDebug()) {
+//                Log.d(TAG, "parsed from command: " + matcher.group(1) + "_" + matcher.group(2)
+//                        + matcher.group(3));
+//            }
+//
+//            int pin = -1;
+//            try {
+//                int x = 32 * Integer.parseInt(matcher.group(1));
+//                int y = 8;
+//                switch (matcher.group(2).toLowerCase()) {
+//                    case "a":
+//                        y *= 0;
+//                        break;
+//                    case "b":
+//                        y *= 1;
+//                        break;
+//                    case "c":
+//                        y *= 2;
+//                        break;
+//                    case "d":
+//                        y *= 3;
+//                        break;
+//                }
+//                int z = Integer.parseInt(matcher.group(3));
+//
+//                pin = x + y + z;
+//            } catch (NumberFormatException e) {
+//                e.printStackTrace();
+//            }
+//
+//            if (pin > -1) {
+//                destroyGpioByKey(key);
+//
+//                gpios.put(key, new Gpio(pin, key, "in"));
+//                gpios.get(key).start();
+//
+//
+//                if (App.isDebug()) {
+//                    Log.d(TAG, "pin created: " + String.valueOf(pin));
+//                }
+//            }
+//        }
+//    }
+
+    public static void destroyGpios() {
+        if (gpios.size() > 0) {
+            for (Map.Entry<String, Gpio> entry : gpios.entrySet()) {
+                entry.getValue().interrupt();
+                gpios.remove(entry.getKey());
+            }
+        }
+    }
+
+    public static void destroyGpioByKey(String key, boolean forced) {
+        int countSameKey = 0;
+
+        if (!forced) {
+            for (Command command : Commands.getCommands()) {
+                if (command.getKey().equals(key)) {
+                    countSameKey++;
+                }
+            }
+        }
+
+        if (gpios.containsKey(key) && countSameKey < 2) {
+            gpios.get(key).interrupt();
+            gpios.remove(key);
+        }
     }
 }

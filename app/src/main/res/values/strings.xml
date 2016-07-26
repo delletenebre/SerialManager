@@ -440,7 +440,7 @@
     <string name="pref_title_gpio_as_io">Generate state change events</string>
     <string name="pref_summary_gpio_as_io">If enabled, the GPIO state change generate:\n&lt;gpioX:0&gt; and &lt;gpioX:1&gt;</string>
     <string name="pref_title_gpio_as_buttons">Generate button events</string>
-    <string name="pref_summary_gpio_as_buttons">If enabled, the GPIO state change generate:\n&lt;gpioX:click&gt; and &lt;gpioX:longPress&gt;\nthat allows to use GPIO ports as buttons</string>
+    <string name="pref_summary_gpio_as_buttons">If enabled, the GPIO state change generate:\n&lt;gpioX:click&gt; and &lt;gpioX:hold&gt;\nthat allows to use GPIO ports as buttons</string>
     <string name="pref_title_gpio_debounce">Debounce delay (ms)</string>
-    <string name="pref_title_long_press_delay">Long press delay (ms)</string>
+    <string name="pref_title_long_press_delay">Hold (long press) delay (ms)</string>
 </resources>
