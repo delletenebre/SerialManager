@@ -201,6 +201,8 @@
 
 
     <!-- CATEGORY GPIO -->
+    <string name="pref_title_gpio_use_interrupt">Использовать GPIO прерывания</string>
+    <string name="pref_summary_gpio_use_interrupt">Позволяет существенно снизить нагрузку на CPU, однако не все платы поддерживают данную возможность\ngpioX/edge = both</string>
     <string name="pref_title_gpio_as_io">Генерировать события изменения состояния</string>
     <string name="pref_summary_gpio_as_io">Если опция включена, то при изменении состояния GPIO будут сгенерированы команды:\n&lt;gpioX:0&gt; и &lt;gpioX:1&gt;</string>
     <string name="pref_title_gpio_as_buttons">Генерировать события кнопки</string>

@@ -154,10 +154,10 @@ public class App extends Application {
 
 
     public static void updateSettings() {
-        Gpio.setDebounce(Integer.parseInt(prefs.getString("gpio_debounce", "20")));
-        Gpio.setLongPressDelay(Integer.parseInt(prefs.getString("gpio_long_press_delay", "500")));
-        Gpio.setGenerateIOEvents(prefs.getBoolean("gpio_as_io", true));
-        Gpio.setGenerateButtonEvents(prefs.getBoolean("gpio_as_button", true));
+        NativeGpio.setDebounce(Integer.parseInt(prefs.getString("gpio_debounce", "20")));
+        NativeGpio.setLongPressDelay(Integer.parseInt(prefs.getString("gpio_long_press_delay", "500")));
+        NativeGpio.setGenerateIOEvents(prefs.getBoolean("gpio_as_io", true));
+        NativeGpio.setGenerateButtonEvents(prefs.getBoolean("gpio_as_button", true));
 
         volumeShowUI = prefs.getBoolean("volumeShowUI", true);
         debug = prefs.getBoolean("debug", false);

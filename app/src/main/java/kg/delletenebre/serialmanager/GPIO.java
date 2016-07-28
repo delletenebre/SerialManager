@@ -38,6 +38,11 @@ public class Gpio extends Thread {
 
     private static Map<String, Gpio> gpios = new HashMap<>();
 
+//    static {
+//        System.loadLibrary("serial-manager");
+//    }
+//    private native int nativeGpioInitializate(int number, String direction);
+
     public Gpio(int pin, String direction) {
         this.pin = pin;
         this.port = "gpio" + pin;

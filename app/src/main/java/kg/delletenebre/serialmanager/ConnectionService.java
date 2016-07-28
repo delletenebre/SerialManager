@@ -138,7 +138,7 @@ public class ConnectionService extends Service implements SensorEventListener {
 
         sendInfoScreenState(null);
 
-        Gpio.createGpiosFromCommands();
+        NativeGpio.createGpiosFromCommands();
 
         if (App.isDebug()) {
             Log.d(TAG, "CREATED");
@@ -148,8 +148,6 @@ public class ConnectionService extends Service implements SensorEventListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        Gpio.destroyGpios();
 
         closeUsbConnections();
         onBluetoothDisabled();
@@ -168,6 +166,8 @@ public class ConnectionService extends Service implements SensorEventListener {
         }
 
         App.destroyUinput();
+
+        NativeGpio.destroyGpios();
 
         if (App.isDebug()) {
             Log.i(TAG, "Service: onDestroy");

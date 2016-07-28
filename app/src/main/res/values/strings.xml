@@ -437,6 +437,8 @@
 
 
     <!-- CATEGORY GPIO -->
+    <string name="pref_title_gpio_use_interrupt">Enable GPIO interrupts</string>
+    <string name="pref_summary_gpio_use_interrupt">Significantly reduce the load on CPU. Not all boards support this feature\ngpioX/edge = both</string>
     <string name="pref_title_gpio_as_io">Generate state change events</string>
     <string name="pref_summary_gpio_as_io">If enabled, the GPIO state change generate:\n&lt;gpioX:0&gt; and &lt;gpioX:1&gt;</string>
     <string name="pref_title_gpio_as_buttons">Generate button events</string>

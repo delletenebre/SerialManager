@@ -152,6 +152,12 @@
         android:title="@string/pref_category_gpio" >
 
         <CheckBoxPreference
+            android:key="gpio_use_interrupt"
+            android:defaultValue="true"
+            android:title="@string/pref_title_gpio_use_interrupt"
+            android:summary="@string/pref_summary_gpio_use_interrupt" />
+
+        <CheckBoxPreference
             android:key="gpio_as_io"
             android:defaultValue="true"
             android:title="@string/pref_title_gpio_as_io"
