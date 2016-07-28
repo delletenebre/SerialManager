@@ -210,3 +210,25 @@ Java_kg_delletenebre_serialmanager_NativeGpio_unexport(JNIEnv *env, jobject inst
     gpio_unexport(pin);
 
 }
+
+JNIEXPORT jboolean JNICALL
+Java_kg_delletenebre_serialmanager_NativeGpio_exportAndDirection(JNIEnv *env, jclass type, jint pin,
+                                                                 jstring direction_) {
+    const char *direction = (*env)->GetStringUTFChars(env, direction_, (jboolean *)0);
+    int export, io;
+
+    export = gpio_export(pin);
+        io = gpio_set_direction(pin, direction);
+
+    (*env)->ReleaseStringUTFChars(env, direction_, direction);
+
+    return (jboolean) ((export > -1) && (io > -1));
+}
+
+JNIEXPORT void JNICALL
+Java_kg_delletenebre_serialmanager_NativeGpio_setValue(JNIEnv *env, jclass type, jint pin,
+                                                       jint value) {
+
+    gpio_set_value(pin, value);
+
+}

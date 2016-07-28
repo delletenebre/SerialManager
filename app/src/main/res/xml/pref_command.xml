@@ -108,6 +108,15 @@
             android:positiveButtonText="@null"
             android:title="@string/pref_title_command_action_system" />
 
+        <EditTextPreference
+            android:key="action_gpio"
+            android:defaultValue="gpioX:1"
+            android:capitalize="none"
+            android:inputType="text"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_command_action_gpio" />
+
         <PreferenceCategory
             android:title="@string/pref_category_title_notification">
 

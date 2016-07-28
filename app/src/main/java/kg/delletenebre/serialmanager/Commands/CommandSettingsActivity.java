@@ -100,6 +100,7 @@ public class CommandSettingsActivity extends AppCompatActivity {
         actions.add("action_shell");
         actions.add("action_send");
         actions.add("action_system");
+        actions.add("action_gpio");
 
         editor.putString("key", "");
         editor.putString("value", "");
@@ -248,6 +249,7 @@ public class CommandSettingsActivity extends AppCompatActivity {
             actionPreferences.put("shell", findPreference("action_shell"));
             actionPreferences.put("send", findPreference("action_send"));
             actionPreferences.put("system", findPreference("action_system"));
+            actionPreferences.put("gpio", findPreference("action_gpio"));
 
             bindPreferenceSummaryToValue(keyPreference, COMMAND_PREFERENCE_NAME);
             bindPreferenceSummaryToValue(valuePreference, COMMAND_PREFERENCE_NAME);
@@ -314,6 +316,7 @@ public class CommandSettingsActivity extends AppCompatActivity {
                     break;
                 case "shell":
                 case "send":
+                case "gpio":
                     action = ((EditTextPreference) actionPreferences.get(category)).getText();
                     break;
                 default:

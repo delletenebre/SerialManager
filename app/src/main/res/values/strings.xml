@@ -157,6 +157,7 @@
     <string name="run_shell" translatable="false">Run Shell</string>
     <string name="send_command">Send command</string>
     <string name="system_management">System Management</string>
+    <string name="gpio" translatable="false">GPIO</string>
     <string-array name="pref_command_action_category_titles" translatable="false">
         <item>@string/no_action</item>
         <item>@string/navigation_root</item>
@@ -166,6 +167,7 @@
         <item>@string/run_shell_root</item>
         <item>@string/send_command</item>
         <item>@string/system_management</item>
+        <item>@string/gpio</item>
     </string-array>
     <string-array name="pref_command_action_category_values" translatable="false">
         <item>none</item>
@@ -176,6 +178,7 @@
         <item>shell</item>
         <item>send</item>
         <item>system</item>
+        <item>gpio</item>
     </string-array>
 
     <string name="pref_title_command_action_navigation" translatable="false">@string/navigation</string>
@@ -281,6 +284,8 @@
         <item>reboot</item>
         <item>set_brightness</item>
     </string-array>
+
+    <string name="pref_title_command_action_gpio">@string/gpio</string>
 
 
     <!-- Universal settings preferences -->

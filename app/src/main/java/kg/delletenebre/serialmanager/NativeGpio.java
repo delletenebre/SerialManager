@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import kg.delletenebre.serialmanager.Commands.Command;
 import kg.delletenebre.serialmanager.Commands.Commands;
+import xdroid.toaster.Toaster;
 
 public class NativeGpio extends Thread {
     private final static String TAG = "GPIO";
@@ -54,10 +55,8 @@ public class NativeGpio extends Thread {
     public native int pool(int pin);
     public native int initializate(int pin, String direction, boolean useInterrupt);
     public native void unexport(int pin);
-
-    public NativeGpio(int pin, String direction) {
-        createPin(pin, direction);
-    }
+    public native static boolean exportAndDirection(int pin, String direction);
+    public native static void setValue(int pin, int value);
 
     public NativeGpio(int pin) {
         createPin(pin, "in");
@@ -76,7 +75,7 @@ public class NativeGpio extends Thread {
 
         initializate(pin, direction, useInterrupt);
 
-        lastValue = getValue();
+        lastValue = getValue(pin);
         if (lastValue == 0) {
             activeValue = 1;
         }
@@ -86,7 +85,7 @@ public class NativeGpio extends Thread {
         int pool = (useInterrupt) ? pool(pin) : -1;
 
         while (!Thread.currentThread().isInterrupted()) {
-            int currentValue = useInterrupt ? read(pool) : getValue();
+            int currentValue = useInterrupt ? read(pool) : getValue(pin);
 
             if (currentValue > -1 && currentValue != lastValue
                     && (System.currentTimeMillis() - changeStateTime) > debounce) {
@@ -115,9 +114,9 @@ public class NativeGpio extends Thread {
         unexport(pin);
     }
 
-    private int getValue() {
+    private static int getValue(int pin) {
         try {
-            Process p = Runtime.getRuntime().exec(String.format("cat /sys/class/gpio/%s/value", this.name));
+            Process p = Runtime.getRuntime().exec(String.format("cat /sys/class/gpio/gpio%s/value", pin));
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
             StringBuilder text = new StringBuilder();
             String line;
@@ -137,6 +136,45 @@ public class NativeGpio extends Thread {
             }
         } catch (IOException e) {
             return -1;
+        }
+    }
+
+    public static String getDirection(int pin) {
+        String command = String.format("cat /sys/class/gpio/gpio%s/direction", pin);
+        try {
+            Process p = Runtime.getRuntime().exec(command);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            StringBuilder text = new StringBuilder();
+            String line;
+            while((line = reader.readLine()) != null) {
+                text.append(line);
+                text.append("\n");
+            }
+
+            return text.toString();
+        } catch (IOException e) {
+            return "";
+        }
+    }
+
+    public static void setState(int pin, String state) {
+        if (pin > 0) {
+            String direction = getDirection(pin);
+
+            if (direction.isEmpty() || direction.equals("in")) {
+                if (!exportAndDirection(pin, state.equals("invert") ? "low" : state)) {
+                    Toaster.toast("GPIO: error");
+                }
+            } else if (state.equals("low") || state.equals("high")) {
+                setValue(pin, state.equals("low") ? 0 : 1);
+            } else if (state.equals("invert")) {
+                int value = getValue(pin);
+                if (value > -1) {
+                    setValue(pin, (value == 1) ? 0 : 1);
+                } else {
+                    Toaster.toast("GPIO: value error");
+                }
+            }
         }
     }
 

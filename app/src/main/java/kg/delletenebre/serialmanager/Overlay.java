@@ -35,7 +35,7 @@ import xdroid.toaster.Toaster;
 
 public class Overlay implements Handler.Callback {
     private static final String TAG = "** HUD **";
-    private static final Handler sHandler = new Handler(Looper.getMainLooper(), new Overlay());
+
     private static final WindowManager windowManager =
             (WindowManager) App.getContext().getSystemService(Context.WINDOW_SERVICE);
 
@@ -49,7 +49,7 @@ public class Overlay implements Handler.Callback {
         List<Object> data = new ArrayList<>();
         data.add(command);
         data.add(value);
-        Message.obtain(sHandler, 0, data).sendToTarget();
+        Message.obtain(new Handler(Looper.getMainLooper(), new Overlay()), 0, data).sendToTarget();
     }
 
     @Override
@@ -68,8 +68,8 @@ public class Overlay implements Handler.Callback {
 
         DisplayMetrics displaymetrics = new DisplayMetrics();
         windowManager.getDefaultDisplay().getMetrics(displaymetrics);
-        int screenWidth = displaymetrics.widthPixels;
-        int screenHeight = displaymetrics.heightPixels;
+//        int screenWidth = displaymetrics.widthPixels;
+//        int screenHeight = displaymetrics.heightPixels;
         int layoutHeight = overlaySettings.isHeightEqualsStatusBar()
                 ? App.getStatusBarHeight()
                 : WindowManager.LayoutParams.WRAP_CONTENT;
@@ -143,6 +143,7 @@ public class Overlay implements Handler.Callback {
         overlayView.post(new Runnable() {
             @Override
             public void run() {
+                Log.d(TAG, "HIDE, show");
                 overlayView.setTranslationY(-overlayHeight);
                 overlayView.animate().translationY(0).setListener(new AnimatorListenerAdapter() {
                     @Override
@@ -170,6 +171,7 @@ public class Overlay implements Handler.Callback {
             overlayView.post(new Runnable() {
                 @Override
                 public void run() {
+                    Log.d(TAG, "HIDE, hide");
                     overlayView.animate().translationY(-overlayHeight).setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
@@ -178,6 +180,7 @@ public class Overlay implements Handler.Callback {
 
                             if (overlayView.getWindowToken() != null) {
                                 windowManager.removeView(overlayView);
+                                overlayView = null;
                             }
                         }
                     });

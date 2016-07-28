@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import kg.delletenebre.serialmanager.App;
 import kg.delletenebre.serialmanager.ConnectionService;
 import kg.delletenebre.serialmanager.MainActivity;
+import kg.delletenebre.serialmanager.NativeGpio;
 import kg.delletenebre.serialmanager.Overlay;
 import kg.delletenebre.serialmanager.Preferences.AppChooserPreference;
 import kg.delletenebre.serialmanager.R;
@@ -80,7 +81,7 @@ public class Commands {
 
             if (activity != null) {
                 if (App.isDebug()) {
-                    Log.d(TAG, "Activity alive. Showing toast message");
+                    Log.d(TAG, "Activity is alive. Showing toast message");
                 }
 
                 Toaster.toast(String.format(
@@ -197,6 +198,19 @@ public class Commands {
                         case "set_brightness":
                             App.setScreenBrightness(value);
                             break;
+                    }
+                } else if (category.equals("gpio")) { // GPIO
+                    final Pattern pattern = Pattern.compile("^gpio(\\d+?):([low,high,invert]+?)$");
+                    final Matcher matcher = pattern.matcher(action);
+                    if (matcher.find()) {
+                        int pin = -1;
+                        try {
+                            pin = Integer.parseInt(matcher.group(1));
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                        }
+
+                        NativeGpio.setState(pin, matcher.group(2));
                     }
                 }
 
