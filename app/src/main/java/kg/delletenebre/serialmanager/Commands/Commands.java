@@ -131,11 +131,11 @@ public class Commands {
 
             String category = command.getCategory();
             String action = command.getAction();
-
-            if (App.isDebug()) {
-                Log.d(TAG, "Current command [key:" + command.getKey() + "/value:" + command.getValue() + "]");
-                Log.d(TAG, "Current command [category:" + category + "/action:" + action + "]");
-            }
+//
+//            if (App.isDebug()) {
+//                Log.d(TAG, "Current command [key:" + command.getKey() + "/value:" + command.getValue() + "]");
+//                Log.d(TAG, "Current command [category:" + category + "/action:" + action + "]");
+//            }
 
             if (command.getKey().equals(key)
                     && (command.getValue().isEmpty()

@@ -8,8 +8,8 @@ model {
             applicationId "kg.delletenebre.serialmanager"
             minSdkVersion.apiLevel 14
             targetSdkVersion.apiLevel 24
-            versionCode 37
-            versionName "1.6.1"
+            versionCode 40
+            versionName "1.6.2"
         }
         buildTypes {
             release {

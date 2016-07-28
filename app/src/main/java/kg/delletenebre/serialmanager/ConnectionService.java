@@ -222,7 +222,6 @@ public class ConnectionService extends Service implements SensorEventListener {
             String data = new String(bytes, 0, bytes.length);
             if (App.isDebug()) {
                 Log.d("Receive [ " + type + " ]", data);
-                Log.d("******", String.valueOf(data.contains(App.LINE_SEPARATOR)));
             }
 
             receivedDataBuffer.put(type, receivedDataBuffer.get(type) + data);
@@ -667,7 +666,6 @@ public class ConnectionService extends Service implements SensorEventListener {
             } else {
                 if (bt.isBluetoothEnabled()) {
                     if (!bt.isServiceAvailable()) {
-                        bt.setupService();
                         bt.startService(BluetoothState.DEVICE_OTHER);
                         bt.setBluetoothStateListener(new BluetoothSPP.BluetoothStateListener() {
                             public void onServiceStateChanged(int state) {

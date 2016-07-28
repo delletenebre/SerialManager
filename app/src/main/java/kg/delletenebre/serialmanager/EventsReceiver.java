@@ -40,7 +40,7 @@ public class EventsReceiver extends BroadcastReceiver {
                             context.startService(new Intent(context, ConnectionService.class));
                         }
                     }
-                }, 2000);
+                }, 7000);
 
                 break;
 
