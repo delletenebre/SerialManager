@@ -124,8 +124,7 @@ public class WidgetReceiveSettings extends AppCompatActivity {
             setHasOptionsMenu(true);
 
             bindPreferenceSummaryToValue(findPreference("key"), widgetId);
-            bindPreferenceSummaryToValue(findPreference("prefix"), widgetId);
-            bindPreferenceSummaryToValue(findPreference("suffix"), widgetId);
+            bindPreferenceSummaryToValue(findPreference("text"), widgetId);
             bindPreferenceSummaryToValue(findPreference("position"), widgetId);
             bindPreferenceSummaryToValue(findPreference("fontSize"), widgetId);
             bindPreferenceSummaryToValue(findPreference("textAlign"), widgetId);

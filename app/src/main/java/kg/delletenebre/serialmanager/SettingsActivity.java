@@ -1,7 +1,6 @@
 package kg.delletenebre.serialmanager;
 
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;

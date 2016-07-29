@@ -14,8 +14,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import kg.delletenebre.serialmanager.R;
 import kg.delletenebre.serialmanager.ConnectionService;
+import kg.delletenebre.serialmanager.R;
 
 public class UsbDevicesListPreference extends ListPreference {
     public UsbDevicesListPreference(Context context, AttributeSet attrs) {

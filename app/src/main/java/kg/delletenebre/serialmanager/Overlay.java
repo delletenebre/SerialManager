@@ -3,15 +3,11 @@ package kg.delletenebre.serialmanager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -19,19 +15,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
-import android.widget.TableLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import kg.delletenebre.serialmanager.Commands.Command;
-import xdroid.toaster.Toaster;
 
 public class Overlay implements Handler.Callback {
     private static final String TAG = "** HUD **";
@@ -57,12 +46,6 @@ public class Overlay implements Handler.Callback {
         List<Object> data = (List<Object>) msg.obj;
         Command command = (Command) data.get(0);
         Command.Overlay overlaySettings = command.getOverlay();
-        String value = (String) data.get(1);
-
-        String text = overlaySettings.getText();
-        text = text.replaceAll("(<key>)", command.getKey());
-        text = text.replaceAll("(<value>)", value);
-
 
         Context context = App.getContext();
 
@@ -107,7 +90,8 @@ public class Overlay implements Handler.Callback {
             textView.setTextColor(overlaySettings.getFontColor());
             textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, overlaySettings.getFontSize());
             textView.setGravity(getTextAlignment(overlaySettings.getTextAlign()));
-            textView.setText(text);
+            textView.setText(App.prepareText(
+                    overlaySettings.getText(), command.getKey(), (String) data.get(1)));
             int fontSize = (int) textView.getTextSize();
             int paddingLR = fontSize / 2;
             int paddingTB = overlaySettings.isHeightEqualsStatusBar() ? 0 : paddingLR;
@@ -143,7 +127,6 @@ public class Overlay implements Handler.Callback {
         overlayView.post(new Runnable() {
             @Override
             public void run() {
-                Log.d(TAG, "HIDE, show");
                 overlayView.setTranslationY(-overlayHeight);
                 overlayView.animate().translationY(0).setListener(new AnimatorListenerAdapter() {
                     @Override
@@ -171,19 +154,27 @@ public class Overlay implements Handler.Callback {
             overlayView.post(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d(TAG, "HIDE, hide");
-                    overlayView.animate().translationY(-overlayHeight).setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            overlayView.setVisibility(View.GONE);
+                    try {
+                        overlayView.animate().translationY(-overlayHeight).setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                try {
+                                    overlayView.setVisibility(View.GONE);
 
-                            if (overlayView.getWindowToken() != null) {
-                                windowManager.removeView(overlayView);
-                                overlayView = null;
+                                    if (overlayView.getWindowToken() != null) {
+                                        windowManager.removeView(overlayView);
+                                        overlayView = null;
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
+                                super.onAnimationEnd(animation);
                             }
-                        }
-                    });
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             });
         }

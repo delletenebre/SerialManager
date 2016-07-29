@@ -10,17 +10,9 @@
         android:singleLine="true" />
 
     <EditTextPreference
-        android:key="prefix"
-        android:defaultValue="@string/pref_widget_prefix_default_value"
-        android:title="@string/pref_widget_title_prefix"
-        android:inputType="text"
-        android:selectAllOnFocus="true"
-        android:singleLine="true" />
-
-    <EditTextPreference
-        android:key="suffix"
-        android:defaultValue="@string/pref_widget_suffix_default_value"
-        android:title="@string/pref_widget_title_suffix"
+        android:key="text"
+        android:defaultValue="@string/pref_widget_receive_default_text"
+        android:title="@string/pref_widget_title_text"
         android:inputType="text"
         android:selectAllOnFocus="true"
         android:singleLine="true" />

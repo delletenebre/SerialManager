@@ -1,7 +1,5 @@
 package kg.delletenebre.serialmanager;
 
-import android.content.Intent;
-import android.os.Handler;
 import android.util.Log;
 
 import java.io.BufferedReader;

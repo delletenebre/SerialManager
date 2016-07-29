@@ -146,10 +146,8 @@
     <string name="bottom_left">Внизу слева</string>
     <string name="bottom_center">Внизу по центру</string>
     <string name="bottom_right">Внизу справа</string>
-    <string name="pref_widget_title_prefix">Текст перед полученным значением</string>
-    <string name="pref_widget_prefix_default_value">Например: </string>
-    <string name="pref_widget_title_suffix">Текст после полученного значения</string>
-    <string name="pref_widget_suffix_default_value"> ед.</string>
+    <string name="pref_widget_title_text">Текст</string>
+    <string name="pref_widget_receive_default_text">Данные: %key / %value</string>
     <string name="pref_widget_title_position">Расположение текста</string>
 
     <string name="pref_widget_title_fontSize">Размер шрифта (sp)</string>

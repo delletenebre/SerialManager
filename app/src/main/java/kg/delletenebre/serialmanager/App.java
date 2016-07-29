@@ -17,13 +17,14 @@ import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 
-//import com.squareup.leakcanary.LeakCanary;
-
 import com.stericson.RootShell.RootShell;
 import com.stericson.RootShell.execution.Command;
+import com.udojava.evalex.Expression;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import xdroid.toaster.Toaster;
 
@@ -378,6 +379,100 @@ public class App extends Application {
             result = context.getResources().getDimensionPixelSize(resourceId);
         }
         return result;
+    }
+
+    public static String prepareText(String text, String key, String value) {
+        StringBuffer stringBuffer;
+        Pattern pattern;
+        Matcher matcher;
+
+        text = text
+                .replaceAll("(%key)", key)
+                .replaceAll("(%value)", value);
+        
+        for (int i = 0; i < 3; i++) {
+
+            // **** hex2dec **** //
+            pattern = Pattern.compile("hex2dec\\(([x0-9a-f]+?)\\)", Pattern.CASE_INSENSITIVE);
+            matcher = pattern.matcher(text);
+            stringBuffer = new StringBuffer();
+            while (matcher.find()) {
+                try {
+                    matcher.appendReplacement(stringBuffer,
+                            String.valueOf(Long.parseLong(matcher.group(1).toLowerCase().replaceAll("0x", ""), 16)));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+            matcher.appendTail(stringBuffer);
+            text = stringBuffer.toString();
+
+
+            // **** dec2hex **** //
+            pattern = Pattern.compile("dec2hex\\((\\d+?)\\)", Pattern.CASE_INSENSITIVE);
+            matcher = pattern.matcher(text);
+            stringBuffer = new StringBuffer();
+            while (matcher.find()) {
+                try {
+                    matcher.appendReplacement(stringBuffer, Long.toHexString(Long.valueOf(matcher.group(1))));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+            matcher.appendTail(stringBuffer);
+            text = stringBuffer.toString();
+
+
+            // **** bin2dec **** //
+            pattern = Pattern.compile("bin2dec\\(([01]+?)\\)");
+            matcher = pattern.matcher(text);
+            stringBuffer = new StringBuffer();
+            while (matcher.find()) {
+                try {
+                    matcher.appendReplacement(stringBuffer,
+                            String.valueOf(Long.parseLong(matcher.group(1), 2)));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+            matcher.appendTail(stringBuffer);
+            text = stringBuffer.toString();
+
+
+            // **** dec2bin **** //
+            pattern = Pattern.compile("dec2bin\\((\\d+?)\\)");
+            matcher = pattern.matcher(text);
+            stringBuffer = new StringBuffer();
+            while (matcher.find()) {
+                try {
+                    matcher.appendReplacement(stringBuffer,
+                            Long.toBinaryString(Long.valueOf(matcher.group(1))));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+            matcher.appendTail(stringBuffer);
+            text = stringBuffer.toString();
+
+
+            // **** EvalEx **** //
+            pattern = Pattern.compile("%\\{(.+?)\\}");
+            matcher = pattern.matcher(text);
+            stringBuffer = new StringBuffer();
+            while (matcher.find()) {
+                try {
+                    matcher.appendReplacement(stringBuffer,
+                            String.valueOf(new Expression(matcher.group(1)).eval()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            matcher.appendTail(stringBuffer);
+            text = stringBuffer.toString();
+
+        }
+
+        return text;
     }
 
 

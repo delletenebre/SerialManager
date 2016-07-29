@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import kg.delletenebre.serialmanager.Widget.WidgetSendSettings;

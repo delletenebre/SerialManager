@@ -33,12 +33,9 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import app.akexorcist.bluetoothspp.library.BluetoothSPP;
 import app.akexorcist.bluetoothspp.library.BluetoothState;
-import kg.delletenebre.serialmanager.Commands.Command;
 import kg.delletenebre.serialmanager.Commands.Commands;
 import kg.delletenebre.serialmanager.helper.FileUtils;
 import xdroid.toaster.Toaster;
@@ -67,7 +64,7 @@ public class ConnectionService extends Service implements SensorEventListener {
     static {
         System.loadLibrary("serial-manager");
     }
-    public native int resetUsbDevice(String filename);
+    public static native int resetUsbDevice(String filename);
 
 
     @Override
@@ -562,7 +559,7 @@ public class ConnectionService extends Service implements SensorEventListener {
         }
     }
 
-    private void resetUsbHubs() {
+    public static void resetUsbHubs() {
         try {
             File hubs = new File("/sys/bus/usb/devices").getCanonicalFile();
             if (hubs.isDirectory()) {

@@ -50,9 +50,8 @@ public class WidgetReceive extends AppWidgetProvider {
         int imageViewId = imageViewIds[position];
 
         int backgroundColor = prefs.getInt("backgroundColor", Color.parseColor("#88000000"));
-        // Construct the RemoteViews object
+
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_receive);
-        //views.setTextViewText(R.id.appwidget_text, widgetText);
         views.setInt(R.id.appwidget_container, "setBackgroundColor", backgroundColor);
 
         for (int id : imageViewIds) {
@@ -109,14 +108,11 @@ public class WidgetReceive extends AppWidgetProvider {
 
     public static Bitmap getFontBitmap(Context context, SharedPreferences prefs, String value) {
 
-        String text =
-                prefs.getString("prefix",
-                    context.getString(R.string.pref_widget_prefix_default_value))
-                + value
-                + prefs.getString("suffix",
-                    context.getString(R.string.pref_widget_suffix_default_value));
+        String text = prefs.getString("text",
+                context.getString(R.string.pref_widget_receive_default_text));
 
-        text = StringEscapeUtils.unescapeJava(text);
+        text = StringEscapeUtils.unescapeJava(
+                App.prepareText(text, prefs.getString("key", ""), value));
         String[] textLines = text.split("\n");
 
         int fontSize = Integer.parseInt(prefs.getString("fontSize", "24"));

@@ -8,7 +8,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.KeyEvent;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -23,7 +22,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -200,7 +198,7 @@ public class Commands {
                             break;
                     }
                 } else if (category.equals("gpio")) { // GPIO
-                    final Pattern pattern = Pattern.compile("^gpio(\\d+?):([low,high,invert]+?)$");
+                    final Pattern pattern = Pattern.compile("^gpio(\\d+?):([lowhignvert]+?)$");
                     final Matcher matcher = pattern.matcher(action);
                     if (matcher.find()) {
                         int pin = -1;
