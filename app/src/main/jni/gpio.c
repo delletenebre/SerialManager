@@ -79,6 +79,30 @@ int gpio_set_direction(int pin, const char *direction) {
     return 0;
 }
 
+int gpio_set_active_low(int pin, int active_low) {
+    char command[PATH_MAX];
+    char filepath[PATH_MAX];
+    FILE *file;
+
+    snprintf(filepath, sizeof(filepath), "/sys/class/gpio/gpio%d/active_low", pin);
+
+    snprintf(command, sizeof(command), "su -c \"chmod -R 646 %s\"", filepath);
+    system(command);
+
+    file = fopen(filepath, "w");
+    if (file == NULL) {
+        LOGE("Failed to open %s for writing! @ line %d", filepath, __LINE__);
+        return -1;
+    }
+    fprintf(file, "%d\n", active_low);
+    fclose(file);
+
+    snprintf(command, sizeof(command), "su -c \"chmod -R 644 %s\"", filepath);
+    system(command);
+
+    return 0;
+}
+
 int gpio_set_edge(int pin, const char *edge) {
     char command[PATH_MAX];
     char filepath[PATH_MAX];
@@ -230,5 +254,13 @@ Java_kg_delletenebre_serialmanager_NativeGpio_setValue(JNIEnv *env, jclass type,
                                                        jint value) {
 
     gpio_set_value(pin, value);
+
+}
+
+JNIEXPORT jint JNICALL
+Java_kg_delletenebre_serialmanager_NativeGpio_setActiveLow(JNIEnv *env, jobject instance, jint pin,
+                                                           jint state) {
+
+    return gpio_set_active_low(pin, state);
 
 }

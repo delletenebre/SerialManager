@@ -116,8 +116,8 @@ public class App extends Application {
             Log.d(TAG, "Root not available or access didn't grant");
         }
 
-        if (App.isScreenOn() || !App.getPrefs().getBoolean("stopWhenScreenOff", true)) {
-            context.startService(new Intent(context, ConnectionService.class));
+        if (App.isScreenOn() || !App.getPrefs().getBoolean("start_when_screen_on", true)) {
+            //context.startService(new Intent(context, ConnectionService.class));
         }
 
         EventsReceiver eventsReceiver = new EventsReceiver();
@@ -275,6 +275,18 @@ public class App extends Application {
 
     }
 
+    public static int getIntPreference(String preferenceName, int defaultValue) {
+        int value = defaultValue;
+        try {
+            value = Integer.parseInt(prefs.getString(preferenceName,
+                                     String.valueOf(defaultValue)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return value;
+    }
+
     public static boolean isScreenOn() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
             DisplayManager dm = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
@@ -389,7 +401,7 @@ public class App extends Application {
         text = text
                 .replaceAll("(%key)", key)
                 .replaceAll("(%value)", value);
-        
+
         for (int i = 0; i < 3; i++) {
 
             // **** hex2dec **** //
@@ -453,24 +465,24 @@ public class App extends Application {
             }
             matcher.appendTail(stringBuffer);
             text = stringBuffer.toString();
-
-
-            // **** EvalEx **** //
-            pattern = Pattern.compile("%\\{(.+?)\\}");
-            matcher = pattern.matcher(text);
-            stringBuffer = new StringBuffer();
-            while (matcher.find()) {
-                try {
-                    matcher.appendReplacement(stringBuffer,
-                            String.valueOf(new Expression(matcher.group(1)).eval()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            matcher.appendTail(stringBuffer);
-            text = stringBuffer.toString();
-
         }
+
+
+        // **** EvalEx **** //
+        pattern = Pattern.compile("%\\{(.+?)\\}");
+        matcher = pattern.matcher(text);
+        stringBuffer = new StringBuffer();
+        while (matcher.find()) {
+            try {
+                matcher.appendReplacement(stringBuffer,
+                        String.valueOf(new Expression(matcher.group(1)).eval()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        matcher.appendTail(stringBuffer);
+        text = stringBuffer.toString();
+
 
         return text;
     }

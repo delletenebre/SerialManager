@@ -55,7 +55,12 @@
     <string name="pref_title_send_screen_state">Отправлять состояние экрана</string>
     <string name="pref_summary_send_screen_state">Отправлять состояние экрана включен/выключен\nФормат: {screen:on} {screen:off}</string>
 
+    <string name="pref_title_autostart">Автозапуск при загрузке устройства</string>
+    <string name="pref_title_autostart_delay">Задержка перед запуском (в секундах)</string>
     <string name="pref_title_stop_service_when_screen_off">Останавливать сервис при отключении экрана</string>
+    <string name="pref_title_stop_when_screen_off_delay">Задержка перед остановкой сервиса (в секундах)</string>
+    <string name="pref_title_start_when_screen_on">Запускать сервис при включении экрана</string>
+    <string name="pref_title_start_when_screen_on_delay">Задержка перед запуском сервиса (в секундах)</string>
 
     <!--<string name="pref_title_reconnect">Переподключаться при запуске программы</string>-->
     <!--<string name="pref_summ_reconnect">Завершать текущее соединение и подключаться заново при открытии главного окна программы</string>-->

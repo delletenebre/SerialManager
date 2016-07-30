@@ -108,7 +108,12 @@
     <string name="pref_title_send_screen_state">Send screen state data</string>
     <string name="pref_summary_send_screen_state">Send screen on/off state\nFormat: {screen:on} {screen:off}</string>
 
+    <string name="pref_title_autostart">Autostart on boot</string>
+    <string name="pref_title_autostart_delay">Autostart delay (seconds)</string>
     <string name="pref_title_stop_service_when_screen_off">Stop Service when screen is off</string>
+    <string name="pref_title_stop_when_screen_off_delay">Delay before service stop (seconds)</string>
+    <string name="pref_title_start_when_screen_on">Start Service when screen is on</string>
+    <string name="pref_title_start_when_screen_on_delay">Delay before service start (seconds)</string>
 
     <!--<string name="pref_title_reconnect">Reconnect on app start</string>-->
     <!--<string name="pref_summ_reconnect">Reconnect on app start</string>-->
@@ -376,7 +381,7 @@
     <string name="pref_co_title_enabled">Show notification</string>
 
     <string name="pref_co_title_text">Text</string>
-    <string name="pref_co_default_text" translatable="false">&lt;key&gt;: &lt;value&gt;</string>
+    <string name="pref_co_default_text" translatable="false">%key: %value</string>
 
     <string name="pref_co_title_timer">Hide delay (in ms)</string>
     <string name="pref_co_default_timer" translatable="false">2000</string>

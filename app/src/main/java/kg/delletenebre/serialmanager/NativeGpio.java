@@ -57,9 +57,14 @@ public class NativeGpio extends Thread {
     public native void unexport(int pin);
     public native static boolean exportAndDirection(int pin, String direction);
     public native static void setValue(int pin, int value);
+    public native int setActiveLow(int pin, int state);
 
     public NativeGpio(int pin) {
         createPin(pin, "in");
+    }
+
+    public NativeGpio(int pin, int active_low) {
+        createPin(pin, "in", active_low);
     }
 
     private void createPin(int pin, String direction) {
@@ -79,6 +84,11 @@ public class NativeGpio extends Thread {
         if (lastValue == 0) {
             activeValue = 1;
         }
+    }
+
+    private void createPin(int pin, String direction, int activeLowState) {
+        createPin(pin, direction);
+        setActiveLow(pin, activeLowState);
     }
 
     public void run() {
@@ -204,10 +214,12 @@ public class NativeGpio extends Thread {
     }
 
     public static void createGpioByKey(final String key) {
-        final int pin = getGpioNumberFromCommandKey(key);
+        final int pin = getGpioFromCommandKey(key);
+        //pin[0] = pin_number
+        //pin[1] = active_low
 
         if (pin > -1 && !gpios.containsKey(key)) {
-            gpios.put(key, new NativeGpio(pin));
+            gpios.put(key, new NativeGpio(pin, 0));
             gpios.get(key).start();
 
             if (App.isDebug()) {
@@ -216,9 +228,23 @@ public class NativeGpio extends Thread {
         }
     }
 
-    private static int getGpioNumberFromCommandKey(String key) {
-        final Pattern pattern = Pattern.compile("^gpio(\\d+?)$");
-        final Matcher matcher = pattern.matcher(key);
+    private static int getGpioFromCommandKey(String key) {
+//        Pattern pattern = Pattern.compile("^gpio([0-9]+)@([0|1])$");
+//        Matcher matcher = pattern.matcher(key);
+//        if (matcher.find()) {
+//            if (App.isDebug()) {
+//                Log.d(TAG, "pin parsed: " + matcher.group(1));
+//            }
+//
+//            try {
+//                return new int[] {Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2))};
+//            } catch (NumberFormatException e) {
+//                e.printStackTrace();
+//            }
+//        }
+
+        Pattern pattern = Pattern.compile("^gpio([0-9]+)$");
+        Matcher matcher = pattern.matcher(key);
         if (matcher.find()) {
             if (App.isDebug()) {
                 Log.d(TAG, "pin parsed: " + matcher.group(1));

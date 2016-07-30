@@ -60,6 +60,9 @@ public class SettingsActivity extends AppCompatActivity {
             bindPreferenceSummaryToValue(findPreference("parity"));
             bindPreferenceSummaryToValue(findPreference("gpio_debounce"));
             bindPreferenceSummaryToValue(findPreference("gpio_long_press_delay"));
+            bindPreferenceSummaryToValue(findPreference("autostart_delay"));
+            bindPreferenceSummaryToValue(findPreference("stop_when_screen_off_delay"));
+            bindPreferenceSummaryToValue(findPreference("start_when_screen_on_delay"));
         }
 
         @Override

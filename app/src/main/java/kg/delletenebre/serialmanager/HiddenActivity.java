@@ -28,7 +28,9 @@ public class HiddenActivity extends Activity {
                 Intent i = new Intent(getApplicationContext(), ConnectionService.class);
                 i.putExtra(UsbManager.EXTRA_DEVICE, device);
 
-                startService(i);
+                if (!EventsReceiver.autostartActive) {
+                    startService(i);
+                }
             }
         }
 

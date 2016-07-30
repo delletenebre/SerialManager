@@ -15,6 +15,7 @@ import xdroid.toaster.Toaster;
 
 public class EventsReceiver extends BroadcastReceiver {
     private final String TAG = getClass().getName();
+    public static boolean autostartActive = false;
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -23,23 +24,44 @@ public class EventsReceiver extends BroadcastReceiver {
 
         switch (action) {
             case Intent.ACTION_BOOT_COMPLETED:
-            case Intent.ACTION_USER_PRESENT:
+                if (App.isDebug()) {
+                    Log.i(TAG, "**** ACTION_BOOT_COMPLETED ****");
+                }
+
+                if (App.getPrefs().getBoolean("autostart", true)) {
+                    autostartActive = true;
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            context.startService(new Intent(context, ConnectionService.class));
+                            autostartActive = false;
+
+                            Log.d(TAG, String.valueOf(App.getIntPreference("autostart_delay", 5)));
+                        }
+                    }, App.getIntPreference("autostart_delay", 5) * 1000);
+                }
+
+                break;
+
+            //case Intent.ACTION_USER_PRESENT:
             case Intent.ACTION_SCREEN_ON:
                 if (App.isDebug()) {
-                    Log.i(TAG, "**** ACTION_USER_PRESENT || ACTION_BOOT_COMPLETED || ACTION_SCREEN_ON ****");
+                    Log.i(TAG, "**** ACTION_USER_PRESENT || ACTION_SCREEN_ON ****");
                     Log.i(TAG, action);
                 }
 
                 ConnectionService.sendInfoScreenState("on");
 
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (App.isScreenOn()) {
-                            context.startService(new Intent(context, ConnectionService.class));
+                if (!autostartActive && App.getPrefs().getBoolean("start_when_screen_on", true)) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (App.isScreenOn()) {
+                                context.startService(new Intent(context, ConnectionService.class));
+                            }
                         }
-                    }
-                }, 7000);
+                    }, App.getIntPreference("start_when_screen_on_delay", 2) * 1000);
+                }
 
                 break;
 
@@ -50,7 +72,7 @@ public class EventsReceiver extends BroadcastReceiver {
 
                 ConnectionService.sendInfoScreenState("off");
 
-                if (App.getPrefs().getBoolean("stopWhenScreenOff", true)) {
+                if (App.getPrefs().getBoolean("stop_when_screen_off", true)) {
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -58,7 +80,7 @@ public class EventsReceiver extends BroadcastReceiver {
                                 context.stopService(new Intent(context, ConnectionService.class));
                             }
                         }
-                    }, 2000);
+                    }, App.getIntPreference("stop_when_screen_off_delay", 2) * 1000);
                 }
                 break;
 

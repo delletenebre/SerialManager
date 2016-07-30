@@ -123,8 +123,7 @@
             <CheckBoxPreference
                 android:key="overlay_enabled"
                 android:defaultValue="false"
-                android:title="@string/pref_co_title_enabled"
-                android:summary="asdasd" />
+                android:title="@string/pref_co_title_enabled" />
 
             <EditTextPreference
                 android:key="overlay_text"

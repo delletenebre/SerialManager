@@ -20,3 +20,7 @@ Java_kg_delletenebre_serialmanager_NativeGpio_exportAndDirection(JNIEnv *env, jc
 JNIEXPORT void JNICALL
 Java_kg_delletenebre_serialmanager_NativeGpio_setValue(JNIEnv *env, jclass type, jint pin,
                                                        jint value);
+
+JNIEXPORT jint JNICALL
+Java_kg_delletenebre_serialmanager_NativeGpio_setActiveLow(JNIEnv *env, jobject instance, jint pin,
+                                                           jint state);
