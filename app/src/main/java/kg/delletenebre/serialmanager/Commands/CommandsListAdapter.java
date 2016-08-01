@@ -82,8 +82,10 @@ public class CommandsListAdapter extends RecyclerView.Adapter<CommandsListAdapte
         int position = getItemPositionById(command.getId());
         if (position > -1) {
             if (database.update(command) > 0) {
-                NativeGpio.destroyGpioByKey(Commands.getCommands().get(position).getKey(), false);
-                NativeGpio.createGpioByKey(command.getKey());
+                if (!Commands.getCommands().get(position).getKey().equals(command.getKey())) {
+                    NativeGpio.destroyGpioByKey(Commands.getCommands().get(position).getKey(), false);
+                    NativeGpio.createGpioByKey(command.getKey());
+                }
 
                 Commands.getCommands().set(position, command);
                 notifyItemChanged(position);

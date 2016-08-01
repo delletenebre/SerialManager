@@ -208,7 +208,7 @@ public class Commands {
                             e.printStackTrace();
                         }
 
-                        NativeGpio.setState(pin, matcher.group(2));
+                        NativeGpio.setValue(pin, matcher.group(2));
                     }
                 }
 

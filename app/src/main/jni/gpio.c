@@ -19,7 +19,7 @@ jobject cb_object;
 JNIEnv *cb_save_env;
 
 
-int gpio_export(int pin) {
+int gpioExport(int pin) {
     FILE *file;
 
     system("su -c \"chmod -R 202 /sys/class/gpio/export\"");
@@ -37,7 +37,7 @@ int gpio_export(int pin) {
     return 0;
 }
 
-int gpio_unexport(int pin) {
+int gpioUnexport(int pin) {
     FILE *file;
 
     system("su -c \"chmod -R 202 /sys/class/gpio/unexport\"");
@@ -55,7 +55,30 @@ int gpio_unexport(int pin) {
     return 0;
 }
 
-int gpio_set_direction(int pin, const char *direction) {
+char* gpioGetDirection(int pin) {
+    char *line = malloc(sizeof(char));
+    char filepath[PATH_MAX];
+    FILE *file;
+
+    snprintf(filepath, sizeof(filepath), "/sys/class/gpio/gpio%d/direction", pin);
+
+    file = fopen(filepath, "r");
+    if (file == NULL) {
+        LOGE("Failed to open %s for reading! @ line %d", filepath, __LINE__);
+        return NULL;
+    }
+
+    if (fgets(line, sizeof(line), file) == NULL) {
+        LOGE("Failed to read %s! @ line %d", filepath, __LINE__);
+        return NULL;
+    };
+    line[strcspn(line, "\r\n")] = 0;
+    fclose(file);
+
+    return line;
+}
+
+int gpioSetDirection(int pin, const char *direction) {
     char command[PATH_MAX];
     char filepath[PATH_MAX];
     FILE *file;
@@ -78,32 +101,32 @@ int gpio_set_direction(int pin, const char *direction) {
 
     return 0;
 }
+//
+//int gpioSetActiveLow(int pin, int active_low) {
+//    char command[PATH_MAX];
+//    char filepath[PATH_MAX];
+//    FILE *file;
+//
+//    snprintf(filepath, sizeof(filepath), "/sys/class/gpio/gpio%d/active_low", pin);
+//
+//    snprintf(command, sizeof(command), "su -c \"chmod -R 646 %s\"", filepath);
+//    system(command);
+//
+//    file = fopen(filepath, "w");
+//    if (file == NULL) {
+//        LOGE("Failed to open %s for writing! @ line %d", filepath, __LINE__);
+//        return -1;
+//    }
+//    fprintf(file, "%d\n", active_low);
+//    fclose(file);
+//
+//    snprintf(command, sizeof(command), "su -c \"chmod -R 644 %s\"", filepath);
+//    system(command);
+//
+//    return 0;
+//}
 
-int gpio_set_active_low(int pin, int active_low) {
-    char command[PATH_MAX];
-    char filepath[PATH_MAX];
-    FILE *file;
-
-    snprintf(filepath, sizeof(filepath), "/sys/class/gpio/gpio%d/active_low", pin);
-
-    snprintf(command, sizeof(command), "su -c \"chmod -R 646 %s\"", filepath);
-    system(command);
-
-    file = fopen(filepath, "w");
-    if (file == NULL) {
-        LOGE("Failed to open %s for writing! @ line %d", filepath, __LINE__);
-        return -1;
-    }
-    fprintf(file, "%d\n", active_low);
-    fclose(file);
-
-    snprintf(command, sizeof(command), "su -c \"chmod -R 644 %s\"", filepath);
-    system(command);
-
-    return 0;
-}
-
-int gpio_set_edge(int pin, const char *edge) {
+int gpioSetEdge(int pin, const char *edge) {
     char command[PATH_MAX];
     char filepath[PATH_MAX];
     FILE *file;
@@ -127,10 +150,9 @@ int gpio_set_edge(int pin, const char *edge) {
     return 0;
 }
 
-int gpio_poll(int pin) {
+int gpioGetFileDescriptor(int pin) {
     char filename[PATH_MAX];
     int fd;
-    char c;
 
     snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", pin);
     fd = open(filename, O_RDONLY);
@@ -138,14 +160,20 @@ int gpio_poll(int pin) {
         return -1;
     }
 
-    read(fd, &c, sizeof(c));
-
     return fd;
 }
 
-int gpio_get(int fd, int timeout) {
-    char c;
+int gpioGetValueByFileDescriptor(int fd) {
+    char value;
 
+    if (pread(fd, &value, sizeof(value), SEEK_SET) != 1) {
+        return -1;
+    }
+
+    return value - '0';
+}
+
+int gpioReadValueByFileDescriptor(int fd, int timeout) {
     struct pollfd pollfd = {
         .fd = fd,
         .events = POLLPRI | POLLERR,
@@ -156,14 +184,33 @@ int gpio_get(int fd, int timeout) {
         return -1;
     }
 
-    if (pread(fd, &c, sizeof(c), SEEK_SET) != 1) {
+    return gpioGetValueByFileDescriptor(fd);
+}
+
+int gpioGetValue(int pin) {
+    char *line = malloc(sizeof(char));
+    char filepath[PATH_MAX];
+    FILE *file;
+
+    snprintf(filepath, sizeof(filepath), "/sys/class/gpio/gpio%d/value", pin);
+
+    file = fopen(filepath, "r");
+    if (file == NULL) {
+        LOGE("Failed to open %s for reading! @ line %d", filepath, __LINE__);
         return -1;
     }
 
-    return c - '0';
+    if (fgets(line, sizeof(line), file) == NULL) {
+        LOGE("Failed to read %s! @ line %d", filepath, __LINE__);
+        return -1;
+    };
+    line[strcspn(line, "\r\n")] = 0;
+    fclose(file);
+
+    return atoi(line);
 }
 
-int gpio_set_value(int pin, int value) {
+int gpioSetValue(int pin, int value) {
     char command[PATH_MAX];
     char filepath[PATH_MAX];
     FILE *file;
@@ -188,79 +235,75 @@ int gpio_set_value(int pin, int value) {
 }
 
 
+
+JNIEXPORT jstring JNICALL
+Java_kg_delletenebre_serialmanager_NativeGpio_getDirection(JNIEnv *env, jobject instance, jint pin) {
+    return (*env)->NewStringUTF(env, gpioGetDirection(pin));
+}
+
+
 JNIEXPORT jint JNICALL
 Java_kg_delletenebre_serialmanager_NativeGpio_initializate(JNIEnv *env, jobject instance,
                                                            jint pin, jstring direction_,
                                                            jboolean useInterrupt) {
     const char *direction = (*env)->GetStringUTFChars(env, direction_, (jboolean *)0);
 
-    int export = gpio_export(pin);
-    if (export > -1) {
-        LOGD("GPIO EXPORTED");
+    int gpioValue;
+    int gpioStatus;
+    char* gpioDirection;
 
-        int io = gpio_set_direction(pin, direction);
-        if (io > -1) {
-            LOGD("GPIO DIRECTION SET");
+    gpioValue = gpioGetValue(pin);
+    if (gpioValue == -1) {
+        gpioStatus = gpioUnexport(pin);
+        if (gpioStatus == -1) {
+            (*env)->ReleaseStringUTFChars(env, direction_, direction);
+            return gpioStatus;
+        }
 
-            if (useInterrupt) {
-                int edge = gpio_set_edge(pin, "both");
-                if (edge > -1) {
-                    LOGD("GPIO EDGE SET");
-                }
-            }
+        gpioStatus = gpioExport(pin);
+        if (gpioStatus == -1) {
+            (*env)->ReleaseStringUTFChars(env, direction_, direction);
+            return gpioStatus;
+        }
+    }
+
+    gpioDirection = gpioGetDirection(pin);
+    if (strcmp(gpioDirection, direction) != 0) {
+        gpioStatus = gpioSetDirection(pin, direction);
+        if (!gpioStatus) {
+            (*env)->ReleaseStringUTFChars(env, direction_, direction);
+            return gpioStatus;
+        }
+    }
+
+    if (strcmp(direction, "in") == 0 && useInterrupt) {
+        gpioStatus = gpioSetEdge(pin, "both");
+        if (gpioStatus == -1) {
+            (*env)->ReleaseStringUTFChars(env, direction_, direction);
+            return gpioStatus;
         }
     }
 
     (*env)->ReleaseStringUTFChars(env, direction_, direction);
+    return (gpioValue == -1) ? gpioGetValue(pin) : gpioValue;
 }
 
 JNIEXPORT jint JNICALL
-Java_kg_delletenebre_serialmanager_NativeGpio_pool(JNIEnv *env, jobject instance, jint pin) {
-
-    return gpio_poll(pin);
-
+Java_kg_delletenebre_serialmanager_NativeGpio_getValueByFileDescriptor(JNIEnv *env, jobject instance, jint fd, jboolean useInterrupt) {
+    return useInterrupt ? gpioReadValueByFileDescriptor(fd, 100) : gpioGetValueByFileDescriptor(fd);
 }
 
 JNIEXPORT jint JNICALL
-Java_kg_delletenebre_serialmanager_NativeGpio_read(JNIEnv *env, jobject instance, jint pool) {
-
-    return gpio_get(pool, -1);
-
+Java_kg_delletenebre_serialmanager_NativeGpio_getFileDescriptor(JNIEnv *env, jobject instance, jint pin) {
+    return gpioGetFileDescriptor(pin);
 }
 
 JNIEXPORT void JNICALL
 Java_kg_delletenebre_serialmanager_NativeGpio_unexport(JNIEnv *env, jobject instance, jint pin) {
-
-    gpio_unexport(pin);
-
-}
-
-JNIEXPORT jboolean JNICALL
-Java_kg_delletenebre_serialmanager_NativeGpio_exportAndDirection(JNIEnv *env, jclass type, jint pin,
-                                                                 jstring direction_) {
-    const char *direction = (*env)->GetStringUTFChars(env, direction_, (jboolean *)0);
-    int export, io;
-
-    export = gpio_export(pin);
-        io = gpio_set_direction(pin, direction);
-
-    (*env)->ReleaseStringUTFChars(env, direction_, direction);
-
-    return (jboolean) ((export > -1) && (io > -1));
+    gpioUnexport(pin);
 }
 
 JNIEXPORT void JNICALL
-Java_kg_delletenebre_serialmanager_NativeGpio_setValue(JNIEnv *env, jclass type, jint pin,
-                                                       jint value) {
-
-    gpio_set_value(pin, value);
-
-}
-
-JNIEXPORT jint JNICALL
-Java_kg_delletenebre_serialmanager_NativeGpio_setActiveLow(JNIEnv *env, jobject instance, jint pin,
-                                                           jint state) {
-
-    return gpio_set_active_low(pin, state);
-
+Java_kg_delletenebre_serialmanager_NativeGpio_setValue(JNIEnv *env, jclass type, jint pin, jint value) {
+    gpioSetValue(pin, value);
 }

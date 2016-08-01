@@ -6,7 +6,6 @@
 #include <linux/usbdevice_fs.h>
 #include <stdlib.h>
 #include "send-event.h"
-#include "gpio.h"
 
 
 #define LOG_TAG "Serial-Manager"

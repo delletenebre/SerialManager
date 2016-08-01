@@ -11,6 +11,7 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
@@ -116,14 +117,15 @@ public class App extends Application {
             Log.d(TAG, "Root not available or access didn't grant");
         }
 
-        if (App.isScreenOn() || !App.getPrefs().getBoolean("start_when_screen_on", true)) {
-            //context.startService(new Intent(context, ConnectionService.class));
-        }
-
         EventsReceiver eventsReceiver = new EventsReceiver();
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         registerReceiver(eventsReceiver, intentFilter);
+
+
+        if (App.getPrefs().getBoolean("start_when_screen_on", true) && App.isScreenOn()) {
+            context.startService(new Intent(context, ConnectionService.class));
+        }
     }
 
 

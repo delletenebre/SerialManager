@@ -51,20 +51,15 @@ public class NativeGpio extends Thread {
     static {
         System.loadLibrary("serial-manager");
     }
-    public native int read(int pool);
-    public native int pool(int pin);
+    public native String getDirection(int pin);
+    public native int getValueByFileDescriptor(int fd, boolean useInterrupt);
+    public native int getFileDescriptor(int pin);
     public native int initializate(int pin, String direction, boolean useInterrupt);
     public native void unexport(int pin);
-    public native static boolean exportAndDirection(int pin, String direction);
     public native static void setValue(int pin, int value);
-    public native int setActiveLow(int pin, int state);
 
     public NativeGpio(int pin) {
         createPin(pin, "in");
-    }
-
-    public NativeGpio(int pin, int active_low) {
-        createPin(pin, "in", active_low);
     }
 
     private void createPin(int pin, String direction) {
@@ -72,30 +67,24 @@ public class NativeGpio extends Thread {
         this.name = "gpio" + pin;
 
         SharedPreferences prefs = App.getPrefs();
-        setDebounce(Integer.parseInt(prefs.getString("gpio_debounce", "20")));
-        setLongPressDelay(Integer.parseInt(prefs.getString("gpio_long_press_delay", "500")));
-        setGenerateIOEvents(prefs.getBoolean("gpio_as_io", true));
-        setGenerateButtonEvents(prefs.getBoolean("gpio_as_button", true));
         useInterrupt = prefs.getBoolean("gpio_use_interrupt", true);
+        lastValue = initializate(pin, direction, useInterrupt);
 
-        initializate(pin, direction, useInterrupt);
+        if (lastValue > -1) {
+            setDebounce(Integer.parseInt(prefs.getString("gpio_debounce", "20")));
+            setLongPressDelay(Integer.parseInt(prefs.getString("gpio_long_press_delay", "500")));
+            setGenerateIOEvents(prefs.getBoolean("gpio_as_io", true));
+            setGenerateButtonEvents(prefs.getBoolean("gpio_as_button", true));
 
-        lastValue = getValue(pin);
-        if (lastValue == 0) {
-            activeValue = 1;
+            activeValue = (lastValue == 0) ? 1 : 0;
         }
     }
 
-    private void createPin(int pin, String direction, int activeLowState) {
-        createPin(pin, direction);
-        setActiveLow(pin, activeLowState);
-    }
-
     public void run() {
-        int pool = (useInterrupt) ? pool(pin) : -1;
+        int fd = getFileDescriptor(pin);
 
         while (!Thread.currentThread().isInterrupted()) {
-            int currentValue = useInterrupt ? read(pool) : getValue(pin);
+            int currentValue = getValueByFileDescriptor(fd, useInterrupt);
 
             if (currentValue > -1 && currentValue != lastValue
                     && (System.currentTimeMillis() - changeStateTime) > debounce) {
@@ -122,69 +111,55 @@ public class NativeGpio extends Thread {
 
         holdButtonHandler.removeCallbacks(holdButtonRunnable);
         unexport(pin);
-    }
 
-    private static int getValue(int pin) {
-        try {
-            Process p = Runtime.getRuntime().exec(String.format("cat /sys/class/gpio/gpio%s/value", pin));
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            StringBuilder text = new StringBuilder();
-            String line;
-            while((line = reader.readLine()) != null){
-                text.append(line);
-                text.append("\n");
-            }
-            try {
-                String retour = text.toString();
-                if (retour.equals("")){
-                    return -1;
-                } else 	{
-                    return Integer.parseInt(retour.substring(0, 1));
-                }
-            } catch(NumberFormatException nfe) {
-                return -1;
-            }
-        } catch (IOException e) {
-            return -1;
+        if (App.isDebug()) {
+            Log.d(TAG, "GPIO thread is interrupted");
         }
     }
+//
+//    private static int getValue(int pin) {
+//        try {
+//            Process p = Runtime.getRuntime().exec(String.format("cat /sys/class/gpio/gpio%s/value", pin));
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+//            StringBuilder text = new StringBuilder();
+//            String line;
+//            while((line = reader.readLine()) != null){
+//                text.append(line);
+//                text.append("\n");
+//            }
+//            try {
+//                String retour = text.toString();
+//                if (retour.equals("")){
+//                    return -1;
+//                } else 	{
+//                    return Integer.parseInt(retour.substring(0, 1));
+//                }
+//            } catch(NumberFormatException nfe) {
+//                return -1;
+//            }
+//        } catch (IOException e) {
+//            return -1;
+//        }
+//    }
 
-    public static String getDirection(int pin) {
-        String command = String.format("cat /sys/class/gpio/gpio%s/direction", pin);
-        try {
-            Process p = Runtime.getRuntime().exec(command);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            StringBuilder text = new StringBuilder();
-            String line;
-            while((line = reader.readLine()) != null) {
-                text.append(line);
-                text.append("\n");
-            }
-
-            return text.toString();
-        } catch (IOException e) {
-            return "";
-        }
-    }
-
-    public static void setState(int pin, String state) {
+    public static void setValue(int pin, String state) {
         if (pin > 0) {
-            String direction = getDirection(pin);
+            String direction = "in";//getDirection(pin);
 
-            if (direction.isEmpty() || direction.equals("in")) {
-                if (!exportAndDirection(pin, state.equals("invert") ? "low" : state)) {
-                    Toaster.toast("GPIO: error");
-                }
-            } else if (state.equals("low") || state.equals("high")) {
-                setValue(pin, state.equals("low") ? 0 : 1);
-            } else if (state.equals("invert")) {
-                int value = getValue(pin);
-                if (value > -1) {
-                    setValue(pin, (value == 1) ? 0 : 1);
-                } else {
-                    Toaster.toast("GPIO: value error");
-                }
-            }
+//            if (direction.isEmpty() || direction.equals("in")) {
+//                if (!exportAndDirection(pin, state.equals("invert") ? "low" : state)) {
+//                    Toaster.toast("GPIO: error");
+//                }
+//            } else if (state.equals("low") || state.equals("high")) {
+//                setValue(pin, state.equals("low") ? 0 : 1);
+//            } else if (state.equals("invert")) {
+//                int value = getValue(pin);
+//                if (value > -1) {
+//                    setValue(pin, (value == 1) ? 0 : 1);
+//                } else {
+//                    Toaster.toast("GPIO: value error");
+//                }
+//            }
         }
     }
 
@@ -215,11 +190,9 @@ public class NativeGpio extends Thread {
 
     public static void createGpioByKey(final String key) {
         final int pin = getGpioFromCommandKey(key);
-        //pin[0] = pin_number
-        //pin[1] = active_low
 
         if (pin > -1 && !gpios.containsKey(key)) {
-            gpios.put(key, new NativeGpio(pin, 0));
+            gpios.put(key, new NativeGpio(pin));
             gpios.get(key).start();
 
             if (App.isDebug()) {
@@ -229,25 +202,11 @@ public class NativeGpio extends Thread {
     }
 
     private static int getGpioFromCommandKey(String key) {
-//        Pattern pattern = Pattern.compile("^gpio([0-9]+)@([0|1])$");
-//        Matcher matcher = pattern.matcher(key);
-//        if (matcher.find()) {
-//            if (App.isDebug()) {
-//                Log.d(TAG, "pin parsed: " + matcher.group(1));
-//            }
-//
-//            try {
-//                return new int[] {Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2))};
-//            } catch (NumberFormatException e) {
-//                e.printStackTrace();
-//            }
-//        }
-
         Pattern pattern = Pattern.compile("^gpio([0-9]+)$");
         Matcher matcher = pattern.matcher(key);
         if (matcher.find()) {
             if (App.isDebug()) {
-                Log.d(TAG, "pin parsed: " + matcher.group(1));
+                Log.d(TAG, "GPIO pin parsed: " + matcher.group(1));
             }
 
             try {
