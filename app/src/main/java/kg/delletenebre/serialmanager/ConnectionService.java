@@ -6,6 +6,7 @@ import android.app.Service;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.hardware.Sensor;
@@ -23,6 +24,13 @@ import android.util.Log;
 import com.felhr.usbserial.CDCSerialDevice;
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
+import com.koushikdutta.async.AsyncServer;
+import com.koushikdutta.async.callback.CompletedCallback;
+import com.koushikdutta.async.http.WebSocket;
+import com.koushikdutta.async.http.server.AsyncHttpServer;
+import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
+import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
+import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -31,8 +39,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import app.akexorcist.bluetoothspp.library.BluetoothSPP;
 import app.akexorcist.bluetoothspp.library.BluetoothState;
@@ -52,6 +64,10 @@ public class ConnectionService extends Service implements SensorEventListener {
 
     // **** BLUETOOTH **** //
     private static BluetoothSPP bt;
+
+    // **** WEBSERVER **** //
+    private static AsyncHttpServer webServer = new AsyncHttpServer();
+    private static List<WebSocket> webSockets = new ArrayList<>();
 
     // **** GENERAL **** //
     private static NotificationCompat.Builder notification;
@@ -137,8 +153,10 @@ public class ConnectionService extends Service implements SensorEventListener {
 
         NativeGpio.createGpiosFromCommands();
 
+        startWebserver();
+
         if (App.isDebug()) {
-            Log.d(TAG, "CREATED");
+            Log.d(TAG, "created");
         }
     }
 
@@ -166,8 +184,10 @@ public class ConnectionService extends Service implements SensorEventListener {
 
         NativeGpio.destroyGpios();
 
+        stopWebserver();
+
         if (App.isDebug()) {
-            Log.i(TAG, "Service: onDestroy");
+            Log.i(TAG, "destroyed");
         }
     }
 
@@ -209,7 +229,7 @@ public class ConnectionService extends Service implements SensorEventListener {
             if (sensorLightMode != mode
                     && App.getPrefs().getBoolean("send_brightness_sensor", false)) {
                 sensorLightMode = mode;
-                usbAndBluetoothSend("{lightsensormode:" + sensorLightMode + "}", false);
+                sendDataToTarget("{lightsensormode:" + sensorLightMode + "}");
             }
         }
     }
@@ -478,10 +498,8 @@ public class ConnectionService extends Service implements SensorEventListener {
         }
     }
 
-    /*
-     * This function will be called to write data through Serial Port
-     */
-    private static String usbSend(String data, boolean showToast) {
+
+    public static String usbSend(String data, boolean showToast) {
         final String mode = "usb";
 
         if (openedSerialPorts != null && openedSerialPorts.size() > 0) {
@@ -512,7 +530,7 @@ public class ConnectionService extends Service implements SensorEventListener {
 
         return null;
     }
-    private static String bluetoothSend(String data, boolean showToast) {
+    public static String bluetoothSend(String data, boolean showToast) {
         final String mode = "bluetooth";
 
         if (bt != null && bt.getConnectedDeviceAddress() != null) {
@@ -535,27 +553,30 @@ public class ConnectionService extends Service implements SensorEventListener {
 
         return null;
     }
-    public static void usbAndBluetoothSend(String data, boolean showToast) {
-        usbSend(data, showToast);
-        bluetoothSend(data, showToast);
-    }
-    public static void sendFromWidget(String where, String data, int widgetId) {
-        if ((where.equals("usb_bt") || where.equals("usb"))
-                && App.getPrefs().getBoolean("usb", true)) {
-            dataSendSuccessBroadcast(widgetId, usbSend(data, true));
-        }
 
-        if ((where.equals("usb_bt") || where.equals("bt"))
-                && App.getPrefs().getBoolean("bluetooth", false)) {
-            dataSendSuccessBroadcast(widgetId, bluetoothSend(data, true));
+    public static void sendBy(String type, String data) {
+        switch (type) {
+            case "usb":
+                usbSend(data, false);
+                break;
+            case "bluetooth":
+                bluetoothSend(data, false);
+                break;
+            case "websocket":
+                websocketSend(data);
+                break;
         }
     }
-    private static void dataSendSuccessBroadcast(int widgetId, String type) {
-        if(type != null && !type.isEmpty()) {
-            Intent i = new Intent(App.ACTION_SEND_DATA_SUCCESS);
-            i.putExtra("widgetId", widgetId);
-            i.putExtra("type", type);
-            App.getContext().sendBroadcast(i);
+
+    public static void sendDataToTarget(String data) {
+        Pattern pattern = Pattern.compile("^(usb|bluetooth|websocket):(.+?)$");
+        Matcher matcher = pattern.matcher(data);
+        if (matcher.find()) {
+            sendBy(matcher.group(1), matcher.group(2));
+        } else {
+            usbSend(data, false);
+            bluetoothSend(data, false);
+            websocketSend(data);
         }
     }
 
@@ -613,6 +634,102 @@ public class ConnectionService extends Service implements SensorEventListener {
         usbRestartState = false;
     }
 
+    public static void startWebserver() {
+        stopWebserver();
+
+        if (App.getPrefs().getBoolean("webserver", true)) {
+            webServer.get("/", new HttpServerRequestCallback() {
+                @Override
+                public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
+                    //request.getQuery()
+                    String webSocketInfo = String.format(App.getContext().getString(R.string.websocket_info),
+                            App.getIpAddress("wlan"), App.getIntPreference("webserver_port", 5000));
+                    //wlan, eth, sit, lo
+                    response.send("<!DOCTYPE html><head><title>SerialManager</title><meta charset=\"utf-8\" /></head><body><h1>SerialManager</h1><i>version: <b>" + App.getVersion() + "</b></i><br><br>" + webSocketInfo + "<br><br><a href=\"/test-websocket\">WebSocket test</a></body></html>");
+                }
+            });
+
+            webServer.get("/test-websocket", new HttpServerRequestCallback() {
+                @Override
+                public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
+                    AssetManager assetManager = App.getContext().getAssets();
+
+                    String html = "<h1>404 Not found</h1>";
+                    InputStream input;
+                    try {
+                        input = assetManager.open("websoket_test.html");
+                        int size = input.available();
+                        byte[] buffer = new byte[size];
+                        input.read(buffer);
+                        input.close();
+
+                        html = new String(buffer);
+                        html = html.replace("{{address}}", App.getIpAddress("wlan") + ":" + App.getPrefs().getString("webserver_port", "5000") + "/ws");
+                    } catch(IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    response.send(html);
+                }
+            });
+
+            webServer.listen(App.getIntPreference("webserver_port", 5000));
+
+            webServer.websocket("/ws", new AsyncHttpServer.WebSocketRequestCallback() {
+                @Override
+                public void onConnected(final WebSocket webSocket, AsyncHttpServerRequest request) {
+                    if (App.isDebug()) {
+                        Log.d(TAG, "New WebSocket client connected");
+                    }
+                    webSockets.add(webSocket);
+
+                    webSocket.setClosedCallback(new CompletedCallback() {
+                        @Override
+                        public void onCompleted(Exception e) {
+                            try {
+                                if (e != null) {
+                                    e.printStackTrace();
+                                }
+                            } finally {
+                                webSockets.remove(webSocket);
+                            }
+                        }
+                    });
+
+                    webSocket.setStringCallback(new WebSocket.StringCallback() {
+                        @Override
+                        public void onStringAvailable(String message) {
+                            if (App.isDebug()) {
+                                Log.d(TAG, "Receive from WebSocket: " + message);
+                            }
+
+                            Commands.processReceivedData(message);
+                        }
+                    });
+
+                }
+            });
+        }
+    }
+
+    private static void stopWebserver() {
+        if (webSockets != null) {
+            for (WebSocket socket : webSockets) {
+                socket.close();
+            }
+        }
+
+        if (webServer != null) {
+            webServer.stop();
+            AsyncServer.getDefault().stop();
+        }
+    }
+
+    public static void websocketSend(String message) {
+        for (WebSocket socket : webSockets) {
+            socket.send(message);
+        }
+    }
 
 
 
@@ -702,11 +819,7 @@ public class ConnectionService extends Service implements SensorEventListener {
                             bt.getBluetoothAdapter().getRemoteDevice(deviceAddress);
 
                     if (bluetoothDevice != null) {
-//                        if (prefs.getBoolean("bluetoothAutoConnect", true)) {
-                            bt.autoConnect(bluetoothDevice.getAddress());
-//                        } else {
-//                            bt.connect(bluetoothDevice.getAddress());
-//                        }
+                        bt.autoConnect(bluetoothDevice.getAddress());
                     } else {
                         Toaster.toast("Choose Bluetooth device to connect");
                     }
@@ -723,8 +836,8 @@ public class ConnectionService extends Service implements SensorEventListener {
                 state = App.isScreenOn() ? "on" : "off";
             }
 
-            ConnectionService.usbAndBluetoothSend(String.format(
-                    App.getContext().getString(R.string.send_data_screen_state), state), false);
+            ConnectionService.sendDataToTarget(String.format(
+                    App.getContext().getString(R.string.send_data_screen_state), state));
         }
     }
 }

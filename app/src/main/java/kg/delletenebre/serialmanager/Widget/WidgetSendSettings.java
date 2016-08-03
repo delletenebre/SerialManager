@@ -26,7 +26,6 @@ import kg.delletenebre.serialmanager.R;
 
 public class WidgetSendSettings extends AppCompatActivity {
 
-    private final String TAG = getClass().getSimpleName();
     public static final String PREF_PREFIX_KEY = "widget_send_";
 
     private GeneralPreferenceFragment preferenceFragment;
@@ -124,7 +123,6 @@ public class WidgetSendSettings extends AppCompatActivity {
             addPreferencesFromResource(R.xml.pref_widget_send);
             setHasOptionsMenu(true);
 
-            bindPreferenceSummaryToValue(findPreference("sendTo"), widgetId);
             bindPreferenceSummaryToValue(findPreference("data"), widgetId);
             bindPreferenceSummaryToValue(findPreference("text"), widgetId);
             bindPreferenceSummaryToValue(findPreference("fontColor"), widgetId);

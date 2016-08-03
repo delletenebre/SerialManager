@@ -56,7 +56,7 @@ public class WidgetSend extends AppWidgetProvider {
         intent.setAction(App.ACTION_SEND_DATA);
         intent.putExtra("widgetId", widgetId);
         intent.putExtra("data", getCurrentValue(prefs, "data", ""));
-        intent.putExtra("sendTo", prefs.getString("sendTo", "0"));
+//        intent.putExtra("sendTo", prefs.getString("sendTo", "0"));
         intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
         views.setOnClickPendingIntent(R.id.widget_text, PendingIntent.getBroadcast(context, 0, intent, 0));
 
@@ -188,17 +188,6 @@ public class WidgetSend extends AppWidgetProvider {
         if (intent.getAction().equals(App.ACTION_SEND_DATA_SUCCESS)) {
             if (App.isDebug()) {
                 Log.i(TAG, "****SERVICE_SEND_ACTION_SUCCESS****");
-            }
-
-            if (prefs.getString("sendTo", "usb_bt").equals("usb_bt")) {
-                boolean status = prefs.getBoolean("status", false);
-
-                if (!status) {
-                    editor.putBoolean("status", true);
-                    editor.apply();
-                } else {
-                    return;
-                }
             }
 
             if (prefs.getBoolean("switch", false)) {

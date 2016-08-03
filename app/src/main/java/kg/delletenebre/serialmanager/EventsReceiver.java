@@ -10,6 +10,9 @@ import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.util.Log;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import kg.delletenebre.serialmanager.Widget.WidgetSendSettings;
 import xdroid.toaster.Toaster;
 
@@ -100,19 +103,24 @@ public class EventsReceiver extends BroadcastReceiver {
 
                 int widgetId = intent.getIntExtra("widgetId", -1);
                 data = intent.getStringExtra("data");
-                String sendTo = intent.getStringExtra("sendTo");
+//                String sendTo = intent.getStringExtra("sendTo");
 
-                if (sendTo.equals("usb_bt")) {
-                    SharedPreferences widgetPrefs = context.getSharedPreferences(
-                            WidgetSendSettings.PREF_PREFIX_KEY + widgetId, Context.MODE_PRIVATE);
-
-                    SharedPreferences.Editor editor = widgetPrefs.edit();
-                    editor.putBoolean("status", false);
-                    editor.apply();
-                }
+//                if (sendTo.equals("usb_bt")) {
+//                    SharedPreferences widgetPrefs = context.getSharedPreferences(
+//                            WidgetSendSettings.PREF_PREFIX_KEY + widgetId, Context.MODE_PRIVATE);
+//
+//                    SharedPreferences.Editor editor = widgetPrefs.edit();
+//                    editor.putBoolean("status", false);
+//                    editor.apply();
+//                }
 
                 if (!data.isEmpty()) {
-                    ConnectionService.sendFromWidget(sendTo, data, widgetId);
+                    ConnectionService.sendDataToTarget(data);
+
+                    Intent i = new Intent(App.ACTION_SEND_DATA_SUCCESS);
+                    i.putExtra("widgetId", widgetId);
+                    App.getContext().sendBroadcast(i);
+
                 } else {
                     if (App.isDebug()) {
                         Log.w(TAG, "Data is empty");
@@ -153,7 +161,7 @@ public class EventsReceiver extends BroadcastReceiver {
                         Log.d(TAG, data);
                     }
 
-                    ConnectionService.usbAndBluetoothSend(data, false);
+                    ConnectionService.sendDataToTarget(data);
                 }
 
 

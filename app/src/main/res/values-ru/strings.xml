@@ -21,6 +21,7 @@
 
     <string name="pref_category_connection_bt">Bluetooth соединение</string>
     <string name="pref_category_connection_usb">USB соединение</string>
+    <string name="pref_category_webserver">Web-сервер</string>
     <string name="pref_category_send_commands">Отправка команд</string>
     <string name="pref_category_other">Разное</string>
 
@@ -129,6 +130,11 @@
         <item>Перезагрузка [Root]</item>
         <item>Установить яркость экрана</item>
     </string-array>
+
+
+    <string name="pref_title_webserver">Запускать Web-сервер</string>
+    <!--<string name="pref_summary_webserver">Для того чтобы изменения вступили в силу, необходимо перезапустить Сервис SerialManager</string>-->
+    <string name="pref_title_webserver_port">Порт</string>
 
 
     <!-- Universal settings preferences -->

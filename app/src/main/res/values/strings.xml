@@ -18,6 +18,8 @@
     <string name="message_commands_import_error">An error occurred during import</string>
     <string name="message_file_read_error">File read error</string>
     <string name="send_data_screen_state" translatable="false">{screen:%1$s}</string>
+    <string name="webserver_info" translatable="false">WebServer: <b>%s:%d</b>\r\nWebSocket: <b>%s:%d/ws</b></string>
+    <string name="websocket_info" translatable="false">WebSocket server address: <b>%s:%d/ws</b></string>
 
     <string name="pref_bt_device_no_device">No device</string>
     <string name="pref_bt_device_template" translatable="false">%1$s [ %2$s ]</string>
@@ -27,6 +29,7 @@
     <string name="pref_category_connection_bt">Bluetooth connection</string>
     <string name="pref_category_connection_usb">USB connection</string>
     <string name="pref_category_send_commands">Sending commands</string>
+    <string name="pref_category_webserver">Web-Server</string>
     <string name="pref_category_gpio" translatable="false">GPIO</string>
     <string name="pref_category_other">Other</string>
 
@@ -197,6 +200,7 @@
         <item>SEARCH</item>
         <item>MENU</item>
         <item>HOME</item>
+        <item>HOME_PAGE</item>
         <item>BACK</item>
         <item>FORWARD</item>
         <item>BRIGHTNESS_DOWN</item>
@@ -289,6 +293,11 @@
         <item>reboot</item>
         <item>set_brightness</item>
     </string-array>
+
+
+    <string name="pref_title_webserver">Start Web-Server</string>
+    <!--<string name="pref_summary_webserver">To apply changes you need to restart the Service</string>-->
+    <string name="pref_title_webserver_port">Port</string>
 
     <string name="pref_title_command_action_gpio" translatable="false">@string/gpio</string>
 

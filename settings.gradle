@@ -1,2 +1,3 @@
 include ':app', ':android-bluetooth-spp'
 project(':android-bluetooth-spp').projectDir = new File('app/libs/android-bluetooth-spp')
+

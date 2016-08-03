@@ -6,9 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -17,11 +21,17 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.widget.EditText;
 
 import com.stericson.RootShell.RootShell;
 import com.stericson.RootShell.execution.Command;
 import com.udojava.evalex.Expression;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -124,7 +134,7 @@ public class App extends Application {
 
 
         if (App.getPrefs().getBoolean("start_when_screen_on", true) && App.isScreenOn()) {
-            context.startService(new Intent(context, ConnectionService.class));
+            //context.startService(new Intent(context, ConnectionService.class));
         }
     }
 
@@ -162,8 +172,23 @@ public class App extends Application {
         NativeGpio.setGenerateIOEvents(prefs.getBoolean("gpio_as_io", true));
         NativeGpio.setGenerateButtonEvents(prefs.getBoolean("gpio_as_button", true));
 
+        ConnectionService.startWebserver();
+
         volumeShowUI = prefs.getBoolean("volumeShowUI", true);
         debug = prefs.getBoolean("debug", false);
+    }
+
+    public static String getVersion() {
+        PackageInfo packageInfo;
+        String version = "undefined";
+        try {
+            packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            version = packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return version;
     }
 
     public static boolean isNumber(String string) {
@@ -287,6 +312,27 @@ public class App extends Application {
         }
 
         return value;
+    }
+
+    public static String getIpAddress(String type) {
+        try {
+            for (Enumeration en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                NetworkInterface intf = (NetworkInterface) en.nextElement();
+
+                if (intf.getName().startsWith(type)) {
+                    for (Enumeration enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
+                        InetAddress inetAddress = (InetAddress) enumIpAddr.nextElement();
+                        if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                            return inetAddress.getHostAddress();
+                        }
+                    }
+                }
+            }
+        } catch (SocketException ex) {
+            Log.e(TAG, "Socket exception in GetIP Address of Utilities" + ex.toString());
+        }
+
+        return "0.0.0.0";
     }
 
     public static boolean isScreenOn() {
@@ -513,6 +559,7 @@ public class App extends Application {
 
         keymap.put("MENU", new KeyboardCode(139, 82));
         keymap.put("HOME", new KeyboardCode(102, 3));
+        keymap.put("HOME_PAGE", new KeyboardCode(172, 0));
         keymap.put("BACK", new KeyboardCode(158, 4));
         keymap.put("FORWARD", new KeyboardCode(159, 125));
 

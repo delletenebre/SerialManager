@@ -21,8 +21,7 @@ static const char* kTAG = "SendEventJni";
 
 
 JNIEXPORT jint JNICALL
-Java_kg_delletenebre_serialmanager_App_initializateUinput(JNIEnv *env,
-                                                                        jobject instance) {
+Java_kg_delletenebre_serialmanager_App_initializateUinput(JNIEnv *env, jobject instance) {
 
     int fd;
     struct uinput_user_dev uidev;
@@ -57,6 +56,7 @@ Java_kg_delletenebre_serialmanager_App_initializateUinput(JNIEnv *env,
 
     ioctl(fd, UI_SET_KEYBIT, KEY_MENU);
     ioctl(fd, UI_SET_KEYBIT, KEY_HOME);
+    ioctl(fd, UI_SET_KEYBIT, KEY_HOMEPAGE);
     ioctl(fd, UI_SET_KEYBIT, KEY_BACK);
     ioctl(fd, UI_SET_KEYBIT, KEY_FORWARD);
 

@@ -1,25 +1,19 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ListPreference
-        android:key="sendTo"
-        android:defaultValue="usb_bt"
-        android:entries="@array/pref_widget_send_send_to_titles"
-        android:entryValues="@array/pref_widget_send_send_to_values"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_widget_send_title_send_to" />
+    <!--<ListPreference-->
+        <!--android:key="sendTo"-->
+        <!--android:defaultValue="usb_bt"-->
+        <!--android:entries="@array/pref_widget_send_send_to_titles"-->
+        <!--android:entryValues="@array/pref_widget_send_send_to_values"-->
+        <!--android:negativeButtonText="@null"-->
+        <!--android:positiveButtonText="@null"-->
+        <!--android:title="@string/pref_widget_send_title_send_to" />-->
 
     <CheckBoxPreference
         android:key="switch"
         android:defaultValue="false"
         android:title="Виджет-переключатель"
         android:summary="Разделитель |\nНапример для поля Отправляемые данные: on|off"/>
-
-    <!--<CheckBoxPreference-->
-        <!--android:key="wait_confirmation"-->
-        <!--android:dependency="switch"-->
-        <!--android:defaultValue="false"-->
-        <!--android:title="Ожидать подтверждения состояния" />-->
 
     <EditTextPreference
         android:key="data"
@@ -64,15 +58,6 @@
     <com.rarepebble.colorpicker.ColorPreference
         android:key="exmpleColor"
         android:title="@string/pref_widget_title_exampleColor" />
-
-    <!--<ListPreference-->
-        <!--android:key="textAlign"-->
-        <!--android:defaultValue="1"-->
-        <!--android:title="@string/pref_widget_title_multiline_align"-->
-        <!--android:entries="@array/pref_widget_multiline_align_titles"-->
-        <!--android:entryValues="@array/pref_widget_multiline_align_values"-->
-        <!--android:negativeButtonText="@null"-->
-        <!--android:positiveButtonText="@null" />-->
 
     <CheckBoxPreference
         android:key="useCustomFont"

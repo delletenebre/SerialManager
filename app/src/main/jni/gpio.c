@@ -13,11 +13,6 @@
 #define LOGE(...)  __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 
-jmethodID cb_method_id;
-jclass cb_class;
-jobject cb_object;
-JNIEnv *cb_save_env;
-
 
 int gpioExport(int pin) {
     FILE *file;
@@ -236,9 +231,41 @@ int gpioSetValue(int pin, int value) {
 
 
 
+JNIEXPORT jint JNICALL
+Java_kg_delletenebre_serialmanager_NativeGpio_export(JNIEnv *env, jclass type, jint pin, jstring direction_) {
+    const char *direction = (*env)->GetStringUTFChars(env, direction_, 0);
+
+    int gpioStatus;
+
+    gpioStatus = gpioExport(pin);
+    if (gpioStatus == -1) {
+        (*env)->ReleaseStringUTFChars(env, direction_, direction);
+        return gpioStatus;
+    }
+
+    gpioStatus = gpioSetDirection(pin, direction);
+    if (gpioStatus == -1) {
+        (*env)->ReleaseStringUTFChars(env, direction_, direction);
+        return gpioStatus;
+    }
+
+    (*env)->ReleaseStringUTFChars(env, direction_, direction);
+    return 0;
+}
+
 JNIEXPORT jstring JNICALL
 Java_kg_delletenebre_serialmanager_NativeGpio_getDirection(JNIEnv *env, jobject instance, jint pin) {
     return (*env)->NewStringUTF(env, gpioGetDirection(pin));
+}
+
+JNIEXPORT jint JNICALL
+Java_kg_delletenebre_serialmanager_NativeGpio_getValue(JNIEnv *env, jclass type, jint pin) {
+    return gpioGetValue(pin);
+}
+
+JNIEXPORT jint JNICALL
+Java_kg_delletenebre_serialmanager_NativeGpio_setValue(JNIEnv *env, jclass type, jint pin, jint value) {
+    return gpioSetValue(pin, value);
 }
 
 
@@ -301,9 +328,4 @@ Java_kg_delletenebre_serialmanager_NativeGpio_getFileDescriptor(JNIEnv *env, job
 JNIEXPORT void JNICALL
 Java_kg_delletenebre_serialmanager_NativeGpio_unexport(JNIEnv *env, jobject instance, jint pin) {
     gpioUnexport(pin);
-}
-
-JNIEXPORT void JNICALL
-Java_kg_delletenebre_serialmanager_NativeGpio_setValue(JNIEnv *env, jclass type, jint pin, jint value) {
-    gpioSetValue(pin, value);
 }

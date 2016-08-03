@@ -115,7 +115,7 @@ public class Commands {
 
         if (App.isDebug()) {
             Log.d(TAG, "Trying to detect saved command for: key:" + key + " / value:" + value);
-            Log.d(TAG, "Saved commands size: " + String.valueOf(commands.size()));
+            //Log.d(TAG, "Saved commands size: " + String.valueOf(commands.size()));
         }
 
         for (Command command: commands) {
@@ -181,7 +181,7 @@ public class Commands {
                     App.runShellCommand(action);
 
                 } else if (category.equals("send")) { // Send Command
-                    ConnectionService.usbAndBluetoothSend(action, false);
+                    ConnectionService.sendDataToTarget(action);
 
                 } else if (category.equals("system")) { // System Management
                     switch (action) {
@@ -198,8 +198,8 @@ public class Commands {
                             break;
                     }
                 } else if (category.equals("gpio")) { // GPIO
-                    final Pattern pattern = Pattern.compile("^gpio(\\d+?):([lowhignvert]+?)$");
-                    final Matcher matcher = pattern.matcher(action);
+                    Pattern pattern = Pattern.compile("^gpio(\\d+?):(low|high|invert)$");
+                    Matcher matcher = pattern.matcher(action);
                     if (matcher.find()) {
                         int pin = -1;
                         try {

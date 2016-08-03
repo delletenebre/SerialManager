@@ -118,6 +118,25 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="@string/pref_category_webserver" >
+
+        <CheckBoxPreference
+            android:key="webserver"
+            android:defaultValue="true"
+            android:title="@string/pref_title_webserver" />
+
+        <EditTextPreference
+            android:key="webserver_port"
+            android:dependency="webserver"
+            android:defaultValue="5000"
+            android:title="@string/pref_title_webserver_port"
+            android:inputType="number"
+            android:selectAllOnFocus="true"
+            android:singleLine="true" />
+
+    </PreferenceCategory>
+
 
     <PreferenceCategory
         android:title="@string/pref_category_send_commands" >

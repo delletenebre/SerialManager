@@ -51,12 +51,16 @@ public class NativeGpio extends Thread {
     static {
         System.loadLibrary("serial-manager");
     }
-    public native String getDirection(int pin);
+    public native static int export(int pin, String direction);
+    public native static String getDirection(int pin);
+    public native static int getValue(int pin);
+    public native static int setValue(int pin, int value);
+
     public native int getValueByFileDescriptor(int fd, boolean useInterrupt);
     public native int getFileDescriptor(int pin);
     public native int initializate(int pin, String direction, boolean useInterrupt);
     public native void unexport(int pin);
-    public native static void setValue(int pin, int value);
+
 
     public NativeGpio(int pin) {
         createPin(pin, "in");
@@ -113,53 +117,46 @@ public class NativeGpio extends Thread {
         unexport(pin);
 
         if (App.isDebug()) {
-            Log.d(TAG, "GPIO thread is interrupted");
+            Log.d(TAG, "GPIO #" + String.valueOf(pin) + " thread is interrupted");
         }
     }
-//
-//    private static int getValue(int pin) {
-//        try {
-//            Process p = Runtime.getRuntime().exec(String.format("cat /sys/class/gpio/gpio%s/value", pin));
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-//            StringBuilder text = new StringBuilder();
-//            String line;
-//            while((line = reader.readLine()) != null){
-//                text.append(line);
-//                text.append("\n");
-//            }
-//            try {
-//                String retour = text.toString();
-//                if (retour.equals("")){
-//                    return -1;
-//                } else 	{
-//                    return Integer.parseInt(retour.substring(0, 1));
-//                }
-//            } catch(NumberFormatException nfe) {
-//                return -1;
-//            }
-//        } catch (IOException e) {
-//            return -1;
-//        }
-//    }
 
     public static void setValue(int pin, String state) {
         if (pin > 0) {
-            String direction = "in";//getDirection(pin);
+            String direction = getDirection(pin);
 
-//            if (direction.isEmpty() || direction.equals("in")) {
-//                if (!exportAndDirection(pin, state.equals("invert") ? "low" : state)) {
-//                    Toaster.toast("GPIO: error");
-//                }
-//            } else if (state.equals("low") || state.equals("high")) {
-//                setValue(pin, state.equals("low") ? 0 : 1);
-//            } else if (state.equals("invert")) {
-//                int value = getValue(pin);
-//                if (value > -1) {
-//                    setValue(pin, (value == 1) ? 0 : 1);
-//                } else {
-//                    Toaster.toast("GPIO: value error");
-//                }
-//            }
+            if (direction == null) {
+                export(pin, state.equals("invert") ? "low" : state);
+            } else if (direction.equals("in")) {
+                Toaster.toast("GPIO #" + String.valueOf(pin) + " error: direction is IN");
+
+                if (App.isDebug()) {
+                    Log.w(TAG, "GPIO #" + String.valueOf(pin) + " error: direction is IN");
+                }
+            } else if (state.equals("invert") || state.equals("low") || state.equals("high")) {
+                int currentValue = getValue(pin);
+                if (currentValue > -1) {
+                    int value;
+
+                    if (state.equals("invert")) {
+                        value = (currentValue == 1) ? 0 : 1;
+                    } else {
+                        value = (state.equals("low")) ? 0 : 1;
+                    }
+
+                    if (setValue(pin, value) > -1) {
+                        if (App.isDebug()) {
+                            Log.d(TAG, "GPIO #" + String.valueOf(pin) + " setted to " + String.valueOf(value));
+                        }
+                    }
+                } else {
+                    if (App.isDebug()) {
+                        Toaster.toast("GPIO #" + String.valueOf(pin) + " error: value unknown");
+
+                        Log.w(TAG, "GPIO #" + String.valueOf(pin) + " error: value unknown");
+                    }
+                }
+            }
         }
     }
 

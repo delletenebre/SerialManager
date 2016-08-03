@@ -6,10 +6,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -21,12 +24,22 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
+
+import com.koushikdutta.async.callback.CompletedCallback;
+import com.koushikdutta.async.http.WebSocket;
+import com.koushikdutta.async.http.server.AsyncHttpServer;
+import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
+import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
+import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import kg.delletenebre.serialmanager.Commands.Command;
@@ -41,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
 
     public CommandsListAdapter commandsListAdapter;
 
+    static {
+        System.loadLibrary("serial-manager");
+    }
+    private native int i2c(int i2cNumber);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
                             })
                     .show();
         }
-
 
         commandsListAdapter = new CommandsListAdapter();
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.commands_list);
@@ -163,6 +179,21 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         App.setAliveActivity(this);
 
+        TextView webserverTextView = (TextView) findViewById(R.id.webserver_address);
+        if (webserverTextView != null) {
+            if (App.getPrefs().getBoolean("webserver", true)) {
+                String address = App.getIpAddress("wlan");
+                int port = App.getIntPreference("webserver_port", 5000);
+
+                webserverTextView.setText(String.format(getString(R.string.webserver_info),
+                        address, port, address, port));
+
+                webserverTextView.setVisibility(View.VISIBLE);
+            } else {
+                webserverTextView.setVisibility(View.GONE);
+            }
+        }
+
         // DELETE
 //        if (Build.VERSION.SDK_INT < 23
 //                || (Build.VERSION.SDK_INT >= 23 && Settings.canDrawOverlays(this))) {
@@ -175,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         App.setAliveActivity(null);
+
         super.onPause();
     }
 
