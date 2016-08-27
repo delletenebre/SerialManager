@@ -111,6 +111,9 @@ public class CommandSettingsActivity extends AppCompatActivity {
         editor.putBoolean("overlay_enabled", false);
         editor.putString("overlay_text", getString(R.string.pref_co_default_text));
         editor.putString("overlay_timer", getString(R.string.pref_co_default_timer));
+        editor.putBoolean("overlay_hide_on_click", false);
+        editor.putString("overlay_show_animation", getString(R.string.pref_co_default_show_animation));
+        editor.putString("overlay_hide_animation", getString(R.string.pref_co_default_hide_animation));
         editor.putString("overlay_position", getString(R.string.pref_co_default_position));
         editor.putString("overlay_position_x", getString(R.string.pref_co_default_position_x));
         editor.putString("overlay_position_y", getString(R.string.pref_co_default_position_y));
@@ -160,6 +163,9 @@ public class CommandSettingsActivity extends AppCompatActivity {
             editor.putBoolean("overlay_enabled", overlay.isEnabled());
             editor.putString("overlay_text", overlay.getText());
             editor.putString("overlay_timer", String.valueOf(overlay.getTimer()));
+            editor.putBoolean("overlay_hide_on_click", overlay.isHideOnClick());
+            editor.putString("overlay_show_animation", overlay.getShowAnimation());
+            editor.putString("overlay_hide_animation", overlay.getHideAnimation());
             editor.putString("overlay_position", overlay.getPosition());
             editor.putString("overlay_position_x", String.valueOf(overlay.getPositionX()));
             editor.putString("overlay_position_y", String.valueOf(overlay.getPositionY()));
@@ -261,6 +267,8 @@ public class CommandSettingsActivity extends AppCompatActivity {
 
             bindPreferenceSummaryToValue(findPreference("overlay_text"), COMMAND_PREFERENCE_NAME);
             bindPreferenceSummaryToValue(findPreference("overlay_timer"), COMMAND_PREFERENCE_NAME);
+            bindPreferenceSummaryToValue(findPreference("overlay_show_animation"), COMMAND_PREFERENCE_NAME);
+            bindPreferenceSummaryToValue(findPreference("overlay_hide_animation"), COMMAND_PREFERENCE_NAME);
             bindPreferenceSummaryToValue(findPreference("overlay_position"), COMMAND_PREFERENCE_NAME);
             bindPreferenceSummaryToValue(findPreference("overlay_position_x"), COMMAND_PREFERENCE_NAME);
             bindPreferenceSummaryToValue(findPreference("overlay_position_y"), COMMAND_PREFERENCE_NAME);
@@ -350,6 +358,12 @@ public class CommandSettingsActivity extends AppCompatActivity {
                         ((EditTextPreference) findPreference("overlay_text")).getText());
                 overlay.setTimer(Integer.parseInt(
                         ((EditTextPreference) findPreference("overlay_timer")).getText()));
+                overlay.setHideOnClick(
+                        ((CheckBoxPreference) findPreference("overlay_hide_on_click")).isChecked());
+                overlay.setShowAnimation(
+                        ((ListPreference) findPreference("overlay_show_animation")).getValue());
+                overlay.setHideAnimation(
+                        ((ListPreference) findPreference("overlay_hide_animation")).getValue());
                 overlay.setPosition(
                         ((ListPreference) findPreference("overlay_position")).getValue());
                 overlay.setPositionX(Integer.parseInt(

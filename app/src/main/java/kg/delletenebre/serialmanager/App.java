@@ -11,17 +11,13 @@ import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.PowerManager;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
-import android.widget.EditText;
 
 import com.stericson.RootShell.RootShell;
 import com.stericson.RootShell.execution.Command;
@@ -46,15 +42,12 @@ public class App extends Application {
     public static final String ACTION_SEND_DATA_COMPLETE = "kg.delletenebre.serial.SEND_DATA_COMPLETE";
     public static final String ACTION_SEND_DATA_SUCCESS = "kg.delletenebre.serial.SEND_DATA_SUCCESS";
     public static final String ACTION_EXTERNAL_SEND = "serial.manager.send";
+    public static final String ACTION_CONNECTED_DEVICES = "serial.manager.CONNECTED_DEVICES";
+    public static final String ACTION_CONNECTED_DEVICES_REQUEST = "serial.manager.CONNECTED_DEVICES_REQUEST";
 
-    protected static final String ACTION_USB_PERMISSION = "kg.delletenebre.serial.usb_permission";
-    protected static final String ACTION_USB_ATTACHED = "kg.delletenebre.serial.usb_attached";
-    protected static final String ACTION_USB_DETACHED = "kg.delletenebre.serial.usb_detached";
     public static final int REQUEST_CODE_ASK_PERMISSIONS_READ = 86;
     public static final int REQUEST_CODE_ASK_PERMISSIONS_WRITE = 87;
     public static final int REQUEST_CODE_UPDATE_COMMAND = 88;
-    protected static final int START_SERVICE_DELAY = 1000;
-    protected static final int BLUETOOTH_RECONNECT_DELAY = 3000;
 
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
@@ -134,7 +127,7 @@ public class App extends Application {
 
 
         if (App.getPrefs().getBoolean("start_when_screen_on", true) && App.isScreenOn()) {
-            //context.startService(new Intent(context, ConnectionService.class));
+            context.startService(new Intent(context, ConnectionService.class));
         }
     }
 
@@ -575,6 +568,9 @@ public class App extends Application {
         keymap.put("DPAD_LEFT", new KeyboardCode(105, 21));
         keymap.put("DPAD_RIGHT", new KeyboardCode(106, 22));
         keymap.put("DPAD_CENTER", new KeyboardCode(353, 23));
+
+        keymap.put("PAGE_UP", new KeyboardCode(104, 92));
+        keymap.put("PAGE_DOWN", new KeyboardCode(109, 93));
 
         keymap.put("ENTER", new KeyboardCode(28, 66));
         keymap.put("ESCAPE", new KeyboardCode(1, 111));

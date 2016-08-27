@@ -6,13 +6,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -24,22 +21,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.koushikdutta.async.callback.CompletedCallback;
-import com.koushikdutta.async.http.WebSocket;
-import com.koushikdutta.async.http.server.AsyncHttpServer;
-import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
-import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
-import com.koushikdutta.async.http.server.HttpServerRequestCallback;
-
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import kg.delletenebre.serialmanager.Commands.Command;
@@ -193,14 +181,6 @@ public class MainActivity extends AppCompatActivity {
                 webserverTextView.setVisibility(View.GONE);
             }
         }
-
-        // DELETE
-//        if (Build.VERSION.SDK_INT < 23
-//                || (Build.VERSION.SDK_INT >= 23 && Settings.canDrawOverlays(this))) {
-//            Log.d(TAG, "onResume abrakadabra");
-//            Overlay.show(Commands.getCommands().get(0), "abrakadabra");
-//        }
-
     }
 
     @Override

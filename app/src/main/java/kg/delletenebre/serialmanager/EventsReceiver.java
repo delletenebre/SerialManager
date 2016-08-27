@@ -4,16 +4,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.util.Log;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import kg.delletenebre.serialmanager.Widget.WidgetSendSettings;
 import xdroid.toaster.Toaster;
 
 public class EventsReceiver extends BroadcastReceiver {
@@ -38,8 +33,6 @@ public class EventsReceiver extends BroadcastReceiver {
                         public void run() {
                             context.startService(new Intent(context, ConnectionService.class));
                             autostartActive = false;
-
-                            Log.d(TAG, String.valueOf(App.getIntPreference("autostart_delay", 5)));
                         }
                     }, App.getIntPreference("autostart_delay", 5) * 1000);
                 }
@@ -164,6 +157,15 @@ public class EventsReceiver extends BroadcastReceiver {
                     ConnectionService.sendDataToTarget(data);
                 }
 
+
+                break;
+
+            case App.ACTION_CONNECTED_DEVICES_REQUEST:
+                if (App.isDebug()) {
+                    Log.i(TAG, "****ACTION_CONNECTED_DEVICES_REQUEST****");
+                }
+
+                ConnectionService.updateNotificationText();
 
                 break;
         }

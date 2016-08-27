@@ -179,7 +179,7 @@
 
 
 
-    <!-- **** Command.Overlay preferences **** -->
+    <!-- **** Command.HudOverlay preferences **** -->
     <string name="pref_category_title_notification">Уведомление</string>
 
     <string name="pref_co_title_enabled">Показывать уведомление</string>
@@ -187,6 +187,17 @@
     <string name="pref_co_title_text">Текст уведомления</string>
 
     <string name="pref_co_title_timer">Скрывать уведомление через (в мс)</string>
+
+    <string name="pref_co_title_hide_on_click">Скрыть уведомление при нажатии на нём</string>
+
+    <string name="pref_co_title_show_animation">Анимация появления</string>
+    <string name="pref_co_title_hide_animation">Анимация скрытия</string>
+    <string name="none">Нет</string>
+    <string name="fade">Плавное (fade)</string>
+    <string name="slide_up">Скольжение вверх</string>
+    <string name="slide_down">Скольжение вниз</string>
+    <string name="slide_up_fade">Плавное (fade) скольжение вверх</string>
+    <string name="slide_down_fade">Плавное (fade) скольжение вниз</string>
 
     <string name="pref_co_title_position">Расположение на экране</string>
 

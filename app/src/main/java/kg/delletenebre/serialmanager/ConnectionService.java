@@ -270,7 +270,7 @@ public class ConnectionService extends Service implements SensorEventListener {
         return notification;
     }
 
-    private static void updateNotificationText() {
+    public static void updateNotificationText() {
         Resources resources = App.getContext().getResources();
         NotificationCompat.Builder notification = getNotification();
 
@@ -287,6 +287,7 @@ public class ConnectionService extends Service implements SensorEventListener {
                         R.string.notification_usb_connected_number), numberUsb);
 
         String bluetoothText = "";
+        int numberBluetooth = 0;
         if (bt != null) {
             bluetoothText = bt.getConnectedDeviceName();
         }
@@ -298,6 +299,7 @@ public class ConnectionService extends Service implements SensorEventListener {
             bluetoothText = String.format(resources.getString(
                     R.string.notification_bluetooth_connected_device),
                     bluetoothText);
+            numberBluetooth = 1;
         }
 
 
@@ -320,6 +322,12 @@ public class ConnectionService extends Service implements SensorEventListener {
         NotificationManager notificationManager =
                 (NotificationManager) App.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, notification.build());
+
+        Intent intent = new Intent(App.ACTION_CONNECTED_DEVICES);
+        intent.putExtra("all", numberUsb + numberBluetooth);
+        intent.putExtra("usb", numberUsb);
+        intent.putExtra("bluetooth", numberBluetooth);
+        App.getContext().sendBroadcast(intent);
     }
 
     private void initializeJsonDevices() {
@@ -485,16 +493,14 @@ public class ConnectionService extends Service implements SensorEventListener {
             if (openedSerialPorts.containsKey(detachedDeviceName)) {
                 try {
                     openedSerialPorts.get(detachedDeviceName).close();
-                    openedSerialPorts.put(detachedDeviceName, null);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
 
                 openedSerialPorts.remove(detachedDeviceName);
-            }
 
-            updateNotificationText();
-            System.gc();
+                updateNotificationText();
+            }
         }
     }
 

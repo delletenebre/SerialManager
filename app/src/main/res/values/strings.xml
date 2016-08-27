@@ -213,6 +213,8 @@
         <item>DPAD_LEFT</item>
         <item>DPAD_RIGHT</item>
         <item>DPAD_CENTER</item>
+        <item>PAGE_UP</item>
+        <item>PAGE_DOWN</item>
         <item>ENTER</item>
         <item>ESCAPE</item>
         <item>MEDIA_FAST_FORWARD</item>
@@ -394,6 +396,35 @@
 
     <string name="pref_co_title_timer">Hide delay (in ms)</string>
     <string name="pref_co_default_timer" translatable="false">2000</string>
+
+    <string name="pref_co_title_hide_on_click">Hide on click</string>
+
+    <string name="pref_co_title_show_animation">Show animation</string>
+    <string name="pref_co_title_hide_animation">Hide animation</string>
+    <string name="none">None</string>
+    <string name="fade">Fade</string>
+    <string name="slide_up">Slide Up</string>
+    <string name="slide_down">Slide Down</string>
+    <string name="slide_up_fade">Slide Up and Fade</string>
+    <string name="slide_down_fade">Slide Down and Fade</string>
+    <string-array name="pref_co_animation_titles" translatable="false">
+        <item>@string/none</item>
+        <item>@string/fade</item>
+        <item>@string/slide_up</item>
+        <item>@string/slide_down</item>
+        <item>@string/slide_up_fade</item>
+        <item>@string/slide_down_fade</item>
+    </string-array>
+    <string-array name="pref_co_animation_values" translatable="false">
+        <item>none</item>
+        <item>fade</item>
+        <item>slide_up</item>
+        <item>slide_down</item>
+        <item>slide_up_fade</item>
+        <item>slide_down_fade</item>
+    </string-array>
+    <string name="pref_co_default_show_animation" translatable="false">none</string>
+    <string name="pref_co_default_hide_animation" translatable="false">none</string>
 
     <string name="pref_co_title_position">Position</string>
     <string name="pref_co_default_position" translatable="false">topLeft</string>

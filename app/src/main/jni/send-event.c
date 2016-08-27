@@ -73,6 +73,9 @@ Java_kg_delletenebre_serialmanager_App_initializateUinput(JNIEnv *env, jobject i
     ioctl(fd, UI_SET_KEYBIT, KEY_RIGHT);
     ioctl(fd, UI_SET_KEYBIT, KEY_SELECT);
 
+    ioctl(fd, UI_SET_KEYBIT, KEY_PAGEUP);
+    ioctl(fd, UI_SET_KEYBIT, KEY_PAGEDOWN);
+
     ioctl(fd, UI_SET_KEYBIT, KEY_ENTER);
     ioctl(fd, UI_SET_KEYBIT, KEY_ESC);
 

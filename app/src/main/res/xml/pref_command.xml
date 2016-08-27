@@ -145,6 +145,32 @@
                 android:singleLine="true"
                 android:title="@string/pref_co_title_timer" />
 
+            <CheckBoxPreference
+                android:key="overlay_hide_on_click"
+                android:dependency="overlay_enabled"
+                android:defaultValue="false"
+                android:title="@string/pref_co_title_hide_on_click" />
+
+            <ListPreference
+                android:key="overlay_show_animation"
+                android:dependency="overlay_enabled"
+                android:defaultValue="@string/pref_co_default_show_animation"
+                android:title="@string/pref_co_title_show_animation"
+                android:entries="@array/pref_co_animation_titles"
+                android:entryValues="@array/pref_co_animation_values"
+                android:negativeButtonText="@null"
+                android:positiveButtonText="@null" />
+
+            <ListPreference
+                android:key="overlay_hide_animation"
+                android:dependency="overlay_enabled"
+                android:defaultValue="@string/pref_co_default_hide_animation"
+                android:title="@string/pref_co_title_hide_animation"
+                android:entries="@array/pref_co_animation_titles"
+                android:entryValues="@array/pref_co_animation_values"
+                android:negativeButtonText="@null"
+                android:positiveButtonText="@null" />
+
             <ListPreference
                 android:key="overlay_position"
                 android:dependency="overlay_enabled"

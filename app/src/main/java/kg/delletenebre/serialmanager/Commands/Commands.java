@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -27,9 +29,9 @@ import java.util.regex.Pattern;
 
 import kg.delletenebre.serialmanager.App;
 import kg.delletenebre.serialmanager.ConnectionService;
+import kg.delletenebre.serialmanager.HudOverlay;
 import kg.delletenebre.serialmanager.MainActivity;
 import kg.delletenebre.serialmanager.NativeGpio;
-import kg.delletenebre.serialmanager.Overlay;
 import kg.delletenebre.serialmanager.Preferences.AppChooserPreference;
 import kg.delletenebre.serialmanager.R;
 import xdroid.toaster.Toaster;
@@ -108,7 +110,7 @@ public class Commands {
         }
     }
 
-    public static void detectCommand(String key, String value) {
+    public static void detectCommand(final String key, final String value) {
         Context context = App.getContext();
         boolean detected = false;
         commands = getCommands();
@@ -118,7 +120,7 @@ public class Commands {
             //Log.d(TAG, "Saved commands size: " + String.valueOf(commands.size()));
         }
 
-        for (Command command: commands) {
+        for (final Command command: commands) {
             boolean inRange = false;
             if (App.isNumber(command.getValue()) && App.isNumber(value)) {
                 float commandValue = Float.parseFloat(command.getValue());
@@ -146,7 +148,14 @@ public class Commands {
 
                 if (command.getOverlay().isEnabled() && (Build.VERSION.SDK_INT < 23
                         || (Build.VERSION.SDK_INT >= 23 && Settings.canDrawOverlays(context)))) {
-                    Overlay.show(command, value);
+
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            (new HudOverlay(command.getOverlay(), command.getKey(), value)).show();
+                        }
+                    });
+
                 }
 
                 if (category.equals("navigation")) {
