@@ -96,30 +96,7 @@ int gpioSetDirection(int pin, const char *direction) {
 
     return 0;
 }
-//
-//int gpioSetActiveLow(int pin, int active_low) {
-//    char command[PATH_MAX];
-//    char filepath[PATH_MAX];
-//    FILE *file;
-//
-//    snprintf(filepath, sizeof(filepath), "/sys/class/gpio/gpio%d/active_low", pin);
-//
-//    snprintf(command, sizeof(command), "su -c \"chmod -R 646 %s\"", filepath);
-//    system(command);
-//
-//    file = fopen(filepath, "w");
-//    if (file == NULL) {
-//        LOGE("Failed to open %s for writing! @ line %d", filepath, __LINE__);
-//        return -1;
-//    }
-//    fprintf(file, "%d\n", active_low);
-//    fclose(file);
-//
-//    snprintf(command, sizeof(command), "su -c \"chmod -R 644 %s\"", filepath);
-//    system(command);
-//
-//    return 0;
-//}
+
 
 int gpioSetEdge(int pin, const char *edge) {
     char command[PATH_MAX];

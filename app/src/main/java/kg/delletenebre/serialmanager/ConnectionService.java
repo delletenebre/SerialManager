@@ -152,6 +152,7 @@ public class ConnectionService extends Service implements SensorEventListener {
         sendInfoScreenState(null);
 
         NativeGpio.createGpiosFromCommands();
+        Hotkey.createHotkeysFromCommands();
 
         startWebserver();
 
@@ -183,6 +184,7 @@ public class ConnectionService extends Service implements SensorEventListener {
         App.destroyUinput();
 
         NativeGpio.destroyGpios();
+        Hotkey.destroyHotkeys();
 
         stopWebserver();
 

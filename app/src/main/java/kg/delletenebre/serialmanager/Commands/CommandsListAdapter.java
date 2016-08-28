@@ -14,6 +14,7 @@ import android.widget.TextView;
 import java.util.Collections;
 
 import kg.delletenebre.serialmanager.App;
+import kg.delletenebre.serialmanager.Hotkey;
 import kg.delletenebre.serialmanager.NativeGpio;
 import kg.delletenebre.serialmanager.R;
 import kg.delletenebre.serialmanager.helper.ItemTouchHelperAdapter;
@@ -83,8 +84,11 @@ public class CommandsListAdapter extends RecyclerView.Adapter<CommandsListAdapte
         if (position > -1) {
             if (database.update(command) > 0) {
                 if (!Commands.getCommands().get(position).getKey().equals(command.getKey())) {
-                    NativeGpio.destroyGpioByKey(Commands.getCommands().get(position).getKey(), false);
-                    NativeGpio.createGpioByKey(command.getKey());
+                    NativeGpio.destroyGpioByCommandKey(Commands.getCommands().get(position).getKey(), false);
+                    NativeGpio.createGpioByCommandKey(command.getKey());
+
+                    Hotkey.destroyHotkeyByCommandKey(Commands.getCommands().get(position).getKey(), false);
+                    Hotkey.createHotkeyByCommandKey(command.getKey());
                 }
 
                 Commands.getCommands().set(position, command);
@@ -97,7 +101,8 @@ public class CommandsListAdapter extends RecyclerView.Adapter<CommandsListAdapte
         database.updatePositions(Commands.getCommands());
         int position = getItemPositionById(id);
         if (position > -1) {
-            NativeGpio.destroyGpioByKey(Commands.getCommands().get(position).getKey(), false);
+            NativeGpio.destroyGpioByCommandKey(Commands.getCommands().get(position).getKey(), false);
+            Hotkey.destroyHotkeyByCommandKey(Commands.getCommands().get(position).getKey(), false);
 
             Commands.getCommands().remove(position);
 

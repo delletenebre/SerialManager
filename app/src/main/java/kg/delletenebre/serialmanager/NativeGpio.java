@@ -60,16 +60,12 @@ public class NativeGpio extends Thread {
 
 
     public NativeGpio(int pin) {
-        createPin(pin, "in");
-    }
-
-    private void createPin(int pin, String direction) {
         this.pin = pin;
         this.name = "gpio" + pin;
 
         SharedPreferences prefs = App.getPrefs();
         useInterrupt = prefs.getBoolean("gpio_use_interrupt", true);
-        lastValue = initializate(pin, direction, useInterrupt);
+        lastValue = initializate(pin, "in", useInterrupt);
 
         if (lastValue > -1) {
             setDebounce(Integer.parseInt(prefs.getString("gpio_debounce", "20")));
@@ -178,11 +174,11 @@ public class NativeGpio extends Thread {
 
     public static void createGpiosFromCommands() {
         for (Command command: Commands.getCommands()) {
-            createGpioByKey(command.getKey());
+            createGpioByCommandKey(command.getKey());
         }
     }
 
-    public static void createGpioByKey(final String key) {
+    public static void createGpioByCommandKey(final String key) {
         final int pin = getGpioFromCommandKey(key);
 
         if (pin > -1 && !gpios.containsKey(key)) {
@@ -222,7 +218,7 @@ public class NativeGpio extends Thread {
         }
     }
 
-    public static void destroyGpioByKey(String key, boolean forced) {
+    public static void destroyGpioByCommandKey(String key, boolean forced) {
         int countSameKey = 0;
 
         if (!forced) {
