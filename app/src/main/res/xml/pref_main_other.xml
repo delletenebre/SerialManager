@@ -1,0 +1,55 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:key="autostart"
+        android:defaultValue="true"
+        android:title="@string/pref_title_autostart" />
+
+    <EditTextPreference
+        android:key="autostart_delay"
+        android:dependency="autostart"
+        android:defaultValue="5"
+        android:title="@string/pref_title_autostart_delay"
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+    <CheckBoxPreference
+        android:key="stop_when_screen_off"
+        android:defaultValue="true"
+        android:title="@string/pref_title_stop_service_when_screen_off" />
+
+    <EditTextPreference
+        android:key="stop_when_screen_off_delay"
+        android:dependency="stop_when_screen_off"
+        android:defaultValue="2"
+        android:title="@string/pref_title_stop_when_screen_off_delay"
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+    <CheckBoxPreference
+        android:key="start_when_screen_on"
+        android:defaultValue="true"
+        android:title="@string/pref_title_start_when_screen_on" />
+
+    <EditTextPreference
+        android:key="start_when_screen_on_delay"
+        android:dependency="start_when_screen_on"
+        android:defaultValue="2"
+        android:title="@string/pref_title_start_when_screen_on_delay"
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+    <CheckBoxPreference
+        android:key="volumeShowUI"
+        android:defaultValue="true"
+        android:title="@string/pref_title_volume_show_ui" />
+
+    <CheckBoxPreference
+        android:key="debug"
+        android:defaultValue="false"
+        android:title="@string/pref_title_debug"
+        android:summary="@string/pref_summ_debug" />
+
+</PreferenceScreen>

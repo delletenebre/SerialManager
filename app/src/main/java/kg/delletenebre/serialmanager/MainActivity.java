@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextView webserverTextView = (TextView) findViewById(R.id.webserver_address);
         if (webserverTextView != null) {
-            if (App.getPrefs().getBoolean("webserver", true)) {
+            if (App.getPrefs().getBoolean("webserver", false)) {
                 String address = App.getIpAddress("wlan");
                 int port = App.getIntPreference("webserver_port", 5000);
 

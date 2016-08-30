@@ -1,0 +1,79 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:key="usb"
+        android:defaultValue="true"
+        android:title="@string/pref_title_usb_connection" />
+
+    <kg.delletenebre.serialmanager.Preferences.UsbDevicesListPreference
+        android:key="usbDevice"
+        android:dependency="usb"
+        android:defaultValue=""
+        android:title="@string/pref_title_usb_devices_list" />
+
+    <CheckBoxPreference
+        android:key="usb_reset_hub"
+        android:dependency="usb"
+        android:defaultValue="false"
+        android:title="@string/pref_title_usb_reset_hub"
+        android:summary="@string/pref_summary_usb_reset_hub"/>
+
+    <CheckBoxPreference
+        android:key="usbDetectCommandByNewLine"
+        android:dependency="usb"
+        android:defaultValue="false"
+        android:title="@string/pref_title_detect_command_by_new_line"
+        android:summary="@string/pref_summ_detect_command_by_new_line" />
+
+    <CheckBoxPreference
+        android:key="dtr"
+        android:dependency="usb"
+        android:defaultValue="false"
+        android:title="@string/pref_title_dtr"
+        android:summary="@string/pref_summ_dtr" />
+
+    <CheckBoxPreference
+        android:key="rts"
+        android:dependency="usb"
+        android:defaultValue="false"
+        android:title="@string/pref_title_rts"
+        android:summary="@string/pref_summ_rts" />
+
+    <EditTextPreference
+        android:key="baudRate"
+        android:dependency="usb"
+        android:defaultValue="9600"
+        android:title="@string/pref_title_baud_rate"
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+    <ListPreference
+        android:key="dataBits"
+        android:dependency="usb"
+        android:defaultValue="8"
+        android:title="@string/pref_title_data_bits"
+        android:entries="@array/pref_data_bits_titles"
+        android:entryValues="@array/pref_data_bits_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+
+    <ListPreference
+        android:key="stopBits"
+        android:dependency="usb"
+        android:defaultValue="1"
+        android:title="@string/pref_title_stop_bits"
+        android:entries="@array/pref_stop_bits_titles"
+        android:entryValues="@array/pref_stop_bits_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+
+    <ListPreference
+        android:key="parity"
+        android:dependency="usb"
+        android:defaultValue="0"
+        android:title="@string/pref_title_parity"
+        android:entries="@array/pref_parity_titles"
+        android:entryValues="@array/pref_parity_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+</PreferenceScreen>

@@ -33,6 +33,15 @@
     <string name="pref_category_gpio" translatable="false">GPIO</string>
     <string name="pref_category_other">Other</string>
 
+    <string name="pref_main_header_bluetooth">Bluetooth</string>
+    <string name="pref_main_header_usb">USB</string>
+    <string name="pref_main_header_webserver">WebSocket</string>
+    <string name="pref_main_header_gpio">GPIO</string>
+    <string name="pref_main_header_hotkeys">Keyboard shortcuts</string>
+    <string name="pref_main_header_sending_commands">Sending commands</string>
+    <string name="pref_main_header_extra">Extra</string>
+    <string name="pref_main_header_other">Other</string>
+
     <string name="pref_title_bluetooth_connection">Enable bluetooth connection</string>
     <string name="pref_title_bluetooth_devices_list">Bluetooth device</string>
     <string name="pref_title_bluetooth_autoconnect">Auto connect to bluetooth device</string>

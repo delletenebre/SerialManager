@@ -1,0 +1,35 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <header
+        android:fragment="kg.delletenebre.serialmanager.SettingsActivity$BluetoothPreferenceFragment"
+        android:title="@string/pref_main_header_bluetooth" />
+
+    <header
+        android:fragment="kg.delletenebre.serialmanager.SettingsActivity$UsbPreferenceFragment"
+        android:title="@string/pref_main_header_usb" />
+
+    <header
+        android:fragment="kg.delletenebre.serialmanager.SettingsActivity$WebServerPreferenceFragment"
+        android:title="@string/pref_main_header_webserver" />
+
+    <header
+        android:fragment="kg.delletenebre.serialmanager.SettingsActivity$GpioPreferenceFragment"
+        android:title="@string/pref_main_header_gpio" />
+
+    <header
+        android:fragment="kg.delletenebre.serialmanager.SettingsActivity$HotkeysPreferenceFragment"
+        android:title="@string/pref_main_header_hotkeys" />
+
+    <header
+        android:fragment="kg.delletenebre.serialmanager.SettingsActivity$SendingCommandsPreferenceFragment"
+        android:title="@string/pref_main_header_sending_commands" />
+
+    <header
+        android:fragment="kg.delletenebre.serialmanager.SettingsActivity$ExtraPreferenceFragment"
+        android:title="@string/pref_main_header_extra" />
+
+    <header
+        android:fragment="kg.delletenebre.serialmanager.SettingsActivity$OtherPreferenceFragment"
+        android:title="@string/pref_main_header_other" />
+
+</preference-headers>

@@ -1,8 +1,11 @@
 package kg.delletenebre.serialmanager;
 
+import android.os.Handler;
 import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -20,12 +23,15 @@ public class Hotkey extends Thread {
 
     private int eventId;
     private String commandKey;
+    private Keycode keycode;
+    private Handler delayDetectKeyPressHandler = new Handler();
+    private ArrayList<Integer> pressedKeys = new ArrayList<>();
 
     static {
         System.loadLibrary("serial-manager");
     }
     public native int getFileDescriptor(int eventId);
-    public native int readKeysByFileDescriptor(int fd);
+    public native String readKeysByFileDescriptor(int fd);
 
     public Hotkey(int eventId, String commandKey) {
         this.eventId = eventId;
@@ -34,25 +40,102 @@ public class Hotkey extends Thread {
 
     public void run() {
         int fd = getFileDescriptor(eventId);
-        int currentValue = -2;
+
+        Runnable delayDetectKeyPressRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (keycode != null) {
+                    if (pressedKeys.size() > 0) {
+                        StringBuilder stringBuilder = new StringBuilder();
+                        for (Integer pressedKey: pressedKeys) {
+                            stringBuilder.append(pressedKey).append("+");
+                        }
+                        Commands.processReceivedData(
+                                String.format("<%s:%s>", commandKey,
+                                        stringBuilder.toString().substring(
+                                                0, stringBuilder.length() - 1)));
+                    }
+
+                }
+            }
+        };
 
         if (fd > -1) {
-            while (!Thread.currentThread().isInterrupted() || currentValue != -1) {
+            String currentValue = "";
+
+            while (!Thread.currentThread().isInterrupted() || !currentValue.equals("error")) {
                 currentValue = readKeysByFileDescriptor(fd);
-                if (currentValue > 0) {
-                    Commands.processReceivedData(
-                            String.format("<%s:%s>", commandKey, 1));
-                    Log.d(TAG, String.format("<%s:%s>", commandKey, 1));
+                if (App.isDebug()) {
+                    Log.d(TAG, String.valueOf(currentValue));
+                }
+
+                if (!currentValue.isEmpty() && currentValue.contains(".")) {
+                    keycode = new Keycode(currentValue);
+                    if (keycode.code > 0) {
+                        delayDetectKeyPressHandler.removeCallbacks(delayDetectKeyPressRunnable);
+
+                        if (keycode.isPressed) {
+                            pressedKeys.add(keycode.code);
+                            delayDetectKeyPressHandler.postDelayed(delayDetectKeyPressRunnable, 100);
+                        } else {
+                            pressedKeys.remove((Integer)keycode.code);
+                        }
+                    }
+
+                    if (App.isDebug()) {
+                        Log.d(TAG, String.format("code: %s | text:%s | isPressed:%s",
+                                keycode.code, keycode.text, keycode.isPressed));
+                    }
                 }
             }
         }
 
+        delayDetectKeyPressHandler.removeCallbacks(delayDetectKeyPressRunnable);
+        destroyHotkeyByCommandKey(commandKey, false);
+
         if (App.isDebug()) {
             Log.d(TAG, "event" + String.valueOf(eventId) + " thread is interrupted");
         }
-
-        destroyHotkeyByCommandKey(commandKey, false);
     }
+
+    class Keycode {
+        protected boolean isPressed = false;
+        protected int code = 0;
+        protected String text = "";
+
+        public Keycode(String string) {
+            String[] result = string.split("\\.");
+            int[] part1 = splitToInt(result[0], "\\|");
+            int[] part2 = splitToInt(result[1], "\\|");
+
+            if (part2[0] > 0) {
+                this.code = part2[0];
+                this.isPressed = part2[1] == 1;
+                this.text = "";
+            } else if (part1[0] > 0) {
+                this.code = part1[0];
+                this.isPressed = part1[1] == 1;
+                this.text = "";
+            }
+        }
+
+        private int[] splitToInt(String string, String divider) {
+            String[] str = string.split(divider);
+            int[] result = new int[str.length];
+            for (int i = 0; i < result.length; i++) {
+                try {
+                    result[i] = Integer.parseInt(str[i]);
+                } catch (NumberFormatException e) {
+                    result[i] = -1;
+                    e.printStackTrace();
+                }
+            }
+
+            return result;
+        }
+    }
+
+
 
 
 

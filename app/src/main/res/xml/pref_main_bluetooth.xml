@@ -1,0 +1,25 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:key="bluetooth"
+        android:defaultValue="false"
+        android:title="@string/pref_title_bluetooth_connection" />
+
+    <kg.delletenebre.serialmanager.Preferences.BluetoothDevicesListPreference
+        android:key="bluetoothDevice"
+        android:dependency="bluetooth"
+        android:defaultValue=""
+        android:title="@string/pref_title_bluetooth_devices_list" />
+
+    <CheckBoxPreference
+        android:key="bluetoothAutoEnable"
+        android:dependency="bluetooth"
+        android:defaultValue="true"
+        android:title="@string/pref_title_enable_if_off" />
+
+    <CheckBoxPreference
+        android:key="bluetoothDetectCommandByNewLine"
+        android:dependency="bluetooth"
+        android:defaultValue="false"
+        android:title="@string/pref_title_detect_command_by_new_line"
+        android:summary="@string/pref_summ_detect_command_by_new_line" />
+</PreferenceScreen>

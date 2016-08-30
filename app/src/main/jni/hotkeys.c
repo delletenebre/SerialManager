@@ -36,26 +36,28 @@ int hotkeysGetFileDescriptor(int eventId) {
     return fd;
 }
 
-int hotkeysReadValueByFileDescriptor(int fd) {
+char* hotkeysReadValueByFileDescriptor(int fd) {
     struct input_event ev[64];
-    //int value;
+    char result[PATH_MAX];
     size_t size = sizeof(struct input_event);
 
     if (read(fd, ev, size * 64) < size) {
         LOGE("Failed to read @ line %d", __LINE__);
-        return -1;
+        return "error";
     }
 
     //value = ev[0].value;
 
     //if (value != ' ') {// && ev[1].value == 1 && ev[1].type == 1) { // Only read the key press event
         //LOGD("Code[%d] | Value[%d] | Type[%d]", ev[0].code, ev[0].value, ev[0].type);
-    LOGD("Code[%d] | Value[%d] | Type[%d]", ev[1].code, ev[1].value, ev[1].type);
-    if (ev[1].value == 1) {
-        return ev[1].code;
-    }
+    //LOGD("Code[%d] | Value[%d] | Type[%d]", ev[1].code, ev[1].value, ev[1].type);
+    //LOGD("%d|%d;%d|%d", ev[0].code, ev[0].value, ev[1].code, ev[1].value);
 
-    return 0;
+    //if (ev[1].value == 1) {
+        //return ev[1].code;
+    //}
+    snprintf(result, PATH_MAX, "%d|%d.%d|%d", ev[0].code, ev[0].value, ev[1].code, ev[1].value);
+    return result;
 }
 
 
@@ -64,103 +66,7 @@ Java_kg_delletenebre_serialmanager_Hotkey_getFileDescriptor(JNIEnv *env, jobject
     return hotkeysGetFileDescriptor(eventId);
 }
 
-JNIEXPORT jint JNICALL
+JNIEXPORT jstring JNICALL
 Java_kg_delletenebre_serialmanager_Hotkey_readKeysByFileDescriptor(JNIEnv *env, jobject instance, jint fd) {
-    return hotkeysReadValueByFileDescriptor(fd);
+    return (*env)->NewStringUTF(env, hotkeysReadValueByFileDescriptor(fd));
 }
-
-//JNIEXPORT jint JNICALL
-//Java_kg_delletenebre_serialmanager_NativeGpio_export(JNIEnv *env, jclass type, jint pin, jstring direction_) {
-//    const char *direction = (*env)->GetStringUTFChars(env, direction_, 0);
-//
-//    int gpioStatus;
-//
-//    gpioStatus = gpioExport(pin);
-//    if (gpioStatus == -1) {
-//        (*env)->ReleaseStringUTFChars(env, direction_, direction);
-//        return gpioStatus;
-//    }
-//
-//    gpioStatus = gpioSetDirection(pin, direction);
-//    if (gpioStatus == -1) {
-//        (*env)->ReleaseStringUTFChars(env, direction_, direction);
-//        return gpioStatus;
-//    }
-//
-//    (*env)->ReleaseStringUTFChars(env, direction_, direction);
-//    return 0;
-//}
-//
-//JNIEXPORT jstring JNICALL
-//Java_kg_delletenebre_serialmanager_NativeGpio_getDirection(JNIEnv *env, jobject instance, jint pin) {
-//    return (*env)->NewStringUTF(env, gpioGetDirection(pin));
-//}
-//
-//JNIEXPORT jint JNICALL
-//Java_kg_delletenebre_serialmanager_NativeGpio_getValue(JNIEnv *env, jclass type, jint pin) {
-//    return gpioGetValue(pin);
-//}
-//
-//JNIEXPORT jint JNICALL
-//Java_kg_delletenebre_serialmanager_NativeGpio_setValue(JNIEnv *env, jclass type, jint pin, jint value) {
-//    return gpioSetValue(pin, value);
-//}
-//
-//
-//JNIEXPORT jint JNICALL
-//Java_kg_delletenebre_serialmanager_NativeGpio_initializate(JNIEnv *env, jobject instance,
-//                                                           jint pin, jstring direction_,
-//                                                           jboolean useInterrupt) {
-//    const char *direction = (*env)->GetStringUTFChars(env, direction_, (jboolean *)0);
-//
-//    int gpioValue;
-//    int gpioStatus;
-//    char* gpioDirection;
-//
-//    gpioValue = gpioGetValue(pin);
-//    if (gpioValue == -1) {
-//        gpioStatus = gpioUnexport(pin);
-//        if (gpioStatus == -1) {
-//            (*env)->ReleaseStringUTFChars(env, direction_, direction);
-//            return gpioStatus;
-//        }
-//
-//        gpioStatus = gpioExport(pin);
-//        if (gpioStatus == -1) {
-//            (*env)->ReleaseStringUTFChars(env, direction_, direction);
-//            return gpioStatus;
-//        }
-//    }
-//
-//    gpioDirection = gpioGetDirection(pin);
-//    if (strcmp(gpioDirection, direction) != 0) {
-//        gpioStatus = gpioSetDirection(pin, direction);
-//        if (!gpioStatus) {
-//            (*env)->ReleaseStringUTFChars(env, direction_, direction);
-//            return gpioStatus;
-//        }
-//    }
-//
-//    if (strcmp(direction, "in") == 0 && useInterrupt) {
-//        gpioStatus = gpioSetEdge(pin, "both");
-//        if (gpioStatus == -1) {
-//            (*env)->ReleaseStringUTFChars(env, direction_, direction);
-//            return gpioStatus;
-//        }
-//    }
-//
-//    (*env)->ReleaseStringUTFChars(env, direction_, direction);
-//    return (gpioValue == -1) ? gpioGetValue(pin) : gpioValue;
-//}
-//
-//JNIEXPORT jint JNICALL
-//Java_kg_delletenebre_serialmanager_NativeGpio_getValueByFileDescriptor(JNIEnv *env, jobject instance, jint fd, jboolean useInterrupt) {
-//    return useInterrupt ? gpioReadValueByFileDescriptor(fd, 100) : gpioGetValueByFileDescriptor(fd);
-//}
-//
-
-//
-//JNIEXPORT void JNICALL
-//Java_kg_delletenebre_serialmanager_NativeGpio_unexport(JNIEnv *env, jobject instance, jint pin) {
-//    gpioUnexport(pin);
-//}

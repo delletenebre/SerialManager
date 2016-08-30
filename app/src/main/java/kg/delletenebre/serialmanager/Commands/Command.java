@@ -2,6 +2,7 @@ package kg.delletenebre.serialmanager.Commands;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 
 import java.io.Serializable;
 
@@ -108,30 +109,24 @@ public class Command implements Serializable {
     public Overlay getOverlay() {
         return overlay;
     }
-    public Command setOverlay(Overlay overlay) {
-        this.overlay = overlay;
-        return this;
-    }
 
 
 
 
     public class Overlay implements Serializable {
-        private final Context context = App.getContext();
-
         private boolean enabled = false;
-        private String text = context.getString(R.string.pref_co_default_text);
-        private int timer = Integer.parseInt(context.getString(R.string.pref_co_default_timer));
+        private String text = App.getContext().getString(R.string.pref_co_default_text);
+        private int timer = Integer.parseInt(App.getContext().getString(R.string.pref_co_default_timer));
         private boolean hideOnClick = false;
-        private String showAnimation = context.getString(R.string.pref_co_default_show_animation);
-        private String hideAnimation = context.getString(R.string.pref_co_default_hide_animation);
-        private String position = context.getString(R.string.pref_co_default_position);
-        private int positionX = Integer.parseInt(context.getString(R.string.pref_co_default_position_x));
-        private int positionY = Integer.parseInt(context.getString(R.string.pref_co_default_position_y));
+        private String showAnimation = App.getContext().getString(R.string.pref_co_default_show_animation);
+        private String hideAnimation = App.getContext().getString(R.string.pref_co_default_hide_animation);
+        private String position = App.getContext().getString(R.string.pref_co_default_position);
+        private int positionX = Integer.parseInt(App.getContext().getString(R.string.pref_co_default_position_x));
+        private int positionY = Integer.parseInt(App.getContext().getString(R.string.pref_co_default_position_y));
         private boolean heightEqualsStatusBar = false;
         private boolean widthEqualsScreen = false;
-        private String textAlign = context.getString(R.string.pref_co_default_text_align);
-        private int fontSize = Integer.parseInt(context.getString(R.string.pref_co_default_font_size));
+        private String textAlign = App.getContext().getString(R.string.pref_co_default_text_align);
+        private int fontSize = Integer.parseInt(App.getContext().getString(R.string.pref_co_default_font_size));
         private int fontColor = Color.WHITE;
         private int backgroundColor = Color.parseColor("#88000000");
 

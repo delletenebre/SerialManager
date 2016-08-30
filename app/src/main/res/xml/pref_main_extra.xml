@@ -1,0 +1,19 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:key="send_brightness_sensor"
+        android:defaultValue="false"
+        android:title="@string/pref_title_send_brightness_sensor"
+        android:summary="@string/pref_summary_send_brightness_sensor" />
+
+    <CheckBoxPreference
+        android:key="send_brightness_settings"
+        android:defaultValue="false"
+        android:title="@string/pref_title_send_brightness_settings"
+        android:summary="@string/pref_summary_send_brightness_settings" />
+
+    <CheckBoxPreference
+        android:key="send_screen_state"
+        android:defaultValue="false"
+        android:title="@string/pref_title_send_screen_state"
+        android:summary="@string/pref_summary_send_screen_state" />
+</PreferenceScreen>

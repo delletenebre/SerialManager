@@ -645,7 +645,7 @@ public class ConnectionService extends Service implements SensorEventListener {
     public static void startWebserver() {
         stopWebserver();
 
-        if (App.getPrefs().getBoolean("webserver", true)) {
+        if (App.getPrefs().getBoolean("webserver", false)) {
             webServer.get("/", new HttpServerRequestCallback() {
                 @Override
                 public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
@@ -721,16 +721,14 @@ public class ConnectionService extends Service implements SensorEventListener {
     }
 
     private static void stopWebserver() {
-        if (webSockets != null) {
+        if (webSockets.size() > 0) {
             for (WebSocket socket : webSockets) {
                 socket.close();
             }
         }
 
-        if (webServer != null) {
-            webServer.stop();
-            AsyncServer.getDefault().stop();
-        }
+        webServer.stop();
+        //AsyncServer.getDefault().stop();
     }
 
     public static void websocketSend(String message) {
