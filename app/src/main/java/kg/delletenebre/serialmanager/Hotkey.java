@@ -74,7 +74,7 @@ public class Hotkey extends Thread {
         };
 
         if (fd > -1) {
-            String currentValue = "";
+            String currentValue;
 
             while (!Thread.currentThread().isInterrupted()) {
                 currentValue = readKeysByFileDescriptor(fd);
