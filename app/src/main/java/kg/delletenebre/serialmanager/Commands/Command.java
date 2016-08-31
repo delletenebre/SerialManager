@@ -1,8 +1,6 @@
 package kg.delletenebre.serialmanager.Commands;
 
-import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 
 import java.io.Serializable;
 

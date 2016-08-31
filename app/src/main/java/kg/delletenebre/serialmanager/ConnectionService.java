@@ -24,7 +24,6 @@ import android.util.Log;
 import com.felhr.usbserial.CDCSerialDevice;
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
-import com.koushikdutta.async.AsyncServer;
 import com.koushikdutta.async.callback.CompletedCallback;
 import com.koushikdutta.async.http.WebSocket;
 import com.koushikdutta.async.http.server.AsyncHttpServer;
@@ -152,7 +151,8 @@ public class ConnectionService extends Service implements SensorEventListener {
         sendInfoScreenState(null);
 
         NativeGpio.createGpiosFromCommands();
-        Hotkey.createHotkeysFromCommands();
+        //Hotkey.createHotkeysFromCommands();
+        Hotkey.startAutodetectKeyboards();
 
         startWebserver();
 

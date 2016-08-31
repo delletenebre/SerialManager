@@ -1,14 +1,12 @@
 package kg.delletenebre.serialmanager;
 
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 
@@ -57,7 +55,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
-            //NavUtils.navigateUpFromSameTask(this);
             this.finish();
             return true;
         }
@@ -130,6 +127,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 ////
 ////            return super.onOptionsItemSelected(item);
 ////        }
+//        @Override
+//        public boolean onOptionsItemSelected(MenuItem item) {
+//            int id = item.getItemId();
+//            if (id == android.R.id.home) {
+//                startActivity(new Intent(getActivity(), SettingsActivity.class));
+//                return true;
+//            }
+//            return super.onOptionsItemSelected(item);
+//        }
 //
 //
 //    }
@@ -143,16 +149,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             bindPreferenceSummaryToValue(findPreference("bluetoothDevice"));
         }
-
-//        @Override
-//        public boolean onOptionsItemSelected(MenuItem item) {
-//            int id = item.getItemId();
-//            if (id == android.R.id.home) {
-//                startActivity(new Intent(getActivity(), SettingsActivity.class));
-//                return true;
-//            }
-//            return super.onOptionsItemSelected(item);
-//        }
     }
 
     public static class UsbPreferenceFragment extends PreferenceFragment {
@@ -168,16 +164,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("stopBits"));
             bindPreferenceSummaryToValue(findPreference("parity"));
         }
-
-//        @Override
-//        public boolean onOptionsItemSelected(MenuItem item) {
-//            int id = item.getItemId();
-//            if (id == android.R.id.home) {
-//                startActivity(new Intent(getActivity(), SettingsActivity.class));
-//                return true;
-//            }
-//            return super.onOptionsItemSelected(item);
-//        }
     }
 
     public static class WebServerPreferenceFragment extends PreferenceFragment {
@@ -189,16 +175,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             bindPreferenceSummaryToValue(findPreference("webserver_port"));
         }
-//
-//        @Override
-//        public boolean onOptionsItemSelected(MenuItem item) {
-//            int id = item.getItemId();
-//            if (id == android.R.id.home) {
-//                startActivity(new Intent(getActivity(), SettingsActivity.class));
-//                return true;
-//            }
-//            return super.onOptionsItemSelected(item);
-//        }
     }
 
     public static class GpioPreferenceFragment extends PreferenceFragment {
@@ -211,16 +187,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("gpio_debounce"));
             bindPreferenceSummaryToValue(findPreference("gpio_long_press_delay"));
         }
-//
-//        @Override
-//        public boolean onOptionsItemSelected(MenuItem item) {
-//            int id = item.getItemId();
-//            if (id == android.R.id.home) {
-//                startActivity(new Intent(getActivity(), SettingsActivity.class));
-//                return true;
-//            }
-//            return super.onOptionsItemSelected(item);
-//        }
     }
 
     public static class HotkeysPreferenceFragment extends PreferenceFragment {
@@ -230,18 +196,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_main_hotkeys);
             setHasOptionsMenu(true);
 
-
+            bindPreferenceSummaryToValue(findPreference("hotkeys_detect_delay"));
         }
-//
-//        @Override
-//        public boolean onOptionsItemSelected(MenuItem item) {
-//            int id = item.getItemId();
-//            if (id == android.R.id.home) {
-//                startActivity(new Intent(getActivity(), SettingsActivity.class));
-//                return true;
-//            }
-//            return super.onOptionsItemSelected(item);
-//        }
     }
 
     public static class SendingCommandsPreferenceFragment extends PreferenceFragment {
@@ -253,16 +209,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
 
         }
-//
-//        @Override
-//        public boolean onOptionsItemSelected(MenuItem item) {
-//            int id = item.getItemId();
-//            if (id == android.R.id.home) {
-//                startActivity(new Intent(getActivity(), SettingsActivity.class));
-//                return true;
-//            }
-//            return super.onOptionsItemSelected(item);
-//        }
     }
 
     public static class ExtraPreferenceFragment extends PreferenceFragment {
@@ -274,16 +220,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
 
         }
-
-//        @Override
-//        public boolean onOptionsItemSelected(MenuItem item) {
-//            int id = item.getItemId();
-//            if (id == android.R.id.home) {
-//                startActivity(new Intent(getActivity(), SettingsActivity.class));
-//                return true;
-//            }
-//            return super.onOptionsItemSelected(item);
-//        }
     }
 
     public static class OtherPreferenceFragment extends PreferenceFragment {
@@ -297,16 +233,5 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("stop_when_screen_off_delay"));
             bindPreferenceSummaryToValue(findPreference("start_when_screen_on_delay"));
         }
-
-//        @Override
-//        public boolean onOptionsItemSelected(MenuItem item) {
-//            int id = item.getItemId();
-//            if (id == android.R.id.home) {
-//                startActivity(new Intent(getActivity(), SettingsActivity.class));
-//                return true;
-//            }
-//
-//            return super.onOptionsItemSelected(item);
-//        }
     }
 }

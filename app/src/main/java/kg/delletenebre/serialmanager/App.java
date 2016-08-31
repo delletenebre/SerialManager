@@ -164,6 +164,7 @@ public class App extends Application {
         NativeGpio.setLongPressDelay(Integer.parseInt(prefs.getString("gpio_long_press_delay", "500")));
         NativeGpio.setGenerateIOEvents(prefs.getBoolean("gpio_as_io", true));
         NativeGpio.setGenerateButtonEvents(prefs.getBoolean("gpio_as_button", true));
+        Hotkey.setDetectDelay(getIntPreference("hotkeys_detect_delay", 100));
 
         ConnectionService.startWebserver();
 

@@ -6,8 +6,8 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,6 +20,17 @@ public class Hotkey extends Thread {
     private final static String TAG = "Hotkey";
 
     private static Map<String, Hotkey> hotkeys = new HashMap<>();
+    private static int detectDelay = 100;
+    private static final int detectKeyboardDelay = 5000;
+
+    private static Handler detectKeyboardsHandler = new Handler();
+    private static Runnable detectKeyboardsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Hotkey.createHotkeysFromCommands();
+            detectKeyboardsHandler.postDelayed(detectKeyboardsRunnable, detectKeyboardDelay);
+        }
+    };
 
     private int eventId;
     private String commandKey;
@@ -36,6 +47,8 @@ public class Hotkey extends Thread {
     public Hotkey(int eventId, String commandKey) {
         this.eventId = eventId;
         this.commandKey = commandKey;
+
+        setDetectDelay(App.getIntPreference("hotkeys_detect_delay", 100));
     }
 
     public void run() {
@@ -63,10 +76,16 @@ public class Hotkey extends Thread {
         if (fd > -1) {
             String currentValue = "";
 
-            while (!Thread.currentThread().isInterrupted() || !currentValue.equals("error")) {
+            while (!Thread.currentThread().isInterrupted()) {
                 currentValue = readKeysByFileDescriptor(fd);
+
                 if (App.isDebug()) {
                     Log.d(TAG, String.valueOf(currentValue));
+                }
+
+                if (currentValue.equals("error")) {
+                    Thread.currentThread().interrupt();
+                    break;
                 }
 
                 if (!currentValue.isEmpty() && currentValue.contains(".")) {
@@ -76,9 +95,9 @@ public class Hotkey extends Thread {
 
                         if (keycode.isPressed) {
                             pressedKeys.add(keycode.code);
-                            delayDetectKeyPressHandler.postDelayed(delayDetectKeyPressRunnable, 100);
+                            delayDetectKeyPressHandler.postDelayed(delayDetectKeyPressRunnable, detectDelay);
                         } else {
-                            pressedKeys.remove((Integer)keycode.code);
+                            pressedKeys.removeAll(Collections.singleton(keycode.code));
                         }
                     }
 
@@ -136,9 +155,14 @@ public class Hotkey extends Thread {
     }
 
 
+    public static void startAutodetectKeyboards() {
+        detectKeyboardsHandler.removeCallbacks(detectKeyboardsRunnable);
+        detectKeyboardsHandler.postDelayed(detectKeyboardsRunnable, detectKeyboardDelay);
+    }
 
-
-
+    public static void setDetectDelay(int value) {
+        detectDelay = value;
+    }
 
     public static void createHotkeysFromCommands() {
         for (Command command: Commands.getCommands()) {
@@ -154,17 +178,17 @@ public class Hotkey extends Thread {
             hotkeys.get(key).start();
 
             if (App.isDebug()) {
-                Log.d(TAG, "Keycodes listener created: /dev/input/event" + String.valueOf(eventId));
+                Log.d(TAG, "Keyboards listener created: /dev/input/event" + String.valueOf(eventId));
             }
         }
     }
 
     private static int getEventIdFromCommandKey(String key) {
-        Pattern pattern = Pattern.compile("^keycode\\|(.+)\\|(.+)$");
+        Pattern pattern = Pattern.compile("^keyboard\\|(.+)\\|(.+)$");
         Matcher matcher = pattern.matcher(key);
         if (matcher.find()) {
             if (App.isDebug()) {
-                Log.d(TAG, "Keycodes listener parsed: NAME=" + matcher.group(1)
+                Log.d(TAG, "Keyboards listener parsed: NAME=" + matcher.group(1)
                         + " | EV=" + matcher.group(2));
             }
 
@@ -205,6 +229,8 @@ public class Hotkey extends Thread {
     }
 
     public static void destroyHotkeys() {
+        detectKeyboardsHandler.removeCallbacks(detectKeyboardsRunnable);
+
         if (hotkeys.size() > 0) {
             for (Map.Entry<String, Hotkey> entry : hotkeys.entrySet()) {
                 entry.getValue().interrupt();

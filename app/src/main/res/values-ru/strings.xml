@@ -25,12 +25,17 @@
     <string name="pref_category_send_commands">Отправка команд</string>
     <string name="pref_category_other">Разное</string>
 
-    <string name="pref_title_bluetooth_connection">Подключение по Bluetooth</string>
+    <string name="pref_main_header_hotkeys">Нажатия клавиатуры</string>
+    <string name="pref_main_header_sending_commands">Отправка команд</string>
+    <string name="pref_main_header_extra">Дополнительные возможности</string>
+    <string name="pref_main_header_other">Разное</string>
+
+    <string name="pref_title_bluetooth_connection">Включить соединение по Bluetooth</string>
     <string name="pref_title_bluetooth_devices_list">Bluetooth-устройство для подключения</string>
     <string name="pref_title_bluetooth_autoconnect">Восстанавливать соединение при потере связи</string>
     <string name="pref_title_enable_if_off">Автоматически включать bluetooth</string>
 
-    <string name="pref_title_usb_connection">Подключение по USB</string>
+    <string name="pref_title_usb_connection">Включить соединение по USB</string>
 
     <string name="pref_title_usb_devices_list">USB-устройство для подключения</string>
 
@@ -135,6 +140,8 @@
     <string name="pref_title_webserver">Запускать Web-сервер</string>
     <!--<string name="pref_summary_webserver">Для того чтобы изменения вступили в силу, необходимо перезапустить Сервис SerialManager</string>-->
     <string name="pref_title_webserver_port">Порт</string>
+
+    <string name="pref_title_hotkeys_detect_delay">Задержка распознавания нажатий (мс)</string>
 
 
     <!-- Universal settings preferences -->

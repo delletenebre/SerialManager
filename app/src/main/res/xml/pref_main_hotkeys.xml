@@ -1,8 +1,8 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <EditTextPreference
         android:key="hotkeys_detect_delay"
-        android:defaultValue="20"
-        android:title="@string/pref_title_gpio_debounce"
+        android:defaultValue="100"
+        android:title="@string/pref_title_hotkeys_detect_delay"
         android:inputType="number"
         android:selectAllOnFocus="true"
         android:singleLine="true" />

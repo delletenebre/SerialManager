@@ -5,9 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <linux/limits.h>
-#include <poll.h>
-#include "../../../../../../ndk/r12/platforms/android-24/arch-mips64/usr/include/linux/input.h"
-
+#include <sys/stat.h>
+#include "linux/input.h"
+//../../../../../../ndk/r12/platforms/android-24/arch-mips64/usr/include/
 
 #define LOG_TAG "Keyboard-Events"
 #define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
@@ -36,26 +36,25 @@ int hotkeysGetFileDescriptor(int eventId) {
     return fd;
 }
 
+int isFdExists(int fd) {
+    struct stat statbuf;
+    fstat(fd, &statbuf);
+    return (statbuf.st_nlink > 0);
+}
+
 char* hotkeysReadValueByFileDescriptor(int fd) {
     struct input_event ev[64];
+    //char *result = malloc(sizeof(char) * PATH_MAX);
     char result[PATH_MAX];
     size_t size = sizeof(struct input_event);
 
-    if (read(fd, ev, size * 64) < size) {
+    if (!isFdExists(fd) || read(fd, ev, size * 64) < size) {
         LOGE("Failed to read @ line %d", __LINE__);
         return "error";
     }
 
-    //value = ev[0].value;
+    LOGD("%d|%d;%d|%d", ev[0].code, ev[0].value, ev[1].code, ev[1].value);
 
-    //if (value != ' ') {// && ev[1].value == 1 && ev[1].type == 1) { // Only read the key press event
-        //LOGD("Code[%d] | Value[%d] | Type[%d]", ev[0].code, ev[0].value, ev[0].type);
-    //LOGD("Code[%d] | Value[%d] | Type[%d]", ev[1].code, ev[1].value, ev[1].type);
-    //LOGD("%d|%d;%d|%d", ev[0].code, ev[0].value, ev[1].code, ev[1].value);
-
-    //if (ev[1].value == 1) {
-        //return ev[1].code;
-    //}
     snprintf(result, PATH_MAX, "%d|%d.%d|%d", ev[0].code, ev[0].value, ev[1].code, ev[1].value);
     return result;
 }

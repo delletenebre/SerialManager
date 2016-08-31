@@ -33,10 +33,10 @@
     <string name="pref_category_gpio" translatable="false">GPIO</string>
     <string name="pref_category_other">Other</string>
 
-    <string name="pref_main_header_bluetooth">Bluetooth</string>
-    <string name="pref_main_header_usb">USB</string>
-    <string name="pref_main_header_webserver">WebSocket</string>
-    <string name="pref_main_header_gpio">GPIO</string>
+    <string name="pref_main_header_bluetooth" translatable="false">Bluetooth</string>
+    <string name="pref_main_header_usb" translatable="false">USB</string>
+    <string name="pref_main_header_webserver" translatable="false">WebSocket</string>
+    <string name="pref_main_header_gpio" translatable="false">GPIO</string>
     <string name="pref_main_header_hotkeys">Keyboard shortcuts</string>
     <string name="pref_main_header_sending_commands">Sending commands</string>
     <string name="pref_main_header_extra">Extra</string>
@@ -311,6 +311,8 @@
     <string name="pref_title_webserver_port">Port</string>
 
     <string name="pref_title_command_action_gpio" translatable="false">@string/gpio</string>
+
+    <string name="pref_title_hotkeys_detect_delay">Detect keypress delay (ms)</string>
 
 
     <!-- Universal settings preferences -->
