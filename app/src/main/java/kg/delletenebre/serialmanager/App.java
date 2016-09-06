@@ -74,7 +74,6 @@ public class App extends Application {
 
     private static boolean volumeShowUI;
 
-    private static String uinputDevice;
     private static Integer uinputId;
     public static void createUinput() {
         if (uinputId == null) {
@@ -89,7 +88,6 @@ public class App extends Application {
         if (uinputId != null) {
             destroyUinput(uinputId);
             uinputId = null;
-            uinputDevice = null;
         }
     }
 
@@ -104,26 +102,20 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        //LeakCanary.install(this);
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         context = this;
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        updateSettings();
+        debug = prefs.getBoolean("debug", false);
 
         initializeKeymap();
 
-        if (RootShell.isRootAvailable() && RootShell.isAccessGiven()) {
-            Log.d(TAG, "Root access granted");
-        } else {
-            Log.d(TAG, "Root not available or access didn't grant");
-        }
-
-        EventsReceiver eventsReceiver = new EventsReceiver();
-        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        registerReceiver(eventsReceiver, intentFilter);
+        App.getContext().registerReceiver(new EventsReceiver(), intentFilter);
+
 
 
         if (App.getPrefs().getBoolean("start_when_screen_on", true) && App.isScreenOn()) {
@@ -138,26 +130,6 @@ public class App extends Application {
     public static void setAliveActivity(Activity activity) {
         aliveActiviity = activity;
     }
-//    public static void restart() {
-//        Activity activity = aliveActiviity;
-//        if (activity != null) {
-////            activity.finish();
-////            Intent intent = new Intent(getContext(), activity.getClass());
-////            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-////            getContext().startActivity(intent);
-//            // Schedule start
-//            PendingIntent pi = PendingIntent.getActivity(
-//                    context, 0, activity.getIntent(), PendingIntent.FLAG_CANCEL_CURRENT);
-//            ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).set(
-//                    AlarmManager.RTC, System.currentTimeMillis() + 500, pi);
-//
-//            // Stop now
-//            System.exit(0);
-//        }
-//
-//
-//    }
-
 
     public static void updateSettings() {
         NativeGpio.setDebounce(Integer.parseInt(prefs.getString("gpio_debounce", "20")));
@@ -212,7 +184,6 @@ public class App extends Application {
             audioManager.setStreamVolume(VOLUME_STREAM,
                     (muteState) ? 0 : lastVolumeLevel,
                     volumeShowUI ? AudioManager.FLAG_SHOW_UI : 0);
-            //mAudioManager.setStreamMute(VOLUME_STREAM, muteState);
         }
     }
 
@@ -234,66 +205,68 @@ public class App extends Application {
     }
 
     public static void emulateKeyEvent(final String keyName) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (isDebug()) {
-                    Log.d(TAG, "Emulated key is " + keyName);
-                }
-
-                KeyboardCode keyboardCode = keymap.get(keyName);
-                if (keyboardCode != null) {
-                    int linuxCode = keyboardCode.linuxCode;
-                    int[] linuxCodes = keyboardCode.linuxCodes;
-                    int androidCode = keyboardCode.androidCode;
-
-                    if (uinputId != null && (linuxCode > 0 || linuxCodes != null)) {
-                        if (linuxCode > 0) {
-                            if (isDebug()) {
-                                Log.d(TAG, "Emulated key in fast mode");
-                            }
-                            sendEvent(uinputId, linuxCode);
-                        } else {
-                            if (isDebug()) {
-                                Log.d(TAG, "Emulated shortcut in fast mode");
-                            }
-                            sendEventDouble(uinputId, linuxCodes[0], linuxCodes[1]);
-                        }
-                    } else if (androidCode > 0) {
-                        if (isDebug()) {
-                            Log.d(TAG, "Emulated key in slow mode");
-                        }
-                        try {
-                            RootShell.getShell(true).add(
-                                    new Command(0, "input keyevent " + String.valueOf(androidCode)));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+        if (RootShell.isRootAvailable()) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (isDebug()) {
+                        Log.d(TAG, "Emulated key is " + keyName);
                     }
-                } else if (isDebug()) {
-                    Log.d(TAG, "Emulated key not found");
-                }
-            }
-        }).start();
 
+                    KeyboardCode keyboardCode = keymap.get(keyName);
+                    if (keyboardCode != null) {
+                        int linuxCode = keyboardCode.linuxCode;
+                        int[] linuxCodes = keyboardCode.linuxCodes;
+                        int androidCode = keyboardCode.androidCode;
+
+                        if (uinputId != null && (linuxCode > 0 || linuxCodes != null)) {
+                            if (linuxCode > 0) {
+                                if (isDebug()) {
+                                    Log.d(TAG, "Emulated key in fast mode");
+                                }
+                                sendEvent(uinputId, linuxCode);
+                            } else {
+                                if (isDebug()) {
+                                    Log.d(TAG, "Emulated shortcut in fast mode");
+                                }
+                                sendEventDouble(uinputId, linuxCodes[0], linuxCodes[1]);
+                            }
+                        } else if (androidCode > 0) {
+                            if (isDebug()) {
+                                Log.d(TAG, "Emulated key in slow mode");
+                            }
+                            try {
+                                RootShell.getShell(true).add(
+                                        new Command(0, "input keyevent " + String.valueOf(androidCode)));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    } else if (isDebug()) {
+                        Log.d(TAG, "Emulated key not found");
+                    }
+                }
+            }).start();
+        }
     }
 
     public static void runShellCommand(final String commandToExecute) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (isDebug()) {
-                    Log.d(TAG, "run shell: " + commandToExecute);
+        if (RootShell.isRootAvailable()) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (isDebug()) {
+                        Log.d(TAG, "run shell: " + commandToExecute);
+                    }
+                    try {
+                        //Runtime.getRuntime().exec(new String[] {"su", "-c", commandToExecute});
+                        RootShell.getShell(true).add(new Command(0, commandToExecute));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-                try {
-                    //Runtime.getRuntime().exec(new String[] {"su", "-c", commandToExecute});
-                    RootShell.getShell(true).add(new Command(0, commandToExecute));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
+            }).start();
+        }
     }
 
     public static int getIntPreference(String preferenceName, int defaultValue) {
@@ -343,11 +316,6 @@ public class App extends Application {
             PowerManager powerManager = (PowerManager) getContext().getSystemService(POWER_SERVICE);
             return powerManager.isScreenOn();
         }
-
-//        return  (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH
-//                    && powerManager.isInteractive())
-//                || (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT_WATCH
-//                    && powerManager.isScreenOn());
     }
 
     public static boolean isScreenOff() {

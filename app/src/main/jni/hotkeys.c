@@ -5,15 +5,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <linux/limits.h>
-#include <sys/stat.h>
 #include "linux/input.h"
-//../../../../../../ndk/r12/platforms/android-24/arch-mips64/usr/include/
+#include "helpers.h"
+
 
 #define LOG_TAG "Keyboard-Events"
 #define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...)  __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
-
-
 
 
 int hotkeysGetFileDescriptor(int eventId) {
@@ -34,12 +32,6 @@ int hotkeysGetFileDescriptor(int eventId) {
     }
 
     return fd;
-}
-
-int isFdExists(int fd) {
-    struct stat statbuf;
-    fstat(fd, &statbuf);
-    return (statbuf.st_nlink > 0);
 }
 
 char* hotkeysReadValueByFileDescriptor(int fd) {

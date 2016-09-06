@@ -5,9 +5,10 @@ import android.content.Intent;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.util.Log;
 
 public class HiddenActivity extends Activity {
-    private final String TAG = getClass().getName();
+    private static final String TAG = "HiddenActivity";
 
 
     @Override
@@ -29,7 +30,7 @@ public class HiddenActivity extends Activity {
                 i.putExtra(UsbManager.EXTRA_DEVICE, device);
 
                 if (!EventsReceiver.autostartActive) {
-                    startService(i);
+                    //startService(i);
                 }
             }
         }

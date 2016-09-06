@@ -27,7 +27,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.koushikdutta.async.util.Charsets;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.util.List;
 
 import kg.delletenebre.serialmanager.Commands.Command;
@@ -41,11 +49,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     public CommandsListAdapter commandsListAdapter;
-
-    static {
-        System.loadLibrary("serial-manager");
-    }
-    private native int i2c(int i2cNumber);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,6 +184,25 @@ public class MainActivity extends AppCompatActivity {
                 webserverTextView.setVisibility(View.GONE);
             }
         }
+
+
+        String data = "<testefa:asdasd>";
+        int[] dataIntegers = convertToIntArray(data.getBytes(Charsets.UTF_8));
+
+//        i2cWrite(fd, 0, dataIntegers, dataIntegers.length);
+//
+//
+//        byte[] buf = new byte[1024];
+//        String receivedData = new String(i2cRead(fd, buf, buf.length)).replaceAll("�", "");
+//        Log.d("I2C", receivedData);
+    }
+
+    public static int[] convertToIntArray(byte[] input) {
+        int[] ret = new int[input.length];
+        for (int i = 0; i < input.length; i++) {
+            ret[i] = input[i] & 0xff; // Range 0 to 255, not -128 to 127
+        }
+        return ret;
     }
 
     @Override

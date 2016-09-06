@@ -117,7 +117,6 @@ public class Commands {
 
         if (App.isDebug()) {
             Log.d(TAG, "Trying to detect saved command for: key:" + key + " / value:" + value);
-            //Log.d(TAG, "Saved commands size: " + String.valueOf(commands.size()));
         }
 
         for (final Command command: commands) {
@@ -132,11 +131,6 @@ public class Commands {
 
             String category = command.getCategory();
             String action = command.getAction();
-//
-//            if (App.isDebug()) {
-//                Log.d(TAG, "Current command [key:" + command.getKey() + "/value:" + command.getValue() + "]");
-//                Log.d(TAG, "Current command [category:" + category + "/action:" + action + "]");
-//            }
 
             if (command.getKey().equals(key)
                     && (command.getValue().isEmpty()
@@ -160,7 +154,6 @@ public class Commands {
 
                 if (category.equals("navigation")) {
                     App.emulateKeyEvent(command.getAction());
-                    //App.sendKeyEvent(command.getAction());
 
                 } else if (category.equals("volume")) {
                     if (action.equals("up") || action.equals("down")) {

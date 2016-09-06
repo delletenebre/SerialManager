@@ -172,14 +172,14 @@ public class NativeGpio extends Thread {
 
 
 
-    public static void createGpiosFromCommands() {
+    public static void createFromCommands() {
         for (Command command: Commands.getCommands()) {
-            createGpioByCommandKey(command.getKey());
+            createByCommandKey(command.getKey());
         }
     }
 
-    public static void createGpioByCommandKey(final String key) {
-        final int pin = getGpioFromCommandKey(key);
+    public static void createByCommandKey(final String key) {
+        final int pin = getFromCommandKey(key);
 
         if (pin > -1 && !gpios.containsKey(key)) {
             gpios.put(key, new NativeGpio(pin));
@@ -191,7 +191,7 @@ public class NativeGpio extends Thread {
         }
     }
 
-    private static int getGpioFromCommandKey(String key) {
+    private static int getFromCommandKey(String key) {
         Pattern pattern = Pattern.compile("^gpio([0-9]+)$");
         Matcher matcher = pattern.matcher(key);
         if (matcher.find()) {
@@ -209,7 +209,7 @@ public class NativeGpio extends Thread {
         return -1;
     }
 
-    public static void destroyGpios() {
+    public static void destroyAll() {
         if (gpios.size() > 0) {
             for (Map.Entry<String, NativeGpio> entry : gpios.entrySet()) {
                 entry.getValue().interrupt();
@@ -218,14 +218,12 @@ public class NativeGpio extends Thread {
         }
     }
 
-    public static void destroyGpioByCommandKey(String key, boolean forced) {
+    public static void destroyByCommandKey(String key) {
         int countSameKey = 0;
 
-        if (!forced) {
-            for (Command command : Commands.getCommands()) {
-                if (command.getKey().equals(key)) {
-                    countSameKey++;
-                }
+        for (Command command : Commands.getCommands()) {
+            if (command.getKey().equals(key)) {
+                countSameKey++;
             }
         }
 

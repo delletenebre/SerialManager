@@ -60,8 +60,8 @@
     <string name="pref_title_dtr" translatable="false">DTR - Data Terminal Ready</string>
     <string name="pref_summ_dtr">Use DTR line to determine serial channel readiness</string>
 
-    <string name="pref_title_rts" translatable="false">RTS / CTS - Request To Send / Clear To Send</string>
-    <string name="pref_summ_rts" translatable="false">¯\\(°_o)/¯</string>
+    <string name="pref_title_rts" translatable="false">RTS / CTS</string>
+    <string name="pref_summ_rts" translatable="false">Request To Send / Clear To Send</string>
 
     <string name="pref_title_data_bits" translatable="false">Data Bits</string>
     <string-array name="pref_data_bits_titles" translatable="false">

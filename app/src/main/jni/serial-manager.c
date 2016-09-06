@@ -12,7 +12,6 @@
 #define LOGE(...)  __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 
-
 JNIEXPORT jint JNICALL
 Java_kg_delletenebre_serialmanager_ConnectionService_resetUsbDevice(JNIEnv *env, jobject instance,
                                                                     jstring filename_) {

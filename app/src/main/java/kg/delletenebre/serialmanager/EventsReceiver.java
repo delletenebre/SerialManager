@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Handler;
@@ -12,7 +13,7 @@ import android.util.Log;
 import xdroid.toaster.Toaster;
 
 public class EventsReceiver extends BroadcastReceiver {
-    private final String TAG = getClass().getName();
+    private static final String TAG = "EventsReceiver";
     public static boolean autostartActive = false;
 
     @Override
@@ -96,16 +97,6 @@ public class EventsReceiver extends BroadcastReceiver {
 
                 int widgetId = intent.getIntExtra("widgetId", -1);
                 data = intent.getStringExtra("data");
-//                String sendTo = intent.getStringExtra("sendTo");
-
-//                if (sendTo.equals("usb_bt")) {
-//                    SharedPreferences widgetPrefs = context.getSharedPreferences(
-//                            WidgetSendSettings.PREF_PREFIX_KEY + widgetId, Context.MODE_PRIVATE);
-//
-//                    SharedPreferences.Editor editor = widgetPrefs.edit();
-//                    editor.putBoolean("status", false);
-//                    editor.apply();
-//                }
 
                 if (!data.isEmpty()) {
                     ConnectionService.sendDataToTarget(data);
@@ -171,26 +162,4 @@ public class EventsReceiver extends BroadcastReceiver {
         }
 
     }
-
-//        } else if (action.equals(App.ACTION_USB_PERMISSION)) {
-//            Log.i(TAG, "****ACTION_USB_DEVICE_PERMISSIONS****");
-//            UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-//            if (device != null) {
-//                if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-//                    UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-//                    UsbDeviceConnection connection = usbManager.openDevice(device);
-//                    if (connection != null) {
-//                        SerialService.start(context, device, connection);
-//                    }
-//
-//                    //                    Toast.makeText(MainActivity.this,
-//                    //                            "ACTION_USB_PERMISSION accepted",
-//                    //                            Toast.LENGTH_LONG).show();
-//                } else {
-//                    //                    Toast.makeText(MainActivity.this,
-//                    //                            "ACTION_USB_PERMISSION rejected",
-//                    //                            Toast.LENGTH_LONG).show();
-//                }
-//            }
-//        }
 }

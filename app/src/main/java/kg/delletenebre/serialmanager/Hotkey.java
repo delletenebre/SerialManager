@@ -27,7 +27,7 @@ public class Hotkey extends Thread {
     private static Runnable detectKeyboardsRunnable = new Runnable() {
         @Override
         public void run() {
-            Hotkey.createHotkeysFromCommands();
+            Hotkey.createFromCommands();
             detectKeyboardsHandler.postDelayed(detectKeyboardsRunnable, detectKeyboardDelay);
         }
     };
@@ -47,8 +47,6 @@ public class Hotkey extends Thread {
     public Hotkey(int eventId, String commandKey) {
         this.eventId = eventId;
         this.commandKey = commandKey;
-
-        setDetectDelay(App.getIntPreference("hotkeys_detect_delay", 100));
     }
 
     public void run() {
@@ -110,7 +108,7 @@ public class Hotkey extends Thread {
         }
 
         delayDetectKeyPressHandler.removeCallbacks(delayDetectKeyPressRunnable);
-        destroyHotkeyByCommandKey(commandKey, false);
+        destroyByCommandKey(commandKey);
 
         if (App.isDebug()) {
             Log.d(TAG, "event" + String.valueOf(eventId) + " thread is interrupted");
@@ -164,13 +162,15 @@ public class Hotkey extends Thread {
         detectDelay = value;
     }
 
-    public static void createHotkeysFromCommands() {
+    public static void createFromCommands() {
+        setDetectDelay(App.getIntPreference("hotkeys_detect_delay", 100));
+
         for (Command command: Commands.getCommands()) {
-            createHotkeyByCommandKey(command.getKey());
+            createByCommandKey(command.getKey());
         }
     }
 
-    public static void createHotkeyByCommandKey(final String key) {
+    public static void createByCommandKey(final String key) {
         final int eventId = getEventIdFromCommandKey(key);
 
         if (eventId > -1 && !hotkeys.containsKey(key)) {
@@ -228,7 +228,7 @@ public class Hotkey extends Thread {
         return -1;
     }
 
-    public static void destroyHotkeys() {
+    public static void destroyAll() {
         detectKeyboardsHandler.removeCallbacks(detectKeyboardsRunnable);
 
         if (hotkeys.size() > 0) {
@@ -239,14 +239,12 @@ public class Hotkey extends Thread {
         }
     }
 
-    public static void destroyHotkeyByCommandKey(String key, boolean forced) {
+    public static void destroyByCommandKey(String key) {
         int countSameKey = 0;
 
-        if (!forced) {
-            for (Command command : Commands.getCommands()) {
-                if (command.getKey().equals(key)) {
-                    countSameKey++;
-                }
+        for (Command command : Commands.getCommands()) {
+            if (command.getKey().equals(key)) {
+                countSameKey++;
             }
         }
 

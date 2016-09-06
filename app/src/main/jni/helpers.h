@@ -1,0 +1,1 @@
+int isFdExists(int fd);

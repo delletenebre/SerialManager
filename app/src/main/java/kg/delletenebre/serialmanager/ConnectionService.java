@@ -30,6 +30,7 @@ import com.koushikdutta.async.http.server.AsyncHttpServer;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 import com.koushikdutta.async.http.server.HttpServerRequestCallback;
+import com.stericson.RootShell.RootShell;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -93,6 +94,8 @@ public class ConnectionService extends Service implements SensorEventListener {
             Log.d(TAG, "onStartCommand");
         }
 
+        usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+
         if (intent != null) {
             if (App.getPrefs().getBoolean("usb", true)) {
                 UsbDevice usbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
@@ -129,8 +132,9 @@ public class ConnectionService extends Service implements SensorEventListener {
         receivedDataBuffer.put("bluetooth", "");
 
 
-        usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        openedSerialPorts = new HashMap<>();
+        if (openedSerialPorts == null) {
+            openedSerialPorts = new HashMap<>();
+        }
 
         if (App.getPrefs().getBoolean("send_brightness_settings", false)) {
             settingsContentObserver = new SettingsContentObserver(new Handler());
@@ -150,9 +154,9 @@ public class ConnectionService extends Service implements SensorEventListener {
 
         sendInfoScreenState(null);
 
-        NativeGpio.createGpiosFromCommands();
-        //Hotkey.createHotkeysFromCommands();
+        NativeGpio.createFromCommands();
         Hotkey.startAutodetectKeyboards();
+        I2C.createFromCommands();
 
         startWebserver();
 
@@ -183,10 +187,13 @@ public class ConnectionService extends Service implements SensorEventListener {
 
         App.destroyUinput();
 
-        NativeGpio.destroyGpios();
-        Hotkey.destroyHotkeys();
+        NativeGpio.destroyAll();
+        Hotkey.destroyAll();
+        I2C.destroyAll();
 
         stopWebserver();
+
+        usbManager = null;
 
         if (App.isDebug()) {
             Log.i(TAG, "destroyed");
@@ -260,8 +267,6 @@ public class ConnectionService extends Service implements SensorEventListener {
                     .setOnlyAlertOnce(true)
                     .setColor(Color.parseColor("#607d8b"))
                     .setSmallIcon(R.drawable.notification_icon)
-//                    .setPriority(Notification.PRIORITY_HIGH)
-//                    .setVibrate(new long[0])
                     .setContentTitle(context.getString(R.string.app_name))
                     .setContentText(context.getString(R.string.tap_to_open_main_activity))
                     .setContentIntent(
@@ -364,7 +369,8 @@ public class ConnectionService extends Service implements SensorEventListener {
     }
 
     private void connectToUsbDevice(UsbDevice device) {
-        UsbSerialDevice serialPort = UsbSerialDevice.createUsbSerialDevice(device, usbManager.openDevice(device));
+        UsbSerialDevice serialPort = UsbSerialDevice.createUsbSerialDevice(device,
+                usbManager.openDevice(device));
         if (serialPort != null) {
             if (serialPort.open()) {
                 int baudRate = Integer.parseInt(App.getPrefs().getString("baudRate", "9600"));
@@ -389,17 +395,14 @@ public class ConnectionService extends Service implements SensorEventListener {
                 serialPort.setRTS(rts);
 
                 serialPort.read(usbReceiveCallback);
-                //serialPort.getCTS(usbCtsCallback);
-                //serialPort.getDSR(usbDsrCallback);
 
                 openedSerialPorts.put(device.getDeviceName(), serialPort);
                 updateNotificationText();
 
                 sendInfoScreenState(null);
 
-                // Everything went as expected
-                Toaster.toast("USB device [" + device.getDeviceName() + "] connected");
                 if (App.isDebug()) {
+                    Toaster.toast("USB device [" + device.getDeviceName() + "] connected");
                     Log.d(TAG, "USB device [" + device.getDeviceName() + "] connected");
                 }
             } else {
@@ -437,18 +440,6 @@ public class ConnectionService extends Service implements SensorEventListener {
             onDataReceive("usb", arg0);
         }
     };
-//    private UsbSerialInterface.UsbCTSCallback usbCtsCallback = new UsbSerialInterface.UsbCTSCallback() {
-//        @Override
-//        public void onCTSChanged(boolean state) {
-//            //Toaster.toast("CTS_CHANGE");
-//        }
-//    };
-//    private UsbSerialInterface.UsbDSRCallback usbDsrCallback = new UsbSerialInterface.UsbDSRCallback() {
-//        @Override
-//        public void onDSRChanged(boolean state) {
-//            //Toaster.toast("DSR_CHANGE");
-//        }
-//    };
 
 
     private void findAttachedUsbDevice() {
