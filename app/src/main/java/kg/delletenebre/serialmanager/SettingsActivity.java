@@ -65,6 +65,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         return     PreferenceFragment.class.getName().equals(fragmentName)
                 || BluetoothPreferenceFragment.class.getName().equals(fragmentName)
                 || UsbPreferenceFragment.class.getName().equals(fragmentName)
+                || I2CPreferenceFragment.class.getName().equals(fragmentName)
                 || WebServerPreferenceFragment.class.getName().equals(fragmentName)
                 || GpioPreferenceFragment.class.getName().equals(fragmentName)
                 || HotkeysPreferenceFragment.class.getName().equals(fragmentName)
@@ -163,6 +164,17 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("dataBits"));
             bindPreferenceSummaryToValue(findPreference("stopBits"));
             bindPreferenceSummaryToValue(findPreference("parity"));
+        }
+    }
+
+    public static class I2CPreferenceFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_main_i2c);
+            setHasOptionsMenu(true);
+
+            bindPreferenceSummaryToValue(findPreference("i2c_request_data_delay"));
         }
     }
 

@@ -1,0 +1,9 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:key="i2c_request_data_delay"
+        android:defaultValue="100"
+        android:title="@string/pref_title_i2c_request_data_delay"
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+</PreferenceScreen>

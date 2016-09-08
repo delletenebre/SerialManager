@@ -49,6 +49,8 @@
 
     <string name="pref_title_baud_rate">Скорость передачи данных</string>
 
+    <string name="pref_title_i2c_request_data_delay">Задержка запроса данных (мс)</string>
+
     <string name="pref_title_crlf">Добавлять CR&#38;LF</string>
     <string name="pref_summ_crlf">Добавлять управляющие символы CR и LF при отправке данных</string>
 

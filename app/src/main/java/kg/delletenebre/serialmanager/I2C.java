@@ -34,6 +34,8 @@ public class I2C extends Thread {
         this.device = device;
         this.slaveAddress = slaveAddress;
         this.commandKey = commandKey;
+
+        detectDelay = App.getIntPreference("i2c_request_data_delay", 100);
     }
 
     public void run() {
@@ -51,7 +53,15 @@ public class I2C extends Thread {
                             Log.d(TAG, "received: " + receivedData);
                         }
 
-                        Commands.processReceivedData(receivedData);
+                        Pattern pattern = Pattern.compile("(<.+?>)");
+                        Matcher matcher = pattern.matcher(receivedData);
+                        if (matcher.find()) {
+                            for (int i = 1; i <= matcher.groupCount(); i++) {
+                                Commands.processReceivedData(matcher.group(i));
+                            }
+                        }
+
+
                     }
                 }
 

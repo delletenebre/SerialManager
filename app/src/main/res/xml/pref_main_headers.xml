@@ -9,6 +9,10 @@
         android:title="@string/pref_main_header_usb" />
 
     <header
+        android:fragment="kg.delletenebre.serialmanager.SettingsActivity$I2CPreferenceFragment"
+        android:title="@string/pref_main_header_i2c" />
+
+    <header
         android:fragment="kg.delletenebre.serialmanager.SettingsActivity$WebServerPreferenceFragment"
         android:title="@string/pref_main_header_webserver" />
 
