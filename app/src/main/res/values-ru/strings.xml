@@ -89,6 +89,15 @@
     <string name="dialog_title_confirm_import_old_commands">Восстановить команды?</string>
     <string name="dialog_content_import_old_commands">Обнаружены команды старого формата. Вы хотите восстановить их?</string>
 
+    <string name="pref_command_title_type">Тип</string>
+    <string name="command_type_default">Обычный</string>
+
+    <string name="pref_title_command_typed_gpio_pin_number">Номер GPIO</string>
+    <string name="pref_title_command_typed_keyboard_name">Параметр NAME</string>
+    <string name="pref_title_command_typed_keyboard_ev">Параметр EV</string>
+    <string name="pref_title_command_typed_i2c_device">Название I2C в /dev</string>
+    <string name="pref_title_command_typed_serial_device">Название последовательного порта в /dev</string>
+
     <string name="pref_title_autoset">Определить ключ/значение автоматически</string>
 
     <string name="pref_title_scatter">Погрешность значения (±)</string>

@@ -84,14 +84,15 @@ public class CommandsListAdapter extends RecyclerView.Adapter<CommandsListAdapte
         int position = getItemPositionById(command.getId());
         if (position > -1) {
             if (database.update(command) > 0) {
-                if (!Commands.getCommands().get(position).getKey().equals(command.getKey())) {
-                    NativeGpio.destroyByCommandKey(Commands.getCommands().get(position).getKey());
+                Command oldCommand = Commands.getCommands().get(position);
+                if (!oldCommand.getKey().equals(command.getKey())) {
+                    NativeGpio.destroyByCommandKey(oldCommand.getKey());
                     NativeGpio.createByCommandKey(command.getKey());
 
-                    Hotkey.destroyByCommandKey(Commands.getCommands().get(position).getKey());
-                    Hotkey.createByCommandKey(command.getKey());
+                    Hotkey.destroyByIdentifier(oldCommand.getKey());
+                    Hotkey.create(command);
 
-                    I2C.destroyByCommandKey(Commands.getCommands().get(position).getKey());
+                    I2C.destroyByCommandKey(oldCommand.getKey());
                     I2C.createByCommandKey(command.getKey());
                 }
 
@@ -105,9 +106,11 @@ public class CommandsListAdapter extends RecyclerView.Adapter<CommandsListAdapte
         database.updatePositions(Commands.getCommands());
         int position = getItemPositionById(id);
         if (position > -1) {
-            NativeGpio.destroyByCommandKey(Commands.getCommands().get(position).getKey());
-            Hotkey.destroyByCommandKey(Commands.getCommands().get(position).getKey());
-            I2C.destroyByCommandKey(Commands.getCommands().get(position).getKey());
+            Command command = Commands.getCommands().get(position);
+
+            NativeGpio.destroyByCommandKey(command.getKey());
+            Hotkey.destroyByCommand(command);
+            I2C.destroyByCommandKey(command.getKey());
 
             Commands.getCommands().remove(position);
 

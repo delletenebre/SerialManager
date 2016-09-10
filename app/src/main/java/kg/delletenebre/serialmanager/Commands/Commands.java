@@ -21,9 +21,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,16 +88,39 @@ public class Commands {
 
                 if (CommandSettingsActivity.autosetPreference != null
                         && CommandSettingsActivity.autosetPreference.isChecked()
+                        && CommandSettingsActivity.typePreference != null
+                        && CommandSettingsActivity.keyboardNamePreference != null
+                        && CommandSettingsActivity.keyboardEvPreference != null
                         && CommandSettingsActivity.keyPreference != null
                         && CommandSettingsActivity.valuePreference != null) {
 
                     activity.runOnUiThread(new Runnable() {
                         public void run() {
-                            CommandSettingsActivity.keyPreference.setText(key);
-                            CommandSettingsActivity.keyPreference.setSummary(key);
+                            switch (CommandSettingsActivity.typePreference.getValue()) {
+                                case "default":
+                                    CommandSettingsActivity.keyPreference.setText(key);
+                                    CommandSettingsActivity.keyPreference.setSummary(key);
 
-                            CommandSettingsActivity.valuePreference.setText(val);
-                            CommandSettingsActivity.valuePreference.setSummary(val);
+                                    CommandSettingsActivity.valuePreference.setText(val);
+                                    CommandSettingsActivity.valuePreference.setSummary(val);
+                                    break;
+
+                                case "keyboard":
+                                    Pattern pattern = Pattern.compile("^\\$keyboard\\|(.+?)\\|(.+?)$");
+                                    Matcher matcher = pattern.matcher(key);
+                                    if (matcher.find()) {
+                                        CommandSettingsActivity.keyboardNamePreference.setText(matcher.group(1));
+                                        CommandSettingsActivity.keyboardNamePreference.setSummary(matcher.group(1));
+
+                                        CommandSettingsActivity.keyboardEvPreference.setText(matcher.group(2));
+                                        CommandSettingsActivity.keyboardEvPreference.setSummary(matcher.group(2));
+                                    }
+
+                                    CommandSettingsActivity.valuePreference.setText(val);
+                                    CommandSettingsActivity.valuePreference.setSummary(val);
+                                    break;
+
+                            }
                         }
                     });
                 }
@@ -330,111 +351,111 @@ public class Commands {
         return false;
     }
 
-
-    public static void importOldCommands(List<String> preferences) {
-        Context context = App.getContext();
-        for (String name : preferences) {
-            SharedPreferences prefs = context.getSharedPreferences(name, Context.MODE_PRIVATE);
-
-
-            String key = prefs.getString("key", "");
-            String value = prefs.getString("value", "");
-            float scatter = 0;
-            String sScatter = prefs.getString("scatter", "");
-            if (App.isNumber(sScatter)) {
-                scatter = Float.parseFloat(sScatter);
-            }
-            boolean through = prefs.getBoolean("is_through", false);
-            String category = prefs.getString("action_category", "0");
-
-            Map<String, String> actions = new HashMap<>();
-
-            actions.put("0", App.getContext().getString(R.string.no_action));
-            actions.put("1", prefs.getString("action_navigation", "0"));
-            actions.put("2", prefs.getString("action_volume", "0"));
-            actions.put("3", prefs.getString("action_media", "0"));
-            actions.put("4", prefs.getString("action_application",
-                    context.getString(R.string.pref_shortcut_default)));
-            actions.put("5", prefs.getString("action_shell", ""));
-            actions.put("6", prefs.getString("action_send", ""));
-            actions.put("8", prefs.getString("action_system", ""));
-
-            String action = actions.get(category);
-
-            Map<String, String> newCategories = new HashMap<>();
-            newCategories.put("0", "none");
-            newCategories.put("1", "navigation");
-            newCategories.put("2", "volume");
-            newCategories.put("3", "media");
-            newCategories.put("4", "application");
-            newCategories.put("5", "shell");
-            newCategories.put("6", "send");
-            newCategories.put("8", "system");
-
-            category = newCategories.get(category);
-            if (category.equals("volume")) {
-                switch (action) {
-                    case "0":
-                        action = "up";
-                        break;
-                    case "1":
-                        action = "down";
-                        break;
-                    case "2":
-                        action = "mute";
-                        break;
-                }
-            } else if (category.equals("media")) {
-                switch (action) {
-                    case "0":
-                        action = "89";
-                        break;
-                    case "1":
-                        action = "88";
-                        break;
-                    case "2":
-                        action = "85";
-                        break;
-                    case "3":
-                        action = "87";
-                        break;
-                    case "4":
-                        action = "90";
-                        break;
-                }
-            }
-
-            Command command = new Command()
-                    .setKey(key)
-                    .setValue(value)
-                    .setScatter(scatter)
-                    .setThrough(through)
-                    .setCategory(category)
-                    .setAction(action);
-
-            ((MainActivity) App.getAliveActivity()).commandsListAdapter.createItem(command);
-            deleteOldCommand(name);
-            Toaster.toast(R.string.message_commands_import_success);
-        }
-    }
-
-    public static void deleteOldCommands(List<String> preferences) {
-        for (String prefName : preferences) {
-            deleteOldCommand(prefName);
-        }
-    }
-
-    public static void deleteOldCommand(String prefName) {
-        Context context = App.getContext();
-
-        context.getSharedPreferences(prefName, Context.MODE_PRIVATE)
-                .edit()
-                .clear()
-                .commit();
-
-        if (!new File(context.getFilesDir().getParent(),
-                "/shared_prefs/" + prefName + ".xml").delete() && App.isDebug()) {
-            Log.w(TAG, "Error deleting " + "/shared_prefs/" + prefName + ".xml" + " file");
-        }
-    }
+//
+//    public static void importOldCommands(List<String> preferences) {
+//        Context context = App.getContext();
+//        for (String name : preferences) {
+//            SharedPreferences prefs = context.getSharedPreferences(name, Context.MODE_PRIVATE);
+//
+//
+//            String key = prefs.getString("key", "");
+//            String value = prefs.getString("value", "");
+//            float scatter = 0;
+//            String sScatter = prefs.getString("scatter", "");
+//            if (App.isNumber(sScatter)) {
+//                scatter = Float.parseFloat(sScatter);
+//            }
+//            boolean through = prefs.getBoolean("is_through", false);
+//            String category = prefs.getString("action_category", "0");
+//
+//            Map<String, String> actions = new HashMap<>();
+//
+//            actions.put("0", App.getContext().getString(R.string.no_action));
+//            actions.put("1", prefs.getString("action_navigation", "0"));
+//            actions.put("2", prefs.getString("action_volume", "0"));
+//            actions.put("3", prefs.getString("action_media", "0"));
+//            actions.put("4", prefs.getString("action_application",
+//                    context.getString(R.string.pref_shortcut_default)));
+//            actions.put("5", prefs.getString("action_shell", ""));
+//            actions.put("6", prefs.getString("action_send", ""));
+//            actions.put("8", prefs.getString("action_system", ""));
+//
+//            String action = actions.get(category);
+//
+//            Map<String, String> newCategories = new HashMap<>();
+//            newCategories.put("0", "none");
+//            newCategories.put("1", "navigation");
+//            newCategories.put("2", "volume");
+//            newCategories.put("3", "media");
+//            newCategories.put("4", "application");
+//            newCategories.put("5", "shell");
+//            newCategories.put("6", "send");
+//            newCategories.put("8", "system");
+//
+//            category = newCategories.get(category);
+//            if (category.equals("volume")) {
+//                switch (action) {
+//                    case "0":
+//                        action = "up";
+//                        break;
+//                    case "1":
+//                        action = "down";
+//                        break;
+//                    case "2":
+//                        action = "mute";
+//                        break;
+//                }
+//            } else if (category.equals("media")) {
+//                switch (action) {
+//                    case "0":
+//                        action = "89";
+//                        break;
+//                    case "1":
+//                        action = "88";
+//                        break;
+//                    case "2":
+//                        action = "85";
+//                        break;
+//                    case "3":
+//                        action = "87";
+//                        break;
+//                    case "4":
+//                        action = "90";
+//                        break;
+//                }
+//            }
+//
+//            Command command = new Command()
+//                    .setKey(key)
+//                    .setValue(value)
+//                    .setScatter(scatter)
+//                    .setThrough(through)
+//                    .setCategory(category)
+//                    .setAction(action);
+//
+//            ((MainActivity) App.getAliveActivity()).commandsListAdapter.createItem(command);
+//            deleteOldCommand(name);
+//            Toaster.toast(R.string.message_commands_import_success);
+//        }
+//    }
+//
+//    public static void deleteOldCommands(List<String> preferences) {
+//        for (String prefName : preferences) {
+//            deleteOldCommand(prefName);
+//        }
+//    }
+//
+//    public static void deleteOldCommand(String prefName) {
+//        Context context = App.getContext();
+//
+//        context.getSharedPreferences(prefName, Context.MODE_PRIVATE)
+//                .edit()
+//                .clear()
+//                .commit();
+//
+//        if (!new File(context.getFilesDir().getParent(),
+//                "/shared_prefs/" + prefName + ".xml").delete() && App.isDebug()) {
+//            Log.w(TAG, "Error deleting " + "/shared_prefs/" + prefName + ".xml" + " file");
+//        }
+//    }
 }

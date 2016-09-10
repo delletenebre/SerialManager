@@ -21,11 +21,14 @@ import android.view.MenuItem;
 import com.rarepebble.colorpicker.ColorPreference;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import kg.delletenebre.serialmanager.App;
+import kg.delletenebre.serialmanager.Hotkey;
 import kg.delletenebre.serialmanager.Preferences.AppChooserPreference;
 import kg.delletenebre.serialmanager.R;
 
@@ -35,103 +38,14 @@ public class CommandSettingsActivity extends AppCompatActivity {
 
     public static final String COMMAND_PREFERENCE_NAME = "command";
     public static CheckBoxPreference autosetPreference;
-    public static EditTextPreference keyPreference, valuePreference;
-    private static Map<String, Preference> actionPreferences;
+    public static ListPreference typePreference;
+    public static EditTextPreference keyPreference, valuePreference,
+            keyboardNamePreference, keyboardEvPreference;
+
     private static PreferenceScreen preferenceScreen;
 
     private GeneralPreferenceFragment preferenceFragment;
     private static Command command;
-
-    private static Preference.OnPreferenceChangeListener bindPreferenceSummaryToValueListener =
-            new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object value) {
-                    String stringValue = value.toString();
-
-                    if (preference instanceof ListPreference) {
-                        ListPreference listPreference = (ListPreference) preference;
-                        if ( listPreference.getKey().equals("action_category")) {
-                            if (preferenceScreen != null) {
-                                for (Map.Entry<String, Preference> entry : actionPreferences.entrySet()) {
-                                    Preference pref = entry.getValue();
-                                    preferenceScreen.removePreference(pref);
-
-                                    if (stringValue.equals(entry.getKey())) {
-                                        preferenceScreen.addPreference(pref);
-                                    }
-                                }
-                            }
-                        }
-                        int index = listPreference.findIndexOfValue(stringValue);
-
-                        preference.setSummary(
-                                index >= 0
-                                        ? listPreference.getEntries()[index]
-                                        : null);
-
-                    } else if (preference instanceof AppChooserPreference) {
-                        preference.setSummary(AppChooserPreference.getDisplayValue(
-                                preference.getContext(), stringValue));
-                    } else {
-                        preference.setSummary(stringValue);
-                    }
-
-                    return true;
-                }
-            };
-
-    private static void bindPreferenceSummaryToValue(Preference preference,
-                                                     String spName) {
-        if (preference != null) {
-            preference.setOnPreferenceChangeListener(bindPreferenceSummaryToValueListener);
-
-            bindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                    preference.getContext().getSharedPreferences(spName, MODE_PRIVATE)
-                            .getString(preference.getKey(), ""));
-        }
-    }
-
-    private SharedPreferences.Editor setDefaults(SharedPreferences.Editor editor) {
-        List<String> actions = new ArrayList<>();
-        actions.add("action_navigation");
-        actions.add("action_volume");
-        actions.add("action_media");
-        actions.add("action_application");
-        actions.add("action_shell");
-        actions.add("action_send");
-        actions.add("action_system");
-        actions.add("action_gpio");
-
-        editor.putString("key", "");
-        editor.putString("value", "");
-        editor.putString("scatter", "");
-        editor.putBoolean("is_through", false);
-        editor.putString("action_category", "none");
-
-        editor.putBoolean("overlay_enabled", false);
-        editor.putString("overlay_text", getString(R.string.pref_co_default_text));
-        editor.putString("overlay_timer", getString(R.string.pref_co_default_timer));
-        editor.putBoolean("overlay_hide_on_click", false);
-        editor.putString("overlay_show_animation", getString(R.string.pref_co_default_show_animation));
-        editor.putString("overlay_hide_animation", getString(R.string.pref_co_default_hide_animation));
-        editor.putString("overlay_position", getString(R.string.pref_co_default_position));
-        editor.putString("overlay_position_x", getString(R.string.pref_co_default_position_x));
-        editor.putString("overlay_position_y", getString(R.string.pref_co_default_position_y));
-        editor.putBoolean("overlay_height_equals_status_bar", false);
-        editor.putBoolean("overlay_width_full", false);
-        editor.putString("overlay_text_align", getString(R.string.pref_co_default_text_align));
-        editor.putString("overlay_font_size", getString(R.string.pref_co_default_font_size));
-        editor.putInt("overlay_font_color", Color.WHITE);
-        editor.putInt("overlay_background_color", Color.BLACK);
-
-        for (String action: actions) {
-            editor.putString(action, "");
-        }
-
-        editor.commit();
-
-        return editor;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,14 +57,17 @@ public class CommandSettingsActivity extends AppCompatActivity {
             SharedPreferences.Editor editor =
                     getSharedPreferences(COMMAND_PREFERENCE_NAME, Context.MODE_PRIVATE).edit();
 
-            editor = setDefaults(editor);
-
             float scatter = command.getScatter();
+            int gpioPinNumber = command.getGpioPinNumber();
             String category = command.getCategory();
             if (category.isEmpty()) {
                 category = "none";
             }
 
+            editor.putString("type", command.getType());
+            editor.putString("command_typed_gpio_pin_number", (gpioPinNumber > -1) ? String.valueOf(gpioPinNumber) : "");
+            editor.putString("command_typed_keyboard_name", command.getKeyboardName());
+            editor.putString("command_typed_keyboard_ev", command.getKeyboardEv());
             editor.putString("key", command.getKey());
             editor.putString("value", command.getValue());
             editor.putString("scatter", (scatter != 0) ? String.valueOf(scatter) : "");
@@ -218,11 +135,9 @@ public class CommandSettingsActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
 
-        if (actionPreferences != null) {
-            actionPreferences.clear();
-        }
-        actionPreferences = null;
-
+        typePreference = null;
+        keyboardNamePreference = null;
+        keyboardEvPreference = null;
         autosetPreference = null;
         keyPreference = null;
         valuePreference = null;
@@ -230,6 +145,8 @@ public class CommandSettingsActivity extends AppCompatActivity {
     }
 
     public static class GeneralPreferenceFragment extends PreferenceFragment {
+        private Map<String, List<Preference>> typedPreferences;
+        private Map<String, Preference> actionPreferences;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -240,14 +157,15 @@ public class CommandSettingsActivity extends AppCompatActivity {
             addPreferencesFromResource(R.xml.pref_command);
             setHasOptionsMenu(true);
 
-            if (actionPreferences == null) {
-                actionPreferences = new HashMap<>();
-            }
-
             preferenceScreen = getPreferenceScreen();
+            typePreference = (ListPreference) findPreference("type");
+            keyboardNamePreference = (EditTextPreference) findPreference("command_typed_keyboard_name");
+            keyboardEvPreference = (EditTextPreference) findPreference("command_typed_keyboard_ev");
             autosetPreference = (CheckBoxPreference) findPreference("autoset");
             keyPreference = (EditTextPreference) findPreference("key");
             valuePreference = (EditTextPreference) findPreference("value");
+
+            actionPreferences = new HashMap<>();
             actionPreferences.put("navigation", findPreference("action_navigation"));
             actionPreferences.put("volume", findPreference("action_volume"));
             actionPreferences.put("media", findPreference("action_media"));
@@ -257,6 +175,26 @@ public class CommandSettingsActivity extends AppCompatActivity {
             actionPreferences.put("system", findPreference("action_system"));
             actionPreferences.put("gpio", findPreference("action_gpio"));
 
+            typedPreferences = new HashMap<>();
+            typedPreferences.put("default", Collections.singletonList(
+                    findPreference("key")));
+
+            typedPreferences.put("gpio", Collections.singletonList(
+                    findPreference("command_typed_gpio_pin_number")));
+
+            typedPreferences.put("keyboard", Arrays.asList(
+                    findPreference("command_typed_keyboard_name"),
+                    findPreference("command_typed_keyboard_ev")));
+
+            for (Map.Entry<String, List<Preference>> entry : typedPreferences.entrySet()) {
+                for (Preference pref : entry.getValue()) {
+                    //if (!pref.getClass().getName().equals("android.preference.CheckBoxPreference")) {
+                    bindPreferenceSummaryToValue(pref, COMMAND_PREFERENCE_NAME);
+                    //}
+                }
+            }
+
+            bindPreferenceSummaryToValue(findPreference("type"), COMMAND_PREFERENCE_NAME);
             bindPreferenceSummaryToValue(keyPreference, COMMAND_PREFERENCE_NAME);
             bindPreferenceSummaryToValue(valuePreference, COMMAND_PREFERENCE_NAME);
             bindPreferenceSummaryToValue(findPreference("scatter"), COMMAND_PREFERENCE_NAME);
@@ -297,6 +235,67 @@ public class CommandSettingsActivity extends AppCompatActivity {
             super.onPause();
         }
 
+        private Preference.OnPreferenceChangeListener bindPreferenceSummaryToValueListener =
+                new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object value) {
+                        String stringValue = value.toString();
+
+                        if (preference instanceof ListPreference) {
+                            ListPreference listPreference = (ListPreference) preference;
+                            if ( listPreference.getKey().equals("action_category")) {
+                                if (preferenceScreen != null) {
+                                    for (Map.Entry<String, Preference> entry : actionPreferences.entrySet()) {
+                                        Preference pref = entry.getValue();
+                                        preferenceScreen.removePreference(pref);
+
+                                        if (stringValue.equals(entry.getKey())) {
+                                            preferenceScreen.addPreference(pref);
+                                        }
+                                    }
+                                }
+                            } else if (listPreference.getKey().equals("type")) {
+                                if (preferenceScreen != null) {
+                                    for (Map.Entry<String, List<Preference>> entry : typedPreferences.entrySet()) {
+                                        for (Preference pref : entry.getValue()) {
+                                            preferenceScreen.removePreference(pref);
+
+                                            if (stringValue.equals(entry.getKey())) {
+                                                preferenceScreen.addPreference(pref);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            int index = listPreference.findIndexOfValue(stringValue);
+
+                            preference.setSummary(
+                                    index >= 0
+                                            ? listPreference.getEntries()[index]
+                                            : null);
+
+                        } else if (preference instanceof AppChooserPreference) {
+                            preference.setSummary(AppChooserPreference.getDisplayValue(
+                                    preference.getContext(), stringValue));
+                        } else {
+                            preference.setSummary(stringValue);
+                        }
+
+                        return true;
+                    }
+                };
+
+        private void bindPreferenceSummaryToValue(Preference preference, String name) {
+            if (preference != null) {
+                preference.setOnPreferenceChangeListener(bindPreferenceSummaryToValueListener);
+
+                bindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                        preference.getContext().getSharedPreferences(name, MODE_PRIVATE)
+                                .getString(preference.getKey(), ""));
+            }
+        }
+
         private void setResultForActivity() {
             Intent intent = new Intent();
 
@@ -304,11 +303,7 @@ public class CommandSettingsActivity extends AppCompatActivity {
             try {
                 scatter = Float.parseFloat(
                         ((EditTextPreference) findPreference("scatter")).getText());
-            } catch (NumberFormatException e) {
-                if (App.isDebug()) {
-                    Log.w(TAG, "Can not cast [scatter] to float");
-                }
-            }
+            } catch (NumberFormatException e) {}
 
             String category = ((ListPreference) findPreference("action_category")).getValue();
             String categoryString = findPreference("action_category").getSummary().toString();
@@ -343,14 +338,33 @@ public class CommandSettingsActivity extends AppCompatActivity {
             Command.Overlay overlay = command.getOverlay();
 
             if (command != null) {
-                command.setKey(keyPreference.getText());
-                command.setValue(valuePreference.getText());
-                command.setScatter(scatter);
-                command.setThrough(
-                        ((CheckBoxPreference) findPreference("is_through")).isChecked());
-                command.setCategory(category);
-                command.setAction(action);
-                command.setActionString(actionString);
+                String commandType = ((ListPreference) findPreference("type")).getValue();
+                command.setType(commandType)
+                        .setKey(keyPreference.getText())
+                        .setValue(valuePreference.getText())
+                        .setScatter(scatter)
+                        .setThrough(
+                            ((CheckBoxPreference) findPreference("is_through")).isChecked())
+                        .setCategory(category)
+                        .setAction(action)
+                        .setActionString(actionString);
+
+                List<Preference> typedPreferencesList = typedPreferences.get(commandType);
+                switch (commandType) {
+                    case "gpio":
+                        int gpioPinNumber = -1;
+                        try {
+                            gpioPinNumber = Integer.parseInt(((EditTextPreference) typedPreferencesList.get(0)).getText());
+                        } catch (Exception e) {}
+                        command.setGpioPinNumber(gpioPinNumber);
+                        break;
+
+                    case "keyboard":
+                        command.setKeyboardName(((EditTextPreference) typedPreferencesList.get(0)).getText());
+                        command.setKeyboardEv(((EditTextPreference) typedPreferencesList.get(1)).getText());
+                        command.setKey(Hotkey.createCommandIdentifier(command.getKeyboardName(), command.getKeyboardEv()));
+                        break;
+                }
 
                 overlay.setEnabled(
                         ((CheckBoxPreference) findPreference("overlay_enabled")).isChecked());

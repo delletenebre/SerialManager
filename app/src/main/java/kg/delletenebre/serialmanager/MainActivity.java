@@ -58,28 +58,28 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final List<String> oldCommands = Commands.checkCommandsPreferences();
-        if (!oldCommands.isEmpty()) {
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.dialog_title_confirm_import_old_commands)
-                    .setMessage(R.string.dialog_content_import_old_commands)
-                    .setNegativeButton(R.string.dialog_negative, null)
-                    .setNeutralButton(R.string.dialog_delete,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    Commands.deleteOldCommands(oldCommands);
-                                }
-                            })
-                    .setPositiveButton(R.string.dialog_import_positive,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    Commands.importOldCommands(oldCommands);
-                                }
-                            })
-                    .show();
-        }
+//        final List<String> oldCommands = Commands.checkCommandsPreferences();
+//        if (!oldCommands.isEmpty()) {
+//            new AlertDialog.Builder(this)
+//                    .setTitle(R.string.dialog_title_confirm_import_old_commands)
+//                    .setMessage(R.string.dialog_content_import_old_commands)
+//                    .setNegativeButton(R.string.dialog_negative, null)
+//                    .setNeutralButton(R.string.dialog_delete,
+//                            new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//                                    Commands.deleteOldCommands(oldCommands);
+//                                }
+//                            })
+//                    .setPositiveButton(R.string.dialog_import_positive,
+//                            new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//                                    Commands.importOldCommands(oldCommands);
+//                                }
+//                            })
+//                    .show();
+//        }
 
         commandsListAdapter = new CommandsListAdapter();
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.commands_list);

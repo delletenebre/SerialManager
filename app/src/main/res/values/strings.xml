@@ -158,6 +158,29 @@
     <string name="command_item_key_text" translatable="false">&lt;%1$s:%2$s%3$s&gt;</string>
     <string name="command_item_action_text" translatable="false">(%1$s) %2$s</string>
 
+    <string name="pref_command_title_type">Type</string>
+    <string name="command_type_default">Default</string>
+    <string name="command_type_gpio" translatable="false">GPIO</string>
+    <string name="command_type_keyboard" translatable="false">Keyboard (/dev/input/event*)</string>
+    <string name="command_type_i2c" translatable="false">I2C (/dev/i2c*)</string>
+    <string name="command_type_serial" translatable="false">Serial (/dev/tty*)</string>
+    <string-array name="pref_command_type_titles" translatable="false">
+        <item>@string/command_type_default</item>
+        <item>@string/command_type_gpio</item>
+        <item>@string/command_type_keyboard</item>
+    </string-array>
+    <string-array name="pref_command_type_values" translatable="false">
+        <item>default</item>
+        <item>gpio</item>
+        <item>keyboard</item>
+    </string-array>
+
+    <string name="pref_title_command_typed_gpio_pin_number">GPIO pin number</string>
+    <string name="pref_title_command_typed_keyboard_name">Parameter NAME</string>
+    <string name="pref_title_command_typed_keyboard_ev">Parameter EV</string>
+    <string name="pref_title_command_typed_i2c_device">I2C device name in /dev</string>
+    <string name="pref_title_command_typed_serial_device">Serial device name in /dev</string>
+
     <string name="pref_title_autoset">Autoset key/value</string>
 
     <string name="pref_title_scatter">Value deviation (±)</string>

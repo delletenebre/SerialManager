@@ -1,5 +1,6 @@
 package kg.delletenebre.serialmanager;
 
+import android.icu.text.SymbolTable;
 import android.os.Handler;
 import android.util.Log;
 
@@ -33,7 +34,7 @@ public class Hotkey extends Thread {
     };
 
     private int eventId;
-    private String commandKey;
+    private String commandIdentifier;
     private Keycode keycode;
     private Handler delayDetectKeyPressHandler = new Handler();
     private ArrayList<Integer> pressedKeys = new ArrayList<>();
@@ -44,9 +45,9 @@ public class Hotkey extends Thread {
     public native int getFileDescriptor(int eventId);
     public native String readKeysByFileDescriptor(int fd);
 
-    public Hotkey(int eventId, String commandKey) {
+    public Hotkey(int eventId, String commandIdentifier) {
         this.eventId = eventId;
-        this.commandKey = commandKey;
+        this.commandIdentifier = commandIdentifier;
     }
 
     public void run() {
@@ -62,7 +63,7 @@ public class Hotkey extends Thread {
                             stringBuilder.append(pressedKey).append("+");
                         }
                         Commands.processReceivedData(
-                                String.format("<%s:%s>", commandKey,
+                                String.format("<%s:%s>", commandIdentifier,
                                         stringBuilder.toString().substring(
                                                 0, stringBuilder.length() - 1)));
                     }
@@ -108,7 +109,7 @@ public class Hotkey extends Thread {
         }
 
         delayDetectKeyPressHandler.removeCallbacks(delayDetectKeyPressRunnable);
-        destroyByCommandKey(commandKey);
+        destroyByIdentifier(commandIdentifier);
 
         if (App.isDebug()) {
             Log.d(TAG, "event" + String.valueOf(eventId) + " thread is interrupted");
@@ -166,31 +167,15 @@ public class Hotkey extends Thread {
         setDetectDelay(App.getIntPreference("hotkeys_detect_delay", 100));
 
         for (Command command: Commands.getCommands()) {
-            createByCommandKey(command.getKey());
+            create(command);
         }
     }
 
-    public static void createByCommandKey(final String key) {
-        final int eventId = getEventIdFromCommandKey(key);
-
-        if (eventId > -1 && !hotkeys.containsKey(key)) {
-            hotkeys.put(key, new Hotkey(eventId, key));
-            hotkeys.get(key).start();
-
-            if (App.isDebug()) {
-                Log.d(TAG, "Keyboards listener created: /dev/input/event" + String.valueOf(eventId));
-            }
-        }
-    }
-
-    private static int getEventIdFromCommandKey(String key) {
-        Pattern pattern = Pattern.compile("^keyboard\\|(.+)\\|(.+)$");
-        Matcher matcher = pattern.matcher(key);
-        if (matcher.find()) {
-            if (App.isDebug()) {
-                Log.d(TAG, "Keyboards listener parsed: NAME=" + matcher.group(1)
-                        + " | EV=" + matcher.group(2));
-            }
+    public static void create(Command command) {
+        String parameterName = command.getKeyboardName();
+        String parameterEv = command.getKeyboardEv();
+        if (command.getType().equals("keyboard") && !parameterName.isEmpty() && !hotkeys.containsKey(command.getKey())) {
+            int eventId = -1;
 
             try {
                 Process output = Runtime.getRuntime().exec("cat /proc/bus/input/devices");
@@ -199,7 +184,6 @@ public class Hotkey extends Thread {
                 String line;
                 boolean isNameFind = false;
                 boolean isEvFind = false;
-                int eventId = -1;
                 while((line = input.readLine()) != null) {
                     if (line.isEmpty()) {
                         isNameFind = false;
@@ -207,25 +191,33 @@ public class Hotkey extends Thread {
                         eventId = -1;
                     }
                     if (line.startsWith("N: Name=")) {
-                        isNameFind = line.substring(9, line.length() - 1).contains(matcher.group(1));
+                        isNameFind = line.substring(9, line.length() - 1).contains(parameterName);
                     } else if (line.startsWith("H: Handlers=") && isNameFind) {
                         int index = line.indexOf("event") + 5;
                         eventId = Integer.parseInt(line.substring(index, index + 1));
                     } else if (line.startsWith("B: EV=") && isNameFind) {
-                        isEvFind = line.substring(6, line.length()).equalsIgnoreCase(matcher.group(2));
+                        isEvFind = line.substring(6, line.length()).equalsIgnoreCase(parameterEv);
                     }
 
                     if (isNameFind && eventId > -1 && isEvFind) {
                         Log.d(TAG, "find /dev/input/event" + String.valueOf(eventId));
-                        return eventId;
+                        break;
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
 
-        return -1;
+            if (eventId > -1) {
+                String commandIdentifier = createCommandIdentifier(parameterName, parameterEv);
+                hotkeys.put(commandIdentifier, new Hotkey(eventId, commandIdentifier));
+                hotkeys.get(commandIdentifier).start();
+
+                if (App.isDebug()) {
+                    Log.d(TAG, "Keyboards listener created: /dev/input/event" + String.valueOf(eventId));
+                }
+            }
+        }
     }
 
     public static void destroyAll() {
@@ -239,18 +231,27 @@ public class Hotkey extends Thread {
         }
     }
 
-    public static void destroyByCommandKey(String key) {
+    public static void destroyByIdentifier(String identifier) {
         int countSameKey = 0;
 
         for (Command command : Commands.getCommands()) {
-            if (command.getKey().equals(key)) {
+            if (createCommandIdentifier(command.getKeyboardName(), command.getKeyboardEv()).equals(identifier)) {
                 countSameKey++;
             }
         }
 
-        if (hotkeys.containsKey(key) && countSameKey < 2) {
-            hotkeys.get(key).interrupt();
-            hotkeys.remove(key);
+        if (hotkeys.containsKey(identifier) && countSameKey < 2) {
+            hotkeys.get(identifier).interrupt();
+            hotkeys.remove(identifier);
         }
+    }
+
+    public static void destroyByCommand(Command command) {
+        destroyByIdentifier(createCommandIdentifier(
+                command.getKeyboardName(), command.getKeyboardEv()));
+    }
+
+    public static String createCommandIdentifier(String part1, String part2) {
+        return String.format("$keyboard|%s|%s", part1, part2);
     }
 }

@@ -1,251 +1,284 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <ListPreference
+        android:key="type"
+        android:defaultValue="default"
+        android:title="@string/pref_command_title_type"
+        android:entries="@array/pref_command_type_titles"
+        android:entryValues="@array/pref_command_type_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+
+    <EditTextPreference
+        android:key="command_typed_gpio_pin_number"
+        android:defaultValue=""
+        android:capitalize="none"
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_command_typed_gpio_pin_number" />
+
+    <EditTextPreference
+        android:key="command_typed_keyboard_name"
+        android:defaultValue=""
+        android:capitalize="none"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_command_typed_keyboard_name" />
+
+    <EditTextPreference
+        android:key="command_typed_keyboard_ev"
+        android:defaultValue=""
+        android:capitalize="none"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_command_typed_keyboard_ev" />
+
+    <CheckBoxPreference
+        android:key="autoset"
+        android:defaultValue="false"
+        android:title="@string/pref_title_autoset" />
+
+    <EditTextPreference
+        android:key="key"
+        android:defaultValue="@string/default_key"
+        android:capitalize="none"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_key" />
+
+    <EditTextPreference
+        android:key="value"
+        android:defaultValue=""
+        android:capitalize="none"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_value" />
+
+    <EditTextPreference
+        android:key="scatter"
+        android:defaultValue="0"
+        android:capitalize="none"
+        android:inputType="number|numberDecimal"
+        android:ems="10"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_scatter" />
+
+    <CheckBoxPreference
+        android:key="is_through"
+        android:defaultValue="false"
+        android:title="@string/pref_title_is_through"
+        android:summary="@string/pref_summ_is_through" />
+
+    <ListPreference
+        android:key="action_category"
+        android:defaultValue="0"
+        android:entries="@array/pref_command_action_category_titles"
+        android:entryValues="@array/pref_command_action_category_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_command_action_category" />
+
+    <ListPreference
+        android:key="action_navigation"
+        android:defaultValue=""
+        android:entries="@array/pref_command_action_navigation_titles_values"
+        android:entryValues="@array/pref_command_action_navigation_titles_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_command_action_navigation" />
+
+    <ListPreference
+        android:key="action_volume"
+        android:defaultValue="0"
+        android:entries="@array/pref_command_action_volume_titles"
+        android:entryValues="@array/pref_command_action_volume_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_command_action_volume" />
+
+    <ListPreference
+        android:key="action_media"
+        android:defaultValue="0"
+        android:entries="@array/pref_command_action_media_titles"
+        android:entryValues="@array/pref_command_action_media_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_command_action_media" />
+
+    <kg.delletenebre.serialmanager.Preferences.AppChooserPreference
+        android:key="action_application"
+        android:title="@string/pref_title_command_action_application"
+        app:allowUseDefault="false" />
+
+    <EditTextPreference
+        android:key="action_shell"
+        android:defaultValue=""
+        android:capitalize="none"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_command_action_run_shell" />
+
+    <EditTextPreference
+        android:key="action_send"
+        android:defaultValue=""
+        android:capitalize="none"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_command_action_send" />
+
+    <ListPreference
+        android:key="action_system"
+        android:defaultValue=""
+        android:entries="@array/pref_command_action_system_titles"
+        android:entryValues="@array/pref_command_action_system_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_command_action_system" />
+
+    <EditTextPreference
+        android:key="action_gpio"
+        android:defaultValue="gpioX:1"
+        android:capitalize="none"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_command_action_gpio" />
+
+    <PreferenceCategory
+        android:title="@string/pref_category_title_notification">
+
         <CheckBoxPreference
-            android:key="autoset"
+            android:key="overlay_enabled"
             android:defaultValue="false"
-            android:title="@string/pref_title_autoset" />
+            android:title="@string/pref_co_title_enabled" />
 
         <EditTextPreference
-            android:key="key"
-            android:defaultValue="@string/default_key"
-            android:capitalize="none"
+            android:key="overlay_text"
+            android:dependency="overlay_enabled"
+            android:defaultValue="@string/pref_co_default_text"
+            android:title="@string/pref_co_title_text"
             android:inputType="text"
             android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/pref_title_key" />
+            android:singleLine="true" />
 
         <EditTextPreference
-            android:key="value"
-            android:defaultValue=""
+            android:key="overlay_timer"
+            android:dependency="overlay_enabled"
+            android:defaultValue="@string/pref_co_default_timer"
             android:capitalize="none"
-            android:inputType="text"
-            android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/pref_title_value" />
-
-        <EditTextPreference
-            android:key="scatter"
-            android:defaultValue="0"
-            android:capitalize="none"
-            android:inputType="number|numberDecimal"
+            android:inputType="number"
             android:ems="10"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="@string/pref_title_scatter" />
+            android:title="@string/pref_co_title_timer" />
 
         <CheckBoxPreference
-            android:key="is_through"
+            android:key="overlay_hide_on_click"
+            android:dependency="overlay_enabled"
             android:defaultValue="false"
-            android:title="@string/pref_title_is_through"
-            android:summary="@string/pref_summ_is_through" />
+            android:title="@string/pref_co_title_hide_on_click" />
 
         <ListPreference
-            android:key="action_category"
-            android:defaultValue="0"
-            android:entries="@array/pref_command_action_category_titles"
-            android:entryValues="@array/pref_command_action_category_values"
+            android:key="overlay_show_animation"
+            android:dependency="overlay_enabled"
+            android:defaultValue="@string/pref_co_default_show_animation"
+            android:title="@string/pref_co_title_show_animation"
+            android:entries="@array/pref_co_animation_titles"
+            android:entryValues="@array/pref_co_animation_values"
             android:negativeButtonText="@null"
-            android:positiveButtonText="@null"
-            android:title="@string/pref_title_command_action_category" />
+            android:positiveButtonText="@null" />
 
         <ListPreference
-            android:key="action_navigation"
-            android:defaultValue=""
-            android:entries="@array/pref_command_action_navigation_titles_values"
-            android:entryValues="@array/pref_command_action_navigation_titles_values"
+            android:key="overlay_hide_animation"
+            android:dependency="overlay_enabled"
+            android:defaultValue="@string/pref_co_default_hide_animation"
+            android:title="@string/pref_co_title_hide_animation"
+            android:entries="@array/pref_co_animation_titles"
+            android:entryValues="@array/pref_co_animation_values"
             android:negativeButtonText="@null"
-            android:positiveButtonText="@null"
-            android:title="@string/pref_title_command_action_navigation" />
+            android:positiveButtonText="@null" />
 
         <ListPreference
-            android:key="action_volume"
-            android:defaultValue="0"
-            android:entries="@array/pref_command_action_volume_titles"
-            android:entryValues="@array/pref_command_action_volume_values"
+            android:key="overlay_position"
+            android:dependency="overlay_enabled"
+            android:defaultValue="@string/pref_co_default_position"
+            android:title="@string/pref_co_title_position"
+            android:entries="@array/pref_co_title_position_titles"
+            android:entryValues="@array/pref_co_title_position_values"
             android:negativeButtonText="@null"
-            android:positiveButtonText="@null"
-            android:title="@string/pref_title_command_action_volume" />
-
-        <ListPreference
-            android:key="action_media"
-            android:defaultValue="0"
-            android:entries="@array/pref_command_action_media_titles"
-            android:entryValues="@array/pref_command_action_media_values"
-            android:negativeButtonText="@null"
-            android:positiveButtonText="@null"
-            android:title="@string/pref_title_command_action_media" />
-
-        <kg.delletenebre.serialmanager.Preferences.AppChooserPreference
-            android:key="action_application"
-            android:title="@string/pref_title_command_action_application"
-            app:allowUseDefault="false" />
+            android:positiveButtonText="@null" />
 
         <EditTextPreference
-            android:key="action_shell"
-            android:defaultValue=""
-            android:capitalize="none"
-            android:inputType="text"
+            android:key="overlay_position_x"
+            android:dependency="overlay_enabled"
+            android:defaultValue="@string/pref_co_default_position_x"
+            android:title="@string/pref_co_title_position_x"
+            android:inputType="number|numberSigned"
             android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/pref_title_command_action_run_shell" />
-
+            android:singleLine="true" />
         <EditTextPreference
-            android:key="action_send"
-            android:defaultValue=""
-            android:capitalize="none"
-            android:inputType="text"
+            android:key="overlay_position_y"
+            android:dependency="overlay_enabled"
+            android:defaultValue="@string/pref_co_default_position_y"
+            android:title="@string/pref_co_title_position_y"
+            android:inputType="number|numberSigned"
             android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/pref_title_command_action_send" />
+            android:singleLine="true" />
+
+        <CheckBoxPreference
+            android:key="overlay_height_equals_status_bar"
+            android:dependency="overlay_enabled"
+            android:defaultValue="false"
+            android:title="@string/pref_co_title_status_bar_height"
+            android:summary="" />
+
+        <CheckBoxPreference
+            android:key="overlay_width_full"
+            android:dependency="overlay_enabled"
+            android:defaultValue="false"
+            android:title="@string/pref_co_title_width_full"
+            android:summary="" />
 
         <ListPreference
-            android:key="action_system"
-            android:defaultValue=""
-            android:entries="@array/pref_command_action_system_titles"
-            android:entryValues="@array/pref_command_action_system_values"
+            android:key="overlay_text_align"
+            android:dependency="overlay_width_full"
+            android:defaultValue="@string/pref_co_default_text_align"
+            android:title="@string/pref_co_title_text_align"
+            android:entries="@array/pref_co_text_align_titles"
+            android:entryValues="@array/pref_co_text_align_values"
             android:negativeButtonText="@null"
-            android:positiveButtonText="@null"
-            android:title="@string/pref_title_command_action_system" />
+            android:positiveButtonText="@null" />
 
         <EditTextPreference
-            android:key="action_gpio"
-            android:defaultValue="gpioX:1"
-            android:capitalize="none"
-            android:inputType="text"
+            android:key="overlay_font_size"
+            android:dependency="overlay_enabled"
+            android:defaultValue="@string/pref_co_default_font_size"
+            android:title="@string/pref_co_title_font_size"
+            android:inputType="number"
             android:selectAllOnFocus="true"
-            android:singleLine="true"
-            android:title="@string/pref_title_command_action_gpio" />
+            android:singleLine="true" />
 
-        <PreferenceCategory
-            android:title="@string/pref_category_title_notification">
+        <com.rarepebble.colorpicker.ColorPreference
+            android:key="overlay_font_color"
+            android:dependency="overlay_enabled"
+            android:title="@string/pref_co_title_font_color"
+            app:colorpicker_defaultColor="#fff" />
 
-            <CheckBoxPreference
-                android:key="overlay_enabled"
-                android:defaultValue="false"
-                android:title="@string/pref_co_title_enabled" />
+        <com.rarepebble.colorpicker.ColorPreference
+            android:key="overlay_background_color"
+            android:dependency="overlay_enabled"
+            android:title="@string/pref_co_title_background_color"
+            app:colorpicker_defaultColor="#88000000" />
 
-            <EditTextPreference
-                android:key="overlay_text"
-                android:dependency="overlay_enabled"
-                android:defaultValue="@string/pref_co_default_text"
-                android:title="@string/pref_co_title_text"
-                android:inputType="text"
-                android:selectAllOnFocus="true"
-                android:singleLine="true" />
-
-            <EditTextPreference
-                android:key="overlay_timer"
-                android:dependency="overlay_enabled"
-                android:defaultValue="@string/pref_co_default_timer"
-                android:capitalize="none"
-                android:inputType="number"
-                android:ems="10"
-                android:selectAllOnFocus="true"
-                android:singleLine="true"
-                android:title="@string/pref_co_title_timer" />
-
-            <CheckBoxPreference
-                android:key="overlay_hide_on_click"
-                android:dependency="overlay_enabled"
-                android:defaultValue="false"
-                android:title="@string/pref_co_title_hide_on_click" />
-
-            <ListPreference
-                android:key="overlay_show_animation"
-                android:dependency="overlay_enabled"
-                android:defaultValue="@string/pref_co_default_show_animation"
-                android:title="@string/pref_co_title_show_animation"
-                android:entries="@array/pref_co_animation_titles"
-                android:entryValues="@array/pref_co_animation_values"
-                android:negativeButtonText="@null"
-                android:positiveButtonText="@null" />
-
-            <ListPreference
-                android:key="overlay_hide_animation"
-                android:dependency="overlay_enabled"
-                android:defaultValue="@string/pref_co_default_hide_animation"
-                android:title="@string/pref_co_title_hide_animation"
-                android:entries="@array/pref_co_animation_titles"
-                android:entryValues="@array/pref_co_animation_values"
-                android:negativeButtonText="@null"
-                android:positiveButtonText="@null" />
-
-            <ListPreference
-                android:key="overlay_position"
-                android:dependency="overlay_enabled"
-                android:defaultValue="@string/pref_co_default_position"
-                android:title="@string/pref_co_title_position"
-                android:entries="@array/pref_co_title_position_titles"
-                android:entryValues="@array/pref_co_title_position_values"
-                android:negativeButtonText="@null"
-                android:positiveButtonText="@null" />
-
-            <EditTextPreference
-                android:key="overlay_position_x"
-                android:dependency="overlay_enabled"
-                android:defaultValue="@string/pref_co_default_position_x"
-                android:title="@string/pref_co_title_position_x"
-                android:inputType="number|numberSigned"
-                android:selectAllOnFocus="true"
-                android:singleLine="true" />
-            <EditTextPreference
-                android:key="overlay_position_y"
-                android:dependency="overlay_enabled"
-                android:defaultValue="@string/pref_co_default_position_y"
-                android:title="@string/pref_co_title_position_y"
-                android:inputType="number|numberSigned"
-                android:selectAllOnFocus="true"
-                android:singleLine="true" />
-
-            <CheckBoxPreference
-                android:key="overlay_height_equals_status_bar"
-                android:dependency="overlay_enabled"
-                android:defaultValue="false"
-                android:title="@string/pref_co_title_status_bar_height"
-                android:summary="" />
-
-            <CheckBoxPreference
-                android:key="overlay_width_full"
-                android:dependency="overlay_enabled"
-                android:defaultValue="false"
-                android:title="@string/pref_co_title_width_full"
-                android:summary="" />
-
-            <ListPreference
-                android:key="overlay_text_align"
-                android:dependency="overlay_width_full"
-                android:defaultValue="@string/pref_co_default_text_align"
-                android:title="@string/pref_co_title_text_align"
-                android:entries="@array/pref_co_text_align_titles"
-                android:entryValues="@array/pref_co_text_align_values"
-                android:negativeButtonText="@null"
-                android:positiveButtonText="@null" />
-
-            <EditTextPreference
-                android:key="overlay_font_size"
-                android:dependency="overlay_enabled"
-                android:defaultValue="@string/pref_co_default_font_size"
-                android:title="@string/pref_co_title_font_size"
-                android:inputType="number"
-                android:selectAllOnFocus="true"
-                android:singleLine="true" />
-
-            <com.rarepebble.colorpicker.ColorPreference
-                android:key="overlay_font_color"
-                android:dependency="overlay_enabled"
-                android:title="@string/pref_co_title_font_color"
-                app:colorpicker_defaultColor="#fff" />
-
-            <com.rarepebble.colorpicker.ColorPreference
-                android:key="overlay_background_color"
-                android:dependency="overlay_enabled"
-                android:title="@string/pref_co_title_background_color"
-                app:colorpicker_defaultColor="#88000000" />
-
-
-
-        </PreferenceCategory>
-
+    </PreferenceCategory>
 
 </PreferenceScreen>

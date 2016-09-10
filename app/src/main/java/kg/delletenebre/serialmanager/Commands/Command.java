@@ -8,36 +8,58 @@ import kg.delletenebre.serialmanager.App;
 import kg.delletenebre.serialmanager.R;
 
 public class Command implements Serializable {
-    private long id;
-    private String key;
-    private String value;
-    private float scatter;
-    private boolean through;
-    private String category;
-    private String action;
-    private String actionString;
-    private int position;
-    private Overlay overlay;
-
-
-    public Command() {
-        this.id = -1;
-        this.key = "";
-        this.value = "";
-        this.scatter = 0.0f;
-        this.through = false;
-        this.category = "none";
-        this.action = "";
-        this.actionString = "";
-        this.position = -1;
-        this.overlay = new Overlay();
-    }
+    private long id = -1;
+    private String type = "default";
+    private int gpioPinNumber = -1;
+    private String keyboardName = "";
+    private String keyboardEv = "";
+    private String key = "";
+    private String value = "";
+    private float scatter = 0.0f;
+    private boolean through = false;
+    private String category = "none";
+    private String action = "";
+    private String actionString = "";
+    private int position = -1;
+    private Overlay overlay = new Overlay();
 
     public long getId() {
         return id;
     }
     public Command setId(long id) {
         this.id = id;
+        return this;
+    }
+
+    public String getType() {
+        return type;
+    }
+    public Command setType(String type) {
+        this.type = type;
+        return this;
+    }
+
+    public int getGpioPinNumber() {
+        return gpioPinNumber;
+    }
+    public Command setGpioPinNumber(int gpioPinNumber) {
+        this.gpioPinNumber = gpioPinNumber;
+        return this;
+    }
+
+    public String getKeyboardName() {
+        return keyboardName;
+    }
+    public Command setKeyboardName(String keyboardName) {
+        this.keyboardName = keyboardName;
+        return this;
+    }
+
+    public String getKeyboardEv() {
+        return keyboardEv;
+    }
+    public Command setKeyboardEv(String keyboardEv) {
+        this.keyboardEv = keyboardEv;
         return this;
     }
 
