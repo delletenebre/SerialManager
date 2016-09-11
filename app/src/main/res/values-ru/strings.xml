@@ -25,7 +25,7 @@
     <string name="pref_category_send_commands">Отправка команд</string>
     <string name="pref_category_other">Разное</string>
 
-    <string name="pref_main_header_hotkeys">Нажатия клавиатуры</string>
+    <string name="pref_main_header_hotkeys">Клавиатура (/dev/input/event*)</string>
     <string name="pref_main_header_sending_commands">Отправка команд</string>
     <string name="pref_main_header_extra">Дополнительные возможности</string>
     <string name="pref_main_header_other">Разное</string>
@@ -49,7 +49,13 @@
 
     <string name="pref_title_baud_rate">Скорость передачи данных</string>
 
+    <string name="pref_title_i2c_connection">Включить соединение по шине I2C</string>
+    <string name="pref_title_i2c_devices">Название I2C устройства в /dev (формат: deviceName|slaveAddress)</string>
     <string name="pref_title_i2c_request_data_delay">Задержка запроса данных (мс)</string>
+
+    <string name="pref_title_serial_connection">Включить коммуникацию через последовательный порт</string>
+    <string name="pref_title_serial_devices">Названия последовательных портов в /dev (разделитель: запятая)</string>
+
 
     <string name="pref_title_crlf">Добавлять CR&#38;LF</string>
     <string name="pref_summ_crlf">Добавлять управляющие символы CR и LF при отправке данных</string>
@@ -152,6 +158,7 @@
     <!--<string name="pref_summary_webserver">Для того чтобы изменения вступили в силу, необходимо перезапустить Сервис SerialManager</string>-->
     <string name="pref_title_webserver_port">Порт</string>
 
+    <string name="pref_title_hotkeys_autodetect">Автоматически проверять наличие устройств каждые 5 секунд</string>
     <string name="pref_title_hotkeys_detect_delay">Задержка распознавания нажатий (мс)</string>
 
 

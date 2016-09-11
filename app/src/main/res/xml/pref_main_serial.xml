@@ -1,0 +1,27 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:key="serial"
+        android:defaultValue="false"
+        android:title="@string/pref_title_serial_connection" />
+
+    <ListPreference
+        android:key="serial_baudrate"
+        android:dependency="serial"
+        android:defaultValue="115200"
+        android:entries="@array/pref_serial_baudrate_values"
+        android:entryValues="@array/pref_serial_baudrate_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_serial_baudrate" />
+
+    <EditTextPreference
+        android:key="serial_devices"
+        android:dependency="serial"
+        android:defaultValue=""
+        android:title="@string/pref_title_serial_devices"
+        android:inputType="text"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
+</PreferenceScreen>

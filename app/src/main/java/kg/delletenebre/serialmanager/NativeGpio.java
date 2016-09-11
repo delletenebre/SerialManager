@@ -18,7 +18,7 @@ public class NativeGpio extends Thread {
     private final static String TAG = "GPIO";
 
     private int pin;
-    private String name;
+    private String identifier;
     private static boolean useInterrupt;
 
     int activeValue = 0;
@@ -34,7 +34,7 @@ public class NativeGpio extends Thread {
         public void run() {
             longPressActive = true;
             Commands.processReceivedData(
-                    String.format(Locale.getDefault(), "<%s:%s>", name, "hold"));
+                    String.format(Locale.getDefault(), "<%s:%s>", identifier, "hold"));
         }
     };
 
@@ -61,7 +61,7 @@ public class NativeGpio extends Thread {
 
     public NativeGpio(int pin) {
         this.pin = pin;
-        this.name = "gpio" + pin;
+        this.identifier = createCommandIdentifier(pin);
 
         SharedPreferences prefs = App.getPrefs();
         useInterrupt = prefs.getBoolean("gpio_use_interrupt", true);
@@ -90,7 +90,7 @@ public class NativeGpio extends Thread {
 
                 if (generateIOEvents) {
                     Commands.processReceivedData(
-                            String.format(Locale.getDefault(), "<%s:%d>", name, currentValue));
+                            String.format(Locale.getDefault(), "<%s:%d>", identifier, currentValue));
                 }
 
                 if (generateButtonEvents) {
@@ -100,7 +100,7 @@ public class NativeGpio extends Thread {
                     } else if (!longPressActive) {
                         holdButtonHandler.removeCallbacks(holdButtonRunnable);
                         Commands.processReceivedData(
-                                String.format(Locale.getDefault(), "<%s:%s>", name, "click"));
+                                String.format(Locale.getDefault(), "<%s:%s>", identifier, "click"));
                     }
                 }
             }
@@ -174,12 +174,13 @@ public class NativeGpio extends Thread {
 
     public static void createFromCommands() {
         for (Command command: Commands.getCommands()) {
-            createByCommandKey(command.getKey());
+            create(command);
         }
     }
 
-    public static void createByCommandKey(final String key) {
-        final int pin = getFromCommandKey(key);
+    public static void create(Command command) {
+        int pin = command.getGpioPinNumber();
+        String key = command.getKey();
 
         if (pin > -1 && !gpios.containsKey(key)) {
             gpios.put(key, new NativeGpio(pin));
@@ -191,24 +192,6 @@ public class NativeGpio extends Thread {
         }
     }
 
-    private static int getFromCommandKey(String key) {
-        Pattern pattern = Pattern.compile("^gpio([0-9]+)$");
-        Matcher matcher = pattern.matcher(key);
-        if (matcher.find()) {
-            if (App.isDebug()) {
-                Log.d(TAG, "GPIO pin parsed: " + matcher.group(1));
-            }
-
-            try {
-                return Integer.parseInt(matcher.group(1));
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return -1;
-    }
-
     public static void destroyAll() {
         if (gpios.size() > 0) {
             for (Map.Entry<String, NativeGpio> entry : gpios.entrySet()) {
@@ -218,18 +201,22 @@ public class NativeGpio extends Thread {
         }
     }
 
-    public static void destroyByCommandKey(String key) {
+    public static void destroyByIdentifier(String identifier) {
         int countSameKey = 0;
 
         for (Command command : Commands.getCommands()) {
-            if (command.getKey().equals(key)) {
+            if (command.getKey().equals(identifier)) {
                 countSameKey++;
             }
         }
 
-        if (gpios.containsKey(key) && countSameKey < 2) {
-            gpios.get(key).interrupt();
-            gpios.remove(key);
+        if (gpios.containsKey(identifier) && countSameKey < 2) {
+            gpios.get(identifier).interrupt();
+            gpios.remove(identifier);
         }
+    }
+
+    public static String createCommandIdentifier(int part1) {
+        return String.format("$gpio|%s", String.valueOf(part1));
     }
 }

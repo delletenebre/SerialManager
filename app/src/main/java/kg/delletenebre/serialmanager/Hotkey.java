@@ -159,6 +159,10 @@ public class Hotkey extends Thread {
         detectKeyboardsHandler.postDelayed(detectKeyboardsRunnable, detectKeyboardDelay);
     }
 
+    public static void stopAutodetectKeyboards() {
+        detectKeyboardsHandler.removeCallbacks(detectKeyboardsRunnable);
+    }
+
     public static void setDetectDelay(int value) {
         detectDelay = value;
     }
@@ -244,11 +248,6 @@ public class Hotkey extends Thread {
             hotkeys.get(identifier).interrupt();
             hotkeys.remove(identifier);
         }
-    }
-
-    public static void destroyByCommand(Command command) {
-        destroyByIdentifier(createCommandIdentifier(
-                command.getKeyboardName(), command.getKeyboardEv()));
     }
 
     public static String createCommandIdentifier(String part1, String part2) {

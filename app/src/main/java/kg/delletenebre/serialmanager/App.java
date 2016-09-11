@@ -138,6 +138,19 @@ public class App extends Application {
         NativeGpio.setGenerateButtonEvents(prefs.getBoolean("gpio_as_button", true));
         Hotkey.setDetectDelay(getIntPreference("hotkeys_detect_delay", 100));
 
+        if (App.getPrefs().getBoolean("i2c", false)) {
+            I2C.create();
+        } else {
+            I2C.destroyAll();
+        }
+
+        if (App.getPrefs().getBoolean("hotkeys_autodetect", false)) {
+            Hotkey.startAutodetectKeyboards();
+        } else {
+            Hotkey.stopAutodetectKeyboards();
+            Hotkey.createFromCommands();
+        }
+
         ConnectionService.startWebserver();
 
         volumeShowUI = prefs.getBoolean("volumeShowUI", true);

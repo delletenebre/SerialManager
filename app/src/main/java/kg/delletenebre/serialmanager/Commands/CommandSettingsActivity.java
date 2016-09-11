@@ -29,6 +29,7 @@ import java.util.Map;
 
 import kg.delletenebre.serialmanager.App;
 import kg.delletenebre.serialmanager.Hotkey;
+import kg.delletenebre.serialmanager.NativeGpio;
 import kg.delletenebre.serialmanager.Preferences.AppChooserPreference;
 import kg.delletenebre.serialmanager.R;
 
@@ -40,7 +41,7 @@ public class CommandSettingsActivity extends AppCompatActivity {
     public static CheckBoxPreference autosetPreference;
     public static ListPreference typePreference;
     public static EditTextPreference keyPreference, valuePreference,
-            keyboardNamePreference, keyboardEvPreference;
+            gpioPinNumberPreference, keyboardNamePreference, keyboardEvPreference;
 
     private static PreferenceScreen preferenceScreen;
 
@@ -136,6 +137,7 @@ public class CommandSettingsActivity extends AppCompatActivity {
         super.onDestroy();
 
         typePreference = null;
+        gpioPinNumberPreference = null;
         keyboardNamePreference = null;
         keyboardEvPreference = null;
         autosetPreference = null;
@@ -159,6 +161,7 @@ public class CommandSettingsActivity extends AppCompatActivity {
 
             preferenceScreen = getPreferenceScreen();
             typePreference = (ListPreference) findPreference("type");
+            gpioPinNumberPreference = (EditTextPreference) findPreference("command_typed_gpio_pin_number");
             keyboardNamePreference = (EditTextPreference) findPreference("command_typed_keyboard_name");
             keyboardEvPreference = (EditTextPreference) findPreference("command_typed_keyboard_ev");
             autosetPreference = (CheckBoxPreference) findPreference("autoset");
@@ -357,6 +360,7 @@ public class CommandSettingsActivity extends AppCompatActivity {
                             gpioPinNumber = Integer.parseInt(((EditTextPreference) typedPreferencesList.get(0)).getText());
                         } catch (Exception e) {}
                         command.setGpioPinNumber(gpioPinNumber);
+                        command.setKey(NativeGpio.createCommandIdentifier(gpioPinNumber));
                         break;
 
                     case "keyboard":

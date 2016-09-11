@@ -89,6 +89,7 @@ public class Commands {
                 if (CommandSettingsActivity.autosetPreference != null
                         && CommandSettingsActivity.autosetPreference.isChecked()
                         && CommandSettingsActivity.typePreference != null
+                        && CommandSettingsActivity.gpioPinNumberPreference != null
                         && CommandSettingsActivity.keyboardNamePreference != null
                         && CommandSettingsActivity.keyboardEvPreference != null
                         && CommandSettingsActivity.keyPreference != null
@@ -96,18 +97,30 @@ public class Commands {
 
                     activity.runOnUiThread(new Runnable() {
                         public void run() {
+                            CommandSettingsActivity.valuePreference.setText(val);
+                            CommandSettingsActivity.valuePreference.setSummary(val);
+
+                            Pattern pattern;
+                            Matcher matcher;
+
                             switch (CommandSettingsActivity.typePreference.getValue()) {
                                 case "default":
                                     CommandSettingsActivity.keyPreference.setText(key);
                                     CommandSettingsActivity.keyPreference.setSummary(key);
+                                    break;
 
-                                    CommandSettingsActivity.valuePreference.setText(val);
-                                    CommandSettingsActivity.valuePreference.setSummary(val);
+                                case "gpio":
+                                    pattern = Pattern.compile("^\\$gpio\\|(.+?)$");
+                                    matcher = pattern.matcher(key);
+                                    if (matcher.find()) {
+                                        CommandSettingsActivity.gpioPinNumberPreference.setText(matcher.group(1));
+                                        CommandSettingsActivity.gpioPinNumberPreference.setSummary(matcher.group(1));
+                                    }
                                     break;
 
                                 case "keyboard":
-                                    Pattern pattern = Pattern.compile("^\\$keyboard\\|(.+?)\\|(.+?)$");
-                                    Matcher matcher = pattern.matcher(key);
+                                    pattern = Pattern.compile("^\\$keyboard\\|(.+?)\\|(.+?)$");
+                                    matcher = pattern.matcher(key);
                                     if (matcher.find()) {
                                         CommandSettingsActivity.keyboardNamePreference.setText(matcher.group(1));
                                         CommandSettingsActivity.keyboardNamePreference.setSummary(matcher.group(1));
@@ -115,9 +128,6 @@ public class Commands {
                                         CommandSettingsActivity.keyboardEvPreference.setText(matcher.group(2));
                                         CommandSettingsActivity.keyboardEvPreference.setSummary(matcher.group(2));
                                     }
-
-                                    CommandSettingsActivity.valuePreference.setText(val);
-                                    CommandSettingsActivity.valuePreference.setSummary(val);
                                     break;
 
                             }

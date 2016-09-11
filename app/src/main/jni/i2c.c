@@ -84,7 +84,7 @@ Java_kg_delletenebre_serialmanager_I2C_i2cRead(JNIEnv * env, jobject instance, j
 
     //memset(bufByte, '\0', (size_t)length);
     if ((int)read(fd, bufByte, (size_t)length) != length) {
-        LOGE("I2C: read fail @ line %d", __LINE__);
+        //LOGE("I2C: read fail @ line %d", __LINE__);
         goto err1;
     } else if (bufByte[0] == 0 && bufByte[1] == 255) {
         //LOGD("I2C: read bad @ line %d", __LINE__);

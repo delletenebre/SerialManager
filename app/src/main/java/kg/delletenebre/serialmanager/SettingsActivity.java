@@ -65,6 +65,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         return     PreferenceFragment.class.getName().equals(fragmentName)
                 || BluetoothPreferenceFragment.class.getName().equals(fragmentName)
                 || UsbPreferenceFragment.class.getName().equals(fragmentName)
+                || SerialPreferenceFragment.class.getName().equals(fragmentName)
                 || I2CPreferenceFragment.class.getName().equals(fragmentName)
                 || WebServerPreferenceFragment.class.getName().equals(fragmentName)
                 || GpioPreferenceFragment.class.getName().equals(fragmentName)
@@ -167,6 +168,19 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         }
     }
 
+    public static class SerialPreferenceFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_main_serial);
+            setHasOptionsMenu(true);
+
+            bindPreferenceSummaryToValue(findPreference("serial_baudrate"));
+            bindPreferenceSummaryToValue(findPreference("serial_devices"));
+        }
+    }
+
+
     public static class I2CPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -174,6 +188,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_main_i2c);
             setHasOptionsMenu(true);
 
+            bindPreferenceSummaryToValue(findPreference("i2c_devices"));
             bindPreferenceSummaryToValue(findPreference("i2c_request_data_delay"));
         }
     }

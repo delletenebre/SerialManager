@@ -86,14 +86,11 @@ public class CommandsListAdapter extends RecyclerView.Adapter<CommandsListAdapte
             if (database.update(command) > 0) {
                 Command oldCommand = Commands.getCommands().get(position);
                 if (!oldCommand.getKey().equals(command.getKey())) {
-                    NativeGpio.destroyByCommandKey(oldCommand.getKey());
-                    NativeGpio.createByCommandKey(command.getKey());
+                    NativeGpio.destroyByIdentifier(oldCommand.getKey());
+                    NativeGpio.create(command);
 
                     Hotkey.destroyByIdentifier(oldCommand.getKey());
                     Hotkey.create(command);
-
-                    I2C.destroyByCommandKey(oldCommand.getKey());
-                    I2C.createByCommandKey(command.getKey());
                 }
 
                 Commands.getCommands().set(position, command);
@@ -108,9 +105,8 @@ public class CommandsListAdapter extends RecyclerView.Adapter<CommandsListAdapte
         if (position > -1) {
             Command command = Commands.getCommands().get(position);
 
-            NativeGpio.destroyByCommandKey(command.getKey());
-            Hotkey.destroyByCommand(command);
-            I2C.destroyByCommandKey(command.getKey());
+            NativeGpio.destroyByIdentifier(command.getKey());
+            Hotkey.destroyByIdentifier(command.getKey());
 
             Commands.getCommands().remove(position);
 

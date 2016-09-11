@@ -35,10 +35,11 @@
 
     <string name="pref_main_header_bluetooth" translatable="false">Bluetooth</string>
     <string name="pref_main_header_usb" translatable="false">USB</string>
-    <string name="pref_main_header_i2c" translatable="false">I2C</string>
+    <string name="pref_main_header_serial" translatable="false">Serial (/dev/tty*)</string>
+    <string name="pref_main_header_i2c" translatable="false">I2C (/dev/i2c*)</string>
     <string name="pref_main_header_webserver" translatable="false">WebSocket</string>
     <string name="pref_main_header_gpio" translatable="false">GPIO</string>
-    <string name="pref_main_header_hotkeys">Keyboard shortcuts</string>
+    <string name="pref_main_header_hotkeys">Keyboard (/dev/input/event*)</string>
     <string name="pref_main_header_sending_commands">Sending commands</string>
     <string name="pref_main_header_extra">Extra</string>
     <string name="pref_main_header_other">Other</string>
@@ -109,7 +110,46 @@
 
     <string name="pref_title_baud_rate">Baud Rate</string>
 
+    <string name="pref_title_i2c_connection">Enable communication by I2C</string>
+    <string name="pref_title_i2c_devices">I2C device name in /dev (format: deviceName|slaveAddress)</string>
     <string name="pref_title_i2c_request_data_delay">Request data delay (ms)</string>
+
+    <string name="pref_title_serial_connection">Enable communication by Serial</string>
+    <string name="pref_title_serial_baudrate">Baudrate</string>
+    <string-array name="pref_serial_baudrate_values" translatable="false">
+        <item>0</item>
+        <item>50</item>
+        <item>75</item>
+        <item>110</item>
+        <item>134</item>
+        <item>150</item>
+        <item>200</item>
+        <item>300</item>
+        <item>600</item>
+        <item>1200</item>
+        <item>1800</item>
+        <item>2400</item>
+        <item>4800</item>
+        <item>9600</item>
+        <item>19200</item>
+        <item>38400</item>
+        <item>57600</item>
+        <item>115200</item>
+        <item>230400</item>
+        <item>460800</item>
+        <item>500000</item>
+        <item>576000</item>
+        <item>921600</item>
+        <item>1000000</item>
+        <item>1152000</item>
+        <item>1500000</item>
+        <item>2000000</item>
+        <item>2500000</item>
+        <item>3000000</item>
+        <item>3500000</item>
+        <item>4000000</item>
+    </string-array>
+    <string name="pref_title_serial_devices">Serial devices names in /dev (separated by commas)</string>
 
     <string name="pref_title_crlf">Add CR&#38;LF</string>
     <string name="pref_summ_crlf">Add Carriage Return and Line Feed symbols to end of sending data</string>
@@ -178,7 +218,7 @@
     <string name="pref_title_command_typed_gpio_pin_number">GPIO pin number</string>
     <string name="pref_title_command_typed_keyboard_name">Parameter NAME</string>
     <string name="pref_title_command_typed_keyboard_ev">Parameter EV</string>
-    <string name="pref_title_command_typed_i2c_device">I2C device name in /dev</string>
+
     <string name="pref_title_command_typed_serial_device">Serial device name in /dev</string>
 
     <string name="pref_title_autoset">Autoset key/value</string>
@@ -338,6 +378,7 @@
 
     <string name="pref_title_command_action_gpio" translatable="false">@string/gpio</string>
 
+    <string name="pref_title_hotkeys_autodetect">Autodetect devices every 5 seconds</string>
     <string name="pref_title_hotkeys_detect_delay">Detect keypress delay (ms)</string>
 
 

@@ -1,9 +1,26 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:key="i2c"
+        android:defaultValue="false"
+        android:title="@string/pref_title_i2c_connection" />
+
+    <EditTextPreference
+        android:key="i2c_devices"
+        android:dependency="i2c"
+        android:defaultValue=""
+        android:title="@string/pref_title_i2c_devices"
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:singleLine="true" />
+
     <EditTextPreference
         android:key="i2c_request_data_delay"
+        android:dependency="i2c"
         android:defaultValue="100"
         android:title="@string/pref_title_i2c_request_data_delay"
         android:inputType="number"
         android:selectAllOnFocus="true"
         android:singleLine="true" />
+
 </PreferenceScreen>

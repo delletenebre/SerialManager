@@ -59,11 +59,26 @@ public class ConnectionService extends Service implements SensorEventListener {
     // *** USB **** //
     private static JSONArray jsonDevices;
     private UsbManager usbManager;
-    private static Map<String, UsbSerialDevice> openedSerialPorts;
+    private static Map<String, UsbSerialDevice> openedUsbPorts;
     protected static boolean usbRestartState = false;
+    private UsbSerialInterface.UsbReadCallback usbReceiveCallback = new UsbSerialInterface.UsbReadCallback() {
+        @Override
+        public void onReceivedData(byte[] arg0) {
+            onDataReceive("usb", arg0);
+        }
+    };
 
     // **** BLUETOOTH **** //
     private static BluetoothSPP bt;
+
+    // *** Serial **** //
+    private static Map<String, NativeSerial> openedSerialPorts = new HashMap<>();
+    private NativeSerial.ReadCallback serialReceiveCallback = new NativeSerial.ReadCallback() {
+        @Override
+        public void onReceivedData(String message) {
+            onDataReceive("serial", message.getBytes());
+        }
+    };
 
     // **** WEBSERVER **** //
     private static AsyncHttpServer webServer = new AsyncHttpServer();
@@ -132,8 +147,8 @@ public class ConnectionService extends Service implements SensorEventListener {
         receivedDataBuffer.put("bluetooth", "");
 
 
-        if (openedSerialPorts == null) {
-            openedSerialPorts = new HashMap<>();
+        if (openedUsbPorts == null) {
+            openedUsbPorts = new HashMap<>();
         }
 
         if (App.getPrefs().getBoolean("send_brightness_settings", false)) {
@@ -154,9 +169,21 @@ public class ConnectionService extends Service implements SensorEventListener {
 
         sendInfoScreenState(null);
 
+        if (App.getPrefs().getBoolean("serial", false)) {
+            openSerialPorts();
+        }
+
         NativeGpio.createFromCommands();
-        Hotkey.startAutodetectKeyboards();
-        I2C.createFromCommands();
+        if (App.getPrefs().getBoolean("hotkeys_autodetect", false)) {
+            Hotkey.startAutodetectKeyboards();
+        } else {
+            Hotkey.stopAutodetectKeyboards();
+            Hotkey.createFromCommands();
+        }
+
+        if (App.getPrefs().getBoolean("i2c", false)) {
+            I2C.create();
+        }
 
         startWebserver();
 
@@ -171,6 +198,8 @@ public class ConnectionService extends Service implements SensorEventListener {
 
         closeUsbConnections();
         onBluetoothDisabled();
+
+        closeSerialPorts();
 
         if (settingsContentObserver != null) {
             getApplicationContext().getContentResolver()
@@ -245,14 +274,13 @@ public class ConnectionService extends Service implements SensorEventListener {
 
     private static void onDataReceive(String type, byte[] bytes) {
         if (bytes.length > 0) {
-            String data = new String(bytes, 0, bytes.length);
+            String data = new String(bytes);
             if (App.isDebug()) {
                 Log.d("Receive [ " + type + " ]", data);
             }
 
             receivedDataBuffer.put(type, receivedDataBuffer.get(type) + data);
-            if (data.contains(App.LINE_SEPARATOR)
-                    || !App.getPrefs().getBoolean(type + "DetectCommandByNewLine", false)) {
+            if (!"usb".equals(type) || data.contains(App.LINE_SEPARATOR)) {
                 Commands.processReceivedData(receivedDataBuffer.get(type));
                 receivedDataBuffer.put(type, "");
             }
@@ -286,8 +314,8 @@ public class ConnectionService extends Service implements SensorEventListener {
 
 
         int numberUsb = 0;
-        if (openedSerialPorts != null) {
-            numberUsb = openedSerialPorts.size();
+        if (openedUsbPorts != null) {
+            numberUsb = openedUsbPorts.size();
         }
         String usbText = String.format(
                 resources.getString(
@@ -396,7 +424,7 @@ public class ConnectionService extends Service implements SensorEventListener {
 
                 serialPort.read(usbReceiveCallback);
 
-                openedSerialPorts.put(device.getDeviceName(), serialPort);
+                openedUsbPorts.put(device.getDeviceName(), serialPort);
                 updateNotificationText();
 
                 sendInfoScreenState(null);
@@ -434,13 +462,6 @@ public class ConnectionService extends Service implements SensorEventListener {
         }
     }
 
-    private UsbSerialInterface.UsbReadCallback usbReceiveCallback = new UsbSerialInterface.UsbReadCallback() {
-        @Override
-        public void onReceivedData(byte[] arg0) {
-            onDataReceive("usb", arg0);
-        }
-    };
-
 
     private void findAttachedUsbDevice() {
         boolean connectionEnabled = App.getPrefs().getBoolean("usb", false);
@@ -470,7 +491,7 @@ public class ConnectionService extends Service implements SensorEventListener {
             if (vidCheck && pidCheck
                     && usbManager.hasPermission(usbDevice)
                     && connectionEnabled
-                    && !openedSerialPorts.containsKey(usbDevice.getDeviceName())
+                    && !openedUsbPorts.containsKey(usbDevice.getDeviceName())
                     && (usbDeviceToConnect.isEmpty()
                     || usbDeviceToConnect.equals(usbDevice.getDeviceName()))) {
 
@@ -480,17 +501,17 @@ public class ConnectionService extends Service implements SensorEventListener {
     }
 
     public static void detachDevice(UsbDevice detachedDevice) {
-        if (openedSerialPorts != null) {
+        if (openedUsbPorts != null) {
             String detachedDeviceName = detachedDevice.getDeviceName();
 
-            if (openedSerialPorts.containsKey(detachedDeviceName)) {
+            if (openedUsbPorts.containsKey(detachedDeviceName)) {
                 try {
-                    openedSerialPorts.get(detachedDeviceName).close();
+                    openedUsbPorts.get(detachedDeviceName).close();
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
 
-                openedSerialPorts.remove(detachedDeviceName);
+                openedUsbPorts.remove(detachedDeviceName);
 
                 updateNotificationText();
             }
@@ -501,7 +522,7 @@ public class ConnectionService extends Service implements SensorEventListener {
     public static String usbSend(String data, boolean showToast) {
         final String mode = "usb";
 
-        if (openedSerialPorts != null && openedSerialPorts.size() > 0) {
+        if (openedUsbPorts != null && openedUsbPorts.size() > 0) {
             if (App.isDebug()) {
                 Log.d(TAG, "Data to send [ " + mode + " ]: " + data);
             }
@@ -510,7 +531,7 @@ public class ConnectionService extends Service implements SensorEventListener {
                 data += "\r\n";
             }
 
-            for (Map.Entry<String, UsbSerialDevice> entry : openedSerialPorts.entrySet()) {
+            for (Map.Entry<String, UsbSerialDevice> entry : openedUsbPorts.entrySet()) {
                 UsbSerialDevice serialPort = entry.getValue();
 
                 serialPort.write(data.getBytes());
@@ -732,8 +753,8 @@ public class ConnectionService extends Service implements SensorEventListener {
 
 
     public static void closeUsbConnections() {
-        if (openedSerialPorts != null) {
-            for (Map.Entry<String, UsbSerialDevice> entry : openedSerialPorts.entrySet()) {
+        if (openedUsbPorts != null) {
+            for (Map.Entry<String, UsbSerialDevice> entry : openedUsbPorts.entrySet()) {
                 UsbSerialDevice serialPort = entry.getValue();
 
                 try {
@@ -743,7 +764,7 @@ public class ConnectionService extends Service implements SensorEventListener {
                     ex.printStackTrace();
                 }
             }
-            openedSerialPorts = null;
+            openedUsbPorts = null;
         }
     }
 
@@ -751,9 +772,6 @@ public class ConnectionService extends Service implements SensorEventListener {
     public static void onBluetoothDisabled() {
         if (bt != null) {
             bt.stopAutoConnect();
-//            if (bt.getServiceState() == BluetoothState.STATE_CONNECTED) {
-//                bt.disconnect();
-//            }
             bt.stopService();
 
             bt = null;
@@ -837,4 +855,41 @@ public class ConnectionService extends Service implements SensorEventListener {
                     App.getContext().getString(R.string.send_data_screen_state), state));
         }
     }
+
+
+
+
+
+
+
+
+
+
+    // *** Serial **** //
+    public void openSerialPorts() {
+        int baudrate = App.getIntPreference("serial_baudrate", 115200);
+        String[] devices = App.getPrefs().getString("serial_devices", "").replace(" ", "").split(",");
+
+        for (String device: devices) {
+            if (!device.isEmpty() && !openedSerialPorts.containsKey(device)) {
+                try {
+                    NativeSerial serialPort = new NativeSerial("/dev/" + device, baudrate, 0);
+                    serialPort.read(serialReceiveCallback);
+                    //serialPort.write("<nativeserial:asdasd>\r\n".getBytes());
+
+                    openedSerialPorts.put(device, serialPort);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void closeSerialPorts() {
+        for (Map.Entry<String, NativeSerial> entry : openedSerialPorts.entrySet()) {
+            entry.getValue().destroy();
+            openedSerialPorts.remove(entry.getKey());
+        }
+    }
+
 }

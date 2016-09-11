@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -27,15 +28,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.felhr.usbserial.UsbSerialInterface;
 import com.koushikdutta.async.util.Charsets;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.security.InvalidParameterException;
 import java.util.List;
 
 import kg.delletenebre.serialmanager.Commands.Command;
@@ -49,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     public CommandsListAdapter commandsListAdapter;
+
+    private NativeSerial serialPort;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,9 +192,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-
-        String data = "<testefa:asdasd>";
-        int[] dataIntegers = convertToIntArray(data.getBytes(Charsets.UTF_8));
+//        int[] dataIntegers = convertToIntArray("<i2c:asdasd>".getBytes(Charsets.UTF_8));
 
 //        i2cWrite(fd, 0, dataIntegers, dataIntegers.length);
 //

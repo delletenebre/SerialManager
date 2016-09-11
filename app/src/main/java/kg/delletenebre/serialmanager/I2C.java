@@ -3,13 +3,13 @@ package kg.delletenebre.serialmanager;
 
 import android.util.Log;
 
-import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import kg.delletenebre.serialmanager.Commands.Command;
 import kg.delletenebre.serialmanager.Commands.Commands;
 
 public class I2C extends Thread {
@@ -18,7 +18,7 @@ public class I2C extends Thread {
     private static Map<String, I2C> i2cMap = new HashMap<>();
     private static int detectDelay = 100;
 
-    private String commandKey;
+    private String identifier;
     private String device;
     private int slaveAddress;
 
@@ -30,10 +30,10 @@ public class I2C extends Thread {
     private native int i2cWrite(int fd, int mode, int dataArray[], int length);
     private native void i2cClose(int fd);
 
-    public I2C (String device, int slaveAddress, String commandKey) {
+    public I2C (String device, int slaveAddress, String identifier) {
         this.device = device;
         this.slaveAddress = slaveAddress;
-        this.commandKey = commandKey;
+        this.identifier = identifier;
 
         detectDelay = App.getIntPreference("i2c_request_data_delay", 100);
     }
@@ -60,8 +60,6 @@ public class I2C extends Thread {
                                 Commands.processReceivedData(matcher.group(i));
                             }
                         }
-
-
                     }
                 }
 
@@ -72,7 +70,7 @@ public class I2C extends Thread {
         }
 
         i2cClose(fd);
-        destroyByCommandKey(commandKey);
+        destroyByIdentifier(identifier);
 
         if (App.isDebug()) {
             Log.d(TAG, "/dev/" + device + " thread is interrupted");
@@ -83,37 +81,34 @@ public class I2C extends Thread {
         detectDelay = value;
     }
 
-    public static void createFromCommands() {
+    public static void create() {
         setDetectDelay(App.getIntPreference("i2c_read_request_delay", 100));
 
-        for (Command command: Commands.getCommands()) {
-            createByCommandKey(command.getKey());
-        }
-    }
-
-    public static void createByCommandKey(final String key) {
-        Pattern pattern = Pattern.compile("^(i2c-\\d+)\\|(\\d+)$");
-        Matcher matcher = pattern.matcher(key);
-        if (matcher.find()) {
-            if (App.isDebug()) {
-                Log.d(TAG, "I2C listener parsed: device = /dev/" + matcher.group(1)
-                        + " | slave address = " + matcher.group(2));
-            }
-
-            String device = matcher.group(1);
-            int slaveAddress = -1;
-            try {
-                slaveAddress = Integer.parseInt(matcher.group(2));
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
-
-            if (!device.isEmpty() && slaveAddress > -1 && !i2cMap.containsKey(key)) {
-                i2cMap.put(key, new I2C(device, slaveAddress, key));
-                i2cMap.get(key).start();
-
+        List<String> i2cPrefNames = Arrays.asList(App.getPrefs().getString("i2c_devices", "").split(","));
+        for (String i2cPrefName: i2cPrefNames) {
+            Pattern pattern = Pattern.compile("^(.+?)\\|(\\d+)$");
+            Matcher matcher = pattern.matcher(i2cPrefName);
+            if (matcher.find()) {
                 if (App.isDebug()) {
-                    Log.d(TAG, "I2C listener created: /dev/" + device);
+                    Log.d(TAG, "I2C listener parsed: device = /dev/" + matcher.group(1)
+                            + " | slave address = " + matcher.group(2));
+                }
+
+                String device = matcher.group(1);
+                int slaveAddress = -1;
+                try {
+                    slaveAddress = Integer.parseInt(matcher.group(2));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+
+                if (!device.isEmpty() && slaveAddress > -1 && !i2cMap.containsKey(i2cPrefName)) {
+                    i2cMap.put(i2cPrefName, new I2C(device, slaveAddress, i2cPrefName));
+                    i2cMap.get(i2cPrefName).start();
+
+                    if (App.isDebug()) {
+                        Log.d(TAG, "I2C listener created: /dev/" + device);
+                    }
                 }
             }
         }
@@ -128,20 +123,10 @@ public class I2C extends Thread {
         }
     }
 
-    public static void destroyByCommandKey(String key) {
-        int countSameKey = 0;
-
-
-        for (Command command : Commands.getCommands()) {
-            if (command.getKey().equals(key)) {
-                countSameKey++;
-            }
-        }
-
-
-        if (i2cMap.containsKey(key) && countSameKey < 2) {
-            i2cMap.get(key).interrupt();
-            i2cMap.remove(key);
+    public static void destroyByIdentifier(String identifier) {
+        if (i2cMap.containsKey(identifier)) {
+            i2cMap.get(identifier).interrupt();
+            i2cMap.remove(identifier);
         }
     }
 }
