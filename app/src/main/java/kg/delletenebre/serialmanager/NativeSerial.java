@@ -125,12 +125,12 @@ public class NativeSerial {
 
     // *** STATIC Serial **** //
     private static Map<String, NativeSerial> openedSerialPorts = new HashMap<>();
-    private static ReadCallback receiveCallback = new ReadCallback() {
-        @Override
-        public void onReceivedData(String message) {
-            ConnectionService.onDataReceive("serial", message.getBytes());
-        }
-    };
+//    private static ReadCallback receiveCallback = new ReadCallback() {
+//        @Override
+//        public void onReceivedData(String message) {
+//            ConnectionService.onDataReceive("serial", message.getBytes());
+//        }
+//    };
 
     public static void openPorts() {
         int baudrate = App.getIntPreference("serial_baudrate", 115200);
@@ -140,8 +140,12 @@ public class NativeSerial {
             if (!device.isEmpty() && !openedSerialPorts.containsKey(device)) {
                 try {
                     NativeSerial serialPort = new NativeSerial("/dev/" + device, baudrate);
-                    serialPort.read(receiveCallback);
-                    //serialPort.write("<nativeserial:asdasd>\r\n".getBytes());
+                    serialPort.read(new ReadCallback() {
+                        @Override
+                        public void onReceivedData(String message) {
+                            ConnectionService.onDataReceive("serial", message.getBytes());
+                        }
+                    });
 
                     openedSerialPorts.put(device, serialPort);
                 } catch (Exception e) {

@@ -219,8 +219,6 @@
     <string name="pref_title_command_typed_keyboard_name">Parameter NAME</string>
     <string name="pref_title_command_typed_keyboard_ev">Parameter EV</string>
 
-    <string name="pref_title_command_typed_serial_device">Serial device name in /dev</string>
-
     <string name="pref_title_autoset">Autoset key/value</string>
 
     <string name="pref_title_scatter">Value deviation (±)</string>

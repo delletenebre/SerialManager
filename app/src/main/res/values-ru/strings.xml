@@ -50,6 +50,7 @@
     <string name="pref_title_baud_rate">Скорость передачи данных</string>
 
     <string name="pref_title_i2c_connection">Включить соединение по шине I2C</string>
+    <string name="pref_title_serial_baudrate">Скорость передачи данных</string>
     <string name="pref_title_i2c_devices">Название I2C устройства в /dev (формат: deviceName|slaveAddress)</string>
     <string name="pref_title_i2c_request_data_delay">Задержка запроса данных (мс)</string>
 
@@ -101,8 +102,6 @@
     <string name="pref_title_command_typed_gpio_pin_number">Номер GPIO</string>
     <string name="pref_title_command_typed_keyboard_name">Параметр NAME</string>
     <string name="pref_title_command_typed_keyboard_ev">Параметр EV</string>
-    <string name="pref_title_command_typed_i2c_device">Название I2C в /dev</string>
-    <string name="pref_title_command_typed_serial_device">Название последовательного порта в /dev</string>
 
     <string name="pref_title_autoset">Определить ключ/значение автоматически</string>
 

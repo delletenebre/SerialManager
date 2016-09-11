@@ -14,13 +14,13 @@
         android:selectAllOnFocus="true"
         android:singleLine="true" />
 
-    <EditTextPreference
+    <!--<EditTextPreference
         android:key="i2c_request_data_delay"
         android:dependency="i2c"
         android:defaultValue="100"
         android:title="@string/pref_title_i2c_request_data_delay"
         android:inputType="number"
         android:selectAllOnFocus="true"
-        android:singleLine="true" />
+        android:singleLine="true" />-->
 
 </PreferenceScreen>

@@ -98,13 +98,6 @@ public class I2C {
 
     // *** STATIC I2C **** //
     private static Map<String, I2C> openedDevices = new HashMap<>();
-    private static ReadCallback receiveCallback = new ReadCallback() {
-        @Override
-        public void onReceivedData(String message) {
-            ConnectionService.onDataReceive("i2c", message.getBytes());
-        }
-    };
-
 
     public static void openDevices() {
         String[] devices = App.getPrefs().getString("i2c_devices", "").replace(" ", "").split(",");
