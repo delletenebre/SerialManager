@@ -139,7 +139,7 @@ public class App extends Application {
         Hotkey.setDetectDelay(getIntPreference("hotkeys_detect_delay", 100));
 
         if (App.getPrefs().getBoolean("i2c", false)) {
-            I2C.create();
+            I2C.openDevices();
         } else {
             I2C.destroyAll();
         }

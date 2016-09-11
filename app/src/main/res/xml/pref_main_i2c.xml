@@ -10,7 +10,7 @@
         android:dependency="i2c"
         android:defaultValue=""
         android:title="@string/pref_title_i2c_devices"
-        android:inputType="number"
+        android:inputType="text"
         android:selectAllOnFocus="true"
         android:singleLine="true" />
 

@@ -33,41 +33,48 @@
 //***************************************************************************
 // Open I2C device
 //***************************************************************************
-JNIEXPORT jint JNICALL
-Java_kg_delletenebre_serialmanager_I2C_i2cOpen(JNIEnv *env, jobject instance,
-                                                        jstring _device, jint slaveAddress) {
-    const char *device = (*env)->GetStringUTFChars(env, _device, (jboolean *)0);
-    char command[PATH_MAX];
-    char i2cDevice[PATH_MAX];
-    snprintf(i2cDevice, sizeof(i2cDevice), "/dev/%s", device);
-    (*env)->ReleaseStringUTFChars(env, _device, device);
-
+JNIEXPORT jint JNICALL Java_kg_delletenebre_serialmanager_I2C_open
+        (JNIEnv *env, jclass type, jstring path, jint slaveAddress) {
     int fd;
+    char command[PATH_MAX];
 
-    snprintf(command, sizeof(command), "su -c \"chmod -R 646 %s\"", i2cDevice);
-    system(command);
+    /* Opening device */
+    {
+        const char* _path = (*env)->GetStringUTFChars(env, path, (jboolean *)0);
 
-    fd = open(i2cDevice, O_RDWR);
-    if (fd < 0) {
-        LOGE("Failed to open /dev/i2c! @ line %d", __LINE__);
-        return -1;
-    }
+        snprintf(command, sizeof(command), "su -c \"chmod -R 646 %s\"", _path);
+        system(command);
 
-    if (ioctl(fd, 0x0703, slaveAddress) < 0) {
-        LOGE("Can't open slave device by address %d @ line %d", slaveAddress, __LINE__);
-        return -2;
+        fd = open(_path, O_RDWR);
+        (*env)->ReleaseStringUTFChars(env, path, _path);
+        if (fd == -1) {
+            LOGE("Cannot open i2c device %s @ line %d", _path, __LINE__);
+            return -1;
+        }
+
+        if (ioctl(fd, 0x0703, slaveAddress) < 0) {
+            close(fd);
+            LOGE("Can't open slave device by address %d @ line %d", slaveAddress, __LINE__);
+            return -2;
+        }
     }
 
     return fd;
 }
 
 
+JNIEXPORT void JNICALL Java_kg_delletenebre_serialmanager_I2C_close
+        (JNIEnv *env, jobject instance, jint fd) {
+    close(fd);
+}
+
+
+
 //***************************************************************************
 // Read data from the I2C device
 //***************************************************************************
-JNIEXPORT jbyteArray JNICALL
-Java_kg_delletenebre_serialmanager_I2C_i2cRead(JNIEnv * env, jobject instance, jint fd,
-                                                        jbyteArray buffer, jint length) {
+JNIEXPORT jbyteArray JNICALL Java_kg_delletenebre_serialmanager_I2C_read
+        (JNIEnv * env, jobject instance, jint fd, jbyteArray buffer, jint length) {
 
     char* bufByte;
 
@@ -103,13 +110,11 @@ Java_kg_delletenebre_serialmanager_I2C_i2cRead(JNIEnv * env, jobject instance, j
 //***************************************************************************
 // Write data to the I2C device
 //***************************************************************************
-JNIEXPORT jint JNICALL
-Java_kg_delletenebre_serialmanager_I2C_i2cWrite(JNIEnv *env, jobject instance, jint fd,
-                                                         jint mode, jintArray dataArray,
-                                                         jint length) {
+JNIEXPORT jint JNICALL Java_kg_delletenebre_serialmanager_I2C_write
+        (JNIEnv *env, jobject instance, jint fd, jint mode, jintArray dataArray, jint length) {
     jint *bufInt;
     char *bufByte;
-    int i = 0, j = 0;
+    int i = 0;
 
     if (length <= 0) {
         LOGE("I2C: buffer length <= 0 @ line %d", __LINE__);
@@ -152,12 +157,4 @@ Java_kg_delletenebre_serialmanager_I2C_i2cWrite(JNIEnv *env, jobject instance, j
     free(bufInt);
     err0:
     return -1;
-}
-
-//***************************************************************************
-// Close the I2C device
-//***************************************************************************
-JNIEXPORT void JNICALL
-Java_kg_delletenebre_serialmanager_I2C_i2cClose(JNIEnv *env, jobject instance, jint fd) {
-    close(fd);
 }

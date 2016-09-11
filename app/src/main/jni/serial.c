@@ -50,7 +50,7 @@ static speed_t getBaudrate(jint baudrate)
 }
 
 JNIEXPORT jobject JNICALL Java_kg_delletenebre_serialmanager_NativeSerial_open
-        (JNIEnv *env, jclass type, jstring path, jint baudrate, jint flags) {
+        (JNIEnv *env, jclass type, jstring path, jint baudrate) {
     int fd;
     speed_t speed;
     jobject fileDescriptor;
@@ -67,18 +67,15 @@ JNIEXPORT jobject JNICALL Java_kg_delletenebre_serialmanager_NativeSerial_open
 
     /* Opening device */
     {
-        jboolean iscopy;
-        const char* _path = (*env)->GetStringUTFChars(env, path, &iscopy);
+        const char* _path = (*env)->GetStringUTFChars(env, path, (jboolean *)0);
 
         snprintf(command, sizeof(command), "su -c \"chmod -R 646 %s\"", _path);
         system(command);
 
-        LOGD("Opening serial port %s with flags 0x%x @ line %d", _path, O_RDWR | flags,  __LINE__);
-        fd = open(_path, O_RDWR | flags);
-        LOGD("open() fd = %d @ line %d", fd, __LINE__);
+        fd = open(_path, O_RDWR);
         (*env)->ReleaseStringUTFChars(env, path, _path);
         if (fd == -1) {
-            LOGE("Cannot open port @ line %d", __LINE__);
+            LOGE("Cannot open serial port %s @ line %d", _path, __LINE__);
             return NULL;
         }
     }

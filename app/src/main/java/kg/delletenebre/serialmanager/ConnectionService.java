@@ -71,15 +71,6 @@ public class ConnectionService extends Service implements SensorEventListener {
     // **** BLUETOOTH **** //
     private static BluetoothSPP bt;
 
-    // *** Serial **** //
-    private static Map<String, NativeSerial> openedSerialPorts = new HashMap<>();
-    private NativeSerial.ReadCallback serialReceiveCallback = new NativeSerial.ReadCallback() {
-        @Override
-        public void onReceivedData(String message) {
-            onDataReceive("serial", message.getBytes());
-        }
-    };
-
     // **** WEBSERVER **** //
     private static AsyncHttpServer webServer = new AsyncHttpServer();
     private static List<WebSocket> webSockets = new ArrayList<>();
@@ -170,7 +161,7 @@ public class ConnectionService extends Service implements SensorEventListener {
         sendInfoScreenState(null);
 
         if (App.getPrefs().getBoolean("serial", false)) {
-            openSerialPorts();
+            NativeSerial.openPorts();
         }
 
         NativeGpio.createFromCommands();
@@ -182,7 +173,7 @@ public class ConnectionService extends Service implements SensorEventListener {
         }
 
         if (App.getPrefs().getBoolean("i2c", false)) {
-            I2C.create();
+            I2C.openDevices();
         }
 
         startWebserver();
@@ -199,7 +190,8 @@ public class ConnectionService extends Service implements SensorEventListener {
         closeUsbConnections();
         onBluetoothDisabled();
 
-        closeSerialPorts();
+        NativeSerial.destroyAll();
+        I2C.destroyAll();
 
         if (settingsContentObserver != null) {
             getApplicationContext().getContentResolver()
@@ -218,7 +210,7 @@ public class ConnectionService extends Service implements SensorEventListener {
 
         NativeGpio.destroyAll();
         Hotkey.destroyAll();
-        I2C.destroyAll();
+
 
         stopWebserver();
 
@@ -272,7 +264,7 @@ public class ConnectionService extends Service implements SensorEventListener {
         }
     }
 
-    private static void onDataReceive(String type, byte[] bytes) {
+    public static void onDataReceive(String type, byte[] bytes) {
         if (bytes.length > 0) {
             String data = new String(bytes);
             if (App.isDebug()) {
@@ -519,6 +511,29 @@ public class ConnectionService extends Service implements SensorEventListener {
     }
 
 
+    public static String bluetoothSend(String data, boolean showToast) {
+        final String mode = "bluetooth";
+
+        if (bt != null && bt.getConnectedDeviceAddress() != null) {
+            if (App.isDebug()) {
+                Log.d(TAG, "Data to send [ " + mode + " ]: " + data);
+            }
+
+            bt.send(data, App.getPrefs().getBoolean("crlf", true));
+
+            return mode;
+        } else {
+            if (App.isDebug()) {
+                Log.w(TAG, "Can't send data [" + data + "] via " + mode + ". No connected devices");
+            }
+
+            if (showToast) {
+                Toaster.toast(R.string.toast_serial_send_warning);
+            }
+        }
+
+        return null;
+    }
     public static String usbSend(String data, boolean showToast) {
         final String mode = "usb";
 
@@ -550,38 +565,25 @@ public class ConnectionService extends Service implements SensorEventListener {
 
         return null;
     }
-    public static String bluetoothSend(String data, boolean showToast) {
-        final String mode = "bluetooth";
-
-        if (bt != null && bt.getConnectedDeviceAddress() != null) {
-            if (App.isDebug()) {
-                Log.d(TAG, "Data to send [ " + mode + " ]: " + data);
-            }
-
-            bt.send(data, App.getPrefs().getBoolean("crlf", true));
-
-            return mode;
-        } else {
-            if (App.isDebug()) {
-                Log.w(TAG, "Can't send data [" + data + "] via " + mode + ". No connected devices");
-            }
-
-            if (showToast) {
-                Toaster.toast(R.string.toast_serial_send_warning);
-            }
-        }
-
-        return null;
-    }
 
     public static void sendBy(String type, String data) {
         switch (type) {
-            case "usb":
-                usbSend(data, false);
-                break;
             case "bluetooth":
                 bluetoothSend(data, false);
                 break;
+
+            case "usb":
+                usbSend(data, false);
+                break;
+
+            case "serial":
+                NativeSerial.send(data);
+                break;
+
+            case "i2c":
+                I2C.send(data);
+                break;
+
             case "websocket":
                 websocketSend(data);
                 break;
@@ -589,14 +591,17 @@ public class ConnectionService extends Service implements SensorEventListener {
     }
 
     public static void sendDataToTarget(String data) {
-        Pattern pattern = Pattern.compile("^(usb|bluetooth|websocket):(.+?)$");
+        Pattern pattern = Pattern.compile("^(usb|bluetooth|websocket|serial):(.+?)$");
         Matcher matcher = pattern.matcher(data);
         if (matcher.find()) {
             sendBy(matcher.group(1), matcher.group(2));
         } else {
-            usbSend(data, false);
             bluetoothSend(data, false);
+            usbSend(data, false);
+            NativeSerial.send(data);
+            I2C.send(data);
             websocketSend(data);
+
         }
     }
 
@@ -853,42 +858,6 @@ public class ConnectionService extends Service implements SensorEventListener {
 
             ConnectionService.sendDataToTarget(String.format(
                     App.getContext().getString(R.string.send_data_screen_state), state));
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-    // *** Serial **** //
-    public void openSerialPorts() {
-        int baudrate = App.getIntPreference("serial_baudrate", 115200);
-        String[] devices = App.getPrefs().getString("serial_devices", "").replace(" ", "").split(",");
-
-        for (String device: devices) {
-            if (!device.isEmpty() && !openedSerialPorts.containsKey(device)) {
-                try {
-                    NativeSerial serialPort = new NativeSerial("/dev/" + device, baudrate, 0);
-                    serialPort.read(serialReceiveCallback);
-                    //serialPort.write("<nativeserial:asdasd>\r\n".getBytes());
-
-                    openedSerialPorts.put(device, serialPort);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    public void closeSerialPorts() {
-        for (Map.Entry<String, NativeSerial> entry : openedSerialPorts.entrySet()) {
-            entry.getValue().destroy();
-            openedSerialPorts.remove(entry.getKey());
         }
     }
 

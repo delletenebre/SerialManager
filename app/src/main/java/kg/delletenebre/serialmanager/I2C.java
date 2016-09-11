@@ -3,111 +3,149 @@ package kg.delletenebre.serialmanager;
 
 import android.util.Log;
 
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import kg.delletenebre.serialmanager.Commands.Commands;
+public class I2C {
+    public interface ReadCallback {
+        void onReceivedData(String data);
+    }
 
-public class I2C extends Thread {
     private final static String TAG = "I2C";
 
-    private static Map<String, I2C> i2cMap = new HashMap<>();
-    private static int detectDelay = 100;
-
-    private String identifier;
-    private String device;
-    private int slaveAddress;
+    private int fd;
+    private ReadThread readThread = new ReadThread();
 
     static {
         System.loadLibrary("serial-manager");
     }
-    private native int i2cOpen(String device, int slaveAddress);
-    private native byte[] i2cRead(int fd, byte buffer[], int length);
-    private native int i2cWrite(int fd, int mode, int dataArray[], int length);
-    private native void i2cClose(int fd);
+    private native int open(String device, int slaveAddress);
+    private native byte[] read(int fd, byte buffer[], int length);
+    private native int write(int fd, int mode, int dataArray[], int length);
+    private native void close();
 
-    public I2C (String device, int slaveAddress, String identifier) {
-        this.device = device;
-        this.slaveAddress = slaveAddress;
-        this.identifier = identifier;
+    public I2C(String path, int slaveAddress)
+            throws SecurityException, IOException {
+        if ((fd = open(path, slaveAddress)) < 0) {
+            Log.e(TAG, "native open() returns -1");
+            throw new IOException();
+        }
 
-        detectDelay = App.getIntPreference("i2c_request_data_delay", 100);
+        readThread.start();
     }
 
-    public void run() {
-        int fd = i2cOpen(device, slaveAddress);
+    public void destroy() {
+        readThread.interrupt();
+        close();
+    }
 
-        try {
-            while (!Thread.currentThread().isInterrupted()) {
-                byte[] buffer = i2cRead(fd, new byte[1024], 1024);
+    public void read(ReadCallback callback) {
+        this.readThread.setCallback(callback);
+    }
+
+    public void write(byte[] bytes) {
+        int[] data = byteToIntArray(bytes);
+        write(fd, 0, data, data.length);
+    }
+
+    private static int[] byteToIntArray(byte[] input) {
+        int[] ret = new int[input.length];
+        for (int i = 0; i < input.length; i++) {
+            ret[i] = input[i] & 0xff; // Range 0 to 255, not -128 to 127
+        }
+        return ret;
+    }
+
+    private class ReadThread extends Thread {
+        private ReadCallback callback;
+
+        public void setCallback(ReadCallback callback) {
+            this.callback = callback;
+        }
+
+        public void run() {
+
+            while(!Thread.currentThread().isInterrupted()) {
+                byte[] buffer = read(fd, new byte[1024], 1024);
 
                 if (buffer != null && (buffer[0] != 0 && buffer[1] != 0)) {
-                    String receivedData = new String(buffer).replaceAll("\\ufffd", "");
+                    String receivedData = new String(buffer);
+                    receivedData = receivedData.substring(0, receivedData.indexOf("\ufffd"));
 
                     if (!receivedData.isEmpty()) {
                         if (App.isDebug()) {
                             Log.d(TAG, "received: " + receivedData);
                         }
 
-                        Pattern pattern = Pattern.compile("(<.+?>)");
-                        Matcher matcher = pattern.matcher(receivedData);
-                        if (matcher.find()) {
-                            for (int i = 1; i <= matcher.groupCount(); i++) {
-                                Commands.processReceivedData(matcher.group(i));
-                            }
-                        }
+                        this.onReceivedData(receivedData);
                     }
                 }
-
-                Thread.sleep(detectDelay);
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
 
-        i2cClose(fd);
-        destroyByIdentifier(identifier);
-
-        if (App.isDebug()) {
-            Log.d(TAG, "/dev/" + device + " thread is interrupted");
+        private void onReceivedData(String data) {
+            if (callback != null) {
+                callback.onReceivedData(data);
+            }
         }
     }
 
-    public static void setDetectDelay(int value) {
-        detectDelay = value;
-    }
 
-    public static void create() {
-        setDetectDelay(App.getIntPreference("i2c_read_request_delay", 100));
 
-        List<String> i2cPrefNames = Arrays.asList(App.getPrefs().getString("i2c_devices", "").split(","));
-        for (String i2cPrefName: i2cPrefNames) {
-            Pattern pattern = Pattern.compile("^(.+?)\\|(\\d+)$");
-            Matcher matcher = pattern.matcher(i2cPrefName);
-            if (matcher.find()) {
-                if (App.isDebug()) {
-                    Log.d(TAG, "I2C listener parsed: device = /dev/" + matcher.group(1)
-                            + " | slave address = " + matcher.group(2));
-                }
 
-                String device = matcher.group(1);
-                int slaveAddress = -1;
-                try {
-                    slaveAddress = Integer.parseInt(matcher.group(2));
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
+    // *** STATIC I2C **** //
+    private static Map<String, I2C> openedDevices = new HashMap<>();
+    private static ReadCallback receiveCallback = new ReadCallback() {
+        @Override
+        public void onReceivedData(String message) {
+            ConnectionService.onDataReceive("i2c", message.getBytes());
+        }
+    };
 
-                if (!device.isEmpty() && slaveAddress > -1 && !i2cMap.containsKey(i2cPrefName)) {
-                    i2cMap.put(i2cPrefName, new I2C(device, slaveAddress, i2cPrefName));
-                    i2cMap.get(i2cPrefName).start();
 
+    public static void openDevices() {
+        String[] devices = App.getPrefs().getString("i2c_devices", "").replace(" ", "").split(",");
+
+        for (String device: devices) {
+            if (!device.isEmpty()) {// && !openedDevices.containsKey(device)) {
+                Pattern pattern = Pattern.compile("^(.+?)\\|(\\d+)$");
+                Matcher matcher = pattern.matcher(device);
+                if (matcher.find()) {
                     if (App.isDebug()) {
-                        Log.d(TAG, "I2C listener created: /dev/" + device);
+                        Log.d(TAG, "I2C listener parsed: device = /dev/" + matcher.group(1)
+                                + " | slave address = " + matcher.group(2));
+                    }
+
+                    String deviceName = matcher.group(1);
+                    int slaveAddress = -1;
+                    try {
+                        slaveAddress = Integer.parseInt(matcher.group(2));
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
+
+                    if (!deviceName.isEmpty() && slaveAddress > -1 && !openedDevices.containsKey(device)) {
+                        try {
+                            I2C i2cDevice = new I2C("/dev/" + deviceName, slaveAddress);
+//                            i2cDevice.read(receiveCallback);
+                            i2cDevice.read(new ReadCallback() {
+                                @Override
+                                public void onReceivedData(String message) {
+                                    ConnectionService.onDataReceive("i2c", message.getBytes());
+                                }
+                            });
+
+                            openedDevices.put(device, i2cDevice);
+
+                            if (App.isDebug()) {
+                                Log.d(TAG, "I2C listener created: /dev/" + deviceName);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
@@ -115,18 +153,35 @@ public class I2C extends Thread {
     }
 
     public static void destroyAll() {
-        if (i2cMap.size() > 0) {
-            for (Map.Entry<String, I2C> entry : i2cMap.entrySet()) {
-                entry.getValue().interrupt();
-                i2cMap.remove(entry.getKey());
-            }
+        for (Map.Entry<String, I2C> entry : openedDevices.entrySet()) {
+            entry.getValue().destroy();
+            openedDevices.remove(entry.getKey());
         }
     }
 
-    public static void destroyByIdentifier(String identifier) {
-        if (i2cMap.containsKey(identifier)) {
-            i2cMap.get(identifier).interrupt();
-            i2cMap.remove(identifier);
+    public static String send(String data) {
+        final String mode = "i2c";
+
+        if (openedDevices.size() > 0) {
+            if (App.isDebug()) {
+                Log.d(TAG, "Data to send [ " + mode + " ]: " + data);
+            }
+
+            if (App.getPrefs().getBoolean("crlf", true)) {
+                data += "\r\n";
+            }
+
+            for (Map.Entry<String, I2C> entry : openedDevices.entrySet()) {
+                entry.getValue().write(data.getBytes());
+            }
+
+            return mode;
+        } else {
+            if (App.isDebug()) {
+                Log.w(TAG, "Can't send data [" + data + "] via " + mode + ". No connected devices");
+            }
         }
+
+        return null;
     }
 }
