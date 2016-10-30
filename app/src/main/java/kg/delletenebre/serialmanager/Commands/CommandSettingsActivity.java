@@ -224,7 +224,8 @@ public class CommandSettingsActivity extends AppCompatActivity {
             switch (itemId) {
                 case android.R.id.home:
                     setResultForActivity();
-                    NavUtils.navigateUpFromSameTask(getActivity());
+                    getActivity().onBackPressed();
+                    //NavUtils.navigateUpFromSameTask(getActivity());
                     return true;
             }
 

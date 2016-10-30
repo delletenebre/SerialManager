@@ -42,6 +42,7 @@ public class App extends Application {
     public static final String ACTION_SEND_DATA_COMPLETE = "kg.delletenebre.serial.SEND_DATA_COMPLETE";
     public static final String ACTION_SEND_DATA_SUCCESS = "kg.delletenebre.serial.SEND_DATA_SUCCESS";
     public static final String ACTION_EXTERNAL_SEND = "serial.manager.send";
+    public static final String ACTION_EXTERNAL_KEY_VALUE = "kg.delletenebre.serial.NEW_KEY_VALUE";
     public static final String ACTION_CONNECTED_DEVICES = "serial.manager.CONNECTED_DEVICES";
     public static final String ACTION_CONNECTED_DEVICES_REQUEST = "serial.manager.CONNECTED_DEVICES_REQUEST";
 

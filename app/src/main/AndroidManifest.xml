@@ -91,6 +91,7 @@
                 <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
                 <action android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
                 <action android:name="serial.manager.send" />
+                <action android:name="kg.delletenebre.serial.NEW_KEY_VALUE" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

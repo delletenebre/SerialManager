@@ -3,9 +3,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <termios.h>
+//#include <termios.h>
 #include <linux/limits.h>
 #include <stdlib.h>
+#include "termios.h"
 
 #define LOG_TAG "NativeSerialJNI"
 #define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)

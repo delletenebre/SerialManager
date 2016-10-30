@@ -25,4 +25,7 @@
     <!-- 0x1A86 / 0x7523: китайская UNO на CH340G -->
     <usb-device vendor-id="6790" product-id="29987" />
 
+    <!-- 0x04d8 / 0x8011: AVK AudioBox -->
+    <usb-device vendor-id="1240" product-id="32785" />
+
 </resources>

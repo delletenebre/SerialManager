@@ -10,6 +10,7 @@ import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.util.Log;
 
+import kg.delletenebre.serialmanager.Commands.Commands;
 import xdroid.toaster.Toaster;
 
 public class EventsReceiver extends BroadcastReceiver {
@@ -148,7 +149,6 @@ public class EventsReceiver extends BroadcastReceiver {
                     ConnectionService.sendDataToTarget(data);
                 }
 
-
                 break;
 
             case App.ACTION_CONNECTED_DEVICES_REQUEST:
@@ -157,6 +157,27 @@ public class EventsReceiver extends BroadcastReceiver {
                 }
 
                 ConnectionService.updateNotificationText();
+
+                break;
+
+            case App.ACTION_EXTERNAL_KEY_VALUE:
+                if (App.isDebug()) {
+                    Log.i(TAG, "**** App.ACTION_EXTERNAL_NEW_DATA ****");
+                }
+
+                if (intent.hasExtra("key") && intent.hasExtra("value")) {
+                    String key = String.valueOf(intent.getExtras().get("key"));
+                    String value = String.valueOf(intent.getExtras().get("value"));
+
+                    StringBuilder sb = (new StringBuilder())
+                            .append("<")
+                            .append(key)
+                            .append(":")
+                            .append(value)
+                            .append(">");
+
+                    Commands.processReceivedData(sb.toString());
+                }
 
                 break;
         }
