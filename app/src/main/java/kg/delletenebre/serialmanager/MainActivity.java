@@ -192,10 +192,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        Intent intent = new Intent("kg.delletenebre.serial.NEW_KEY_VALUE");
-        intent.putExtra("key", "key1");
-        intent.putExtra("value", "value1");
-        sendBroadcast(intent);
+//        Intent intent = new Intent("kg.delletenebre.serial.NEW_KEY_VALUE");
+//        intent.putExtra("key", "key1");
+//        intent.putExtra("value", "value1");
+//        sendBroadcast(intent);
 
 //        int[] dataIntegers = convertToIntArray("<i2c:asdasd>".getBytes(Charsets.UTF_8));
 
